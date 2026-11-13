@@ -27,42 +27,52 @@ export const STREET = { y0: -58, y1: 232, lotsFrom: -8, lotsTo: 191 };
 // centred on the street's line, its west door at y1, running back east to y0.
 export const CHAPEL_SITE = { x: 0, y1: -74, y0: -150, halfW: 19,
   // where it is to stand instead: the last plot on the south side, beside the Overlook, its door on the street
-  street: { side: -1, y0: 168, y1: 198, front: FRONT } };
+  street: { side: -1, y0: 160, y1: 198, front: FRONT } };
 const WALL = 0.8, SIDE = 0.5;
 
-// face: the upper wall;  paint: the timber shopfront;  trim: sills, cornice, piers' caps
-// inside: plaster tint;  floor: floor material;  up: upper storeys (1 or 2);  bays: windows upstairs
+// Each building is a real one (research/BRIEF.md). The north side is the Mulberry Street Block, 301 to 315 Mulberry
+// Street, Madison, Indiana, as measured for the Historic American Buildings Survey in 1971 (HABS IN-83): eight brick
+// row buildings of the 1820s to 1840s, at their true widths and in their true order, with Pickle Alley let in between
+// 309 and 311. The south side is three fronts of South Main Street, Block 43, South Norwalk, Connecticut (HABS CT-349,
+// measured 1977): the cast-iron Rogers & Stevens Building of 1875 (no. 24), its arched brick neighbour (22), and two
+// shopfronts of the long three-storey front beside them (23), either side of the Yard.
+//
+// src: the real building;  face: the upper wall;  paint: the shopfront;  trim: sills, lintels, cornice
+// up: storeys over the shop;  bays: windows across;  head: 'arch' | 'hood' | 'lintel' (how the upper windows are finished)
+// cornice: 'bracket' (pressed metal or wood, on brackets) | 'dentil' (corbelled brick);  roof: 'ridge' | 'flat'
+// piers: 'stone' | 'iron' | 'brick' | 'coursed' | 'plaster' (what carries the shopfront);  dh: feet taller or lower than the rule
+// inside: plaster tint;  floor: floor material
+const MADISON = 'Mulberry Street Block, Madison, Indiana (HABS IN-83)', NORWALK = 'South Main Street, Block 43, South Norwalk, Connecticut (HABS CT-349)';
 export const LOTS = [
-  // ---- north side (odd numbers, as it should be) ------------------------------------------------
-  { id: 'coffee', name: 'Slow Hand Coffee', side: 1, y0: -8, y1: 24, depth: 30, door: 0.5, enter: true, up: 1, bays: 4,
+  // ---- north side: Mulberry Street, Madison, 301 to 315 ----------------------------------------------
+  { id: 'coffee', name: 'Slow Hand Coffee', side: 1, y0: 3.8, y1: 27.8, depth: 44, door: 0.5, enter: true, src: '301 ' + MADISON, up: 2, bays: 4, head: 'arch', cornice: 'bracket', roof: 'ridge', piers: 'stone',
     face: 'brick#b98f7c', paint: 'painted_wood#2f4a40', trim: 'c#e6dcc6/0.7', inside: 'plaster#f0e8d6', floor: 'floor', awning: ['c#2f4a40/0.9', 'c#e9e0cc/0.9'] },
-  { id: 'yoga', name: 'Low Sun Yoga', side: 1, y0: 24, y1: 56, depth: 30, door: 0.5, enter: true, up: 1, bays: 4,
-    face: 'plaster#e6dccb', paint: 'painted_wood#c98a6a', trim: 'c#f1ebdd/0.7', inside: 'plaster#f3ece0', floor: 'floor' },
-  { id: 'books', name: 'Marginalia', side: 1, y0: 56, y1: 84, depth: 30, door: 0.24, enter: true, up: 2, bays: 3,
-    face: 'plaster#d9c9a8', paint: 'painted_wood#7a2f2a', trim: 'c#efe7d6/0.7', inside: 'plaster#e9dcc2', floor: 'floor' },
-  { id: 'cinema', name: 'The Lantern', side: 1, y0: 84, y1: 112, depth: 10, show: 6, door: 0.5, enter: false, up: 1, bays: 0,
-    face: 'plaster#e6d9c0', paint: 'painted_wood#1f2c3a', trim: 'c#c9a45c/0.4/1', inside: 'plaster#7a2f2f', floor: 'tile_hex' },
+  { id: 'yoga', name: 'Low Sun Yoga', side: 1, y0: 27.8, y1: 48.05, depth: 44, door: 0.5, enter: true, src: '303 ' + MADISON, up: 2, bays: 3, head: 'hood', cornice: 'bracket', roof: 'ridge', piers: 'plaster',
+    face: 'brick#c4a08c', paint: 'painted_wood#c98a6a', trim: 'c#f1ebdd/0.7', inside: 'plaster#f3ece0', floor: 'floor' },
+  { id: 'books', name: 'Marginalia', side: 1, y0: 48.05, y1: 68.8, depth: 44, door: 0.26, enter: true, src: '305 ' + MADISON, up: 2, bays: 3, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'stone',
+    face: 'brick#a87c68', paint: 'painted_wood#7a2f2a', trim: 'c#e3dccb/0.8', inside: 'plaster#e9dcc2', floor: 'floor' },
+  { id: 'bikes', name: 'Spoke & Sprocket', side: 1, y0: 68.8, y1: 88.47, depth: 44, door: 0.74, enter: true, src: '307 ' + MADISON, up: 2, bays: 3, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'coursed',
+    face: 'brick#b08672', paint: 'painted_wood#d4a02a', trim: 'c#d9d2c2/0.8', inside: 'plaster#e6e2d6', floor: 'floor' },
+  { id: 'cinema', name: 'The Lantern', side: 1, y0: 88.47, y1: 112, depth: 10, show: 6, door: 0.5, enter: false, src: '309 ' + MADISON, up: 2, bays: 4, head: 'lintel', cornice: 'dentil', roof: 'flat', piers: 'iron',
+    face: 'brick#9c7260', paint: 'painted_wood#1f2c3a', trim: 'c#c9a45c/0.4/1', inside: 'plaster#7a2f2f', floor: 'tile_hex' },
   // (112 to 120: Pickle Alley)
-  { id: 'grocery', name: 'Salt & Larder', side: 1, y0: 120, y1: 154, depth: 30, door: 0.5, enter: true, up: 1, bays: 4,
-    face: 'brick#a8806c', paint: 'painted_wood#e8dfc8', trim: 'c#2a2a26/0.6', inside: 'tile_subway', floor: 'tile_hex', awning: ['c#b8452e/0.9', 'c#efe6d2/0.9'] },
-  { id: 'plants', name: 'Frond', side: 1, y0: 154, y1: 182, depth: 28, door: 0.72, enter: true, up: 2, bays: 3,
-    face: 'brick#8f6a5c', paint: 'painted_wood#d9d2bf', trim: 'c#efe7d6/0.7', inside: 'plaster#ece6d6', floor: 'pavers' },
-  // ---- south side ----------------------------------------------------------------------------------
-  { id: 'records', name: 'Low Tide Records', side: -1, y0: -8, y1: 22, depth: 28, door: 0.3, enter: true, up: 2, bays: 3,
-    face: 'brick#96705f', paint: 'painted_wood#1d1d1f', trim: 'c#d8c9a8/0.7', inside: 'plaster#e6dccb', floor: 'floor' },
-  { id: 'museum', name: 'The Museum of Small Wonders', side: -1, y0: 22, y1: 54, depth: 32, door: 0.5, enter: true, up: 1, bays: 4,
+  { id: 'grocery', name: 'Salt & Larder', side: 1, y0: 120, y1: 140.75, depth: 44, door: 0.5, enter: true, src: '311 ' + MADISON, up: 2, dh: -1.6, bays: 3, head: 'lintel', cornice: 'bracket', roof: 'flat', piers: 'iron',
+    face: 'brick#a8806c', paint: 'painted_wood#e8dfc8', trim: 'c#ddd5c4/0.7', inside: 'tile_subway', floor: 'tile_hex', awning: ['c#b8452e/0.9', 'c#efe6d2/0.9'] },
+  { id: 'apothecary', name: 'Wick & Sundry', side: 1, y0: 140.75, y1: 160.83, depth: 44, door: 0.5, enter: true, src: '313 ' + MADISON, up: 2, dh: 1.6, bays: 4, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'brick',
+    face: 'brick#94685a', paint: 'painted_wood#34405a', trim: 'c#e3dccb/0.8', inside: 'plaster#e4dfd2', floor: 'floor' },
+  { id: 'plants', name: 'Frond', side: 1, y0: 160.83, y1: 181.5, depth: 44, door: 0.72, enter: true, src: '315 ' + MADISON, up: 1, bays: 4, head: 'lintel', cornice: 'bracket', roof: 'flat', piers: 'iron',
+    face: 'brick#b08a78', paint: 'painted_wood#d9d2bf', trim: 'c#efe7d6/0.7', inside: 'plaster#ece6d6', floor: 'pavers' },
+  // ---- south side: South Main Street, South Norwalk, Block 43 ------------------------------------------
+  { id: 'records', name: 'Low Tide Records', side: -1, y0: 1, y1: 31, depth: 44, door: 0.3, enter: true, src: 'no. 24, the Rogers & Stevens Building of 1875, ' + NORWALK, up: 3, bays: 4, head: 'arch', cornice: 'bracket', roof: 'flat', piers: 'iron',
+    face: 'plaster#d6cdb9', paint: 'painted_wood#1d1d1f', trim: 'c#e9e2d0/0.6', inside: 'plaster#e6dccb', floor: 'floor' },
+  { id: 'museum', name: 'The Museum of Small Wonders', side: -1, y0: 31, y1: 61, depth: 44, door: 0.5, enter: true, src: 'no. 22, ' + NORWALK, up: 2, bays: 3, head: 'arch', cornice: 'dentil', roof: 'flat', piers: 'brick',
     face: 'brick#a08474', paint: 'painted_wood#3a4a44', trim: 'c#e8dfcc/0.7', inside: 'plaster#ece6da', floor: 'floor' },
-  { id: 'bakery', name: 'Tomorrow Bread', side: -1, y0: 54, y1: 78, depth: 26, door: 0.74, enter: true, up: 1, bays: 3,
-    face: 'plaster#e9d6c2', paint: 'painted_wood#d8b7a6', trim: 'c#f1ebdd/0.7', inside: 'plaster#efe6d4', floor: 'tile_hex', awning: ['c#d59a8a/0.9', 'c#f3ecdd/0.9'] },
+  { id: 'bakery', name: 'Tomorrow Bread', side: -1, y0: 61, y1: 78, depth: 44, door: 0.72, enter: true, src: 'no. 23 (the 17 ft shopfront), ' + NORWALK, up: 2, bays: 2, head: 'hood', cornice: 'bracket', roof: 'flat', piers: 'brick',
+    face: 'brick#b4907e', paint: 'painted_wood#d8b7a6', trim: 'c#f1ebdd/0.7', inside: 'plaster#efe6d4', floor: 'tile_hex', awning: ['c#d59a8a/0.9', 'c#f3ecdd/0.9'] },
   // (78 to 118: the Yard, with the dumpling cart)
-  { id: 'apothecary', name: 'Wick & Sundry', side: -1, y0: 118, y1: 146, depth: 28, door: 0.5, enter: true, up: 1, bays: 3,
-    face: 'shake#c9bfae', paint: 'painted_wood#34405a', trim: 'c#e8dfcc/0.7', inside: 'plaster#e4dfd2', floor: 'floor' },
-  { id: 'noodles', name: 'Night Noodle', side: -1, y0: 146, y1: 168, depth: 26, door: 0.26, enter: true, up: 2, bays: 2,
-    face: 'brick#7d5a50', paint: 'painted_wood#2a2320', trim: 'c#c8402f/0.6', inside: 'plaster#c9a070', floor: 'tile' },
-  // (168 to 198: the chapel, its own building: chapel.js)
-  // Spoke & Sprocket, the bicycle shop, is set aside for now (shops/bikes.js is still there):
-  // { id: 'bikes', name: 'Spoke & Sprocket', side: -1, y0: 168, y1: 191, depth: 24, door: 0.2, enter: true, up: 1, bays: 3,
-  // face: 'plaster#c8d2c4', paint: 'painted_wood#d4a02a', trim: 'c#2a2a26/0.6', inside: 'plaster#e6e2d6', floor: 'floor' },
+  { id: 'noodles', name: 'Night Noodle', side: -1, y0: 118, y1: 138, depth: 44, door: 0.28, enter: true, src: 'no. 23 (the 20 ft shopfront), ' + NORWALK, up: 2, bays: 3, head: 'hood', cornice: 'bracket', roof: 'flat', piers: 'brick',
+    face: 'brick#7d5a50', paint: 'painted_wood#2a2320', trim: 'c#d9cdb8/0.7', inside: 'plaster#c9a070', floor: 'tile' },
+  // (138 to 160: a green; 160 to 198: the chapel, its own building: chapel.js)
 ];
 
 export function buildTown(B) {
@@ -76,7 +86,7 @@ export function buildTown(B) {
 
   for (const lot of LOTS) {
     const s = lot.side, { y0, y1 } = lot, depth = lot.depth, back = FRONT + depth;
-    const top = SHOPTOP + lot.up * 11.5;                              // the roof
+    const top = SHOPTOP + lot.up * 11.5 + (lot.dh ?? 0);              // the eaves (or the flat roof)
     const INT = lot.inside, EXT = lot.face, PAINT = lot.paint, TRIM = lot.trim;
     // Everything below is given as (u, v): u out from the centre line, v along the street.
     const L = (mat, u0, u1, v0, v1, h0, h1, o) => { if (Math.abs(u1 - u0) > 0.004 && Math.abs(v1 - v0) > 0.004 && h1 - h0 > 0.004) B.pbox(mat, s * u0, s * u1, v0, v1, h0, h1, o); };
@@ -96,6 +106,17 @@ export function buildTown(B) {
     L(lot.floor, ui - 0.3, ub, y0 + SIDE, y1 - SIDE, FL - 0.5, FL, lot.floor === 'floor' ? { swap: s > 0 } : undefined);
     L('ceil', ui, ub, y0 + SIDE, y1 - SIDE, CEIL, CEIL + 0.4);
     L('roof', FRONT + 0.4, back - 0.3, y0 + 0.3, y1 - 0.3, top - 1.6, top - 1.2);
+    if (lot.roof === 'ridge') {
+      // A ridge roof running with the street, as these Madison buildings have: one slope to the street and one to the
+      // yard, between party walls that stand a little proud of it.
+      const run = Math.min(15, depth / 2), rise = run * 0.62, ang = Math.atan2(rise, run), len = Math.hypot(run, rise);
+      for (const [uc, sgn] of [[FRONT + run / 2, 1], [FRONT + run * 1.5, -1]]) {
+        B.wbox('roof', s * uc - len / 2 - 0.3, s * uc + len / 2 + 0.3, top + rise / 2 - 0.12, top + rise / 2 + 0.12, wz(y1 - 0.5), wz(y0 + 0.5), { rot: [0, 0, s * sgn * ang] });
+        for (const v of [y0, y1 - 0.5]) B.wbox('brick#8a6a5c', s * uc - len / 2 - 0.4, s * uc + len / 2 + 0.4, top + rise / 2 - 0.5, top + rise / 2 + 0.75, wz(v + 0.5), wz(v), { rot: [0, 0, s * sgn * ang] });
+      }
+      for (const v of [y0, y1 - 0.5]) L('brick#8a6a5c', FRONT + 0.2, FRONT + 2 * run, v, v + 0.5, top - 0.4, top + 0.3);
+      if (lot.id === 'apothecary') { L('brick#8a6a5c', FRONT + run - 1.2, FRONT + run + 1.2, y1 - 2.6, y1 - 0.2, top, top + rise + 3.4); L('c#3a342e/0.9', FRONT + run - 1.4, FRONT + run + 1.4, y1 - 2.8, y1, top + rise + 3.4, top + rise + 3.7); }
+    }
     surfaces.push({ x0: Math.min(s * (FRONT - 0.2), s * ub), x1: Math.max(s * (FRONT - 0.2), s * ub), z0: wz(y1 - SIDE), z1: wz(y0 + SIDE), h: FL });
     // beams across the ceiling of the real shops, and a deep cornice
     if (lot.enter) {
@@ -110,12 +131,14 @@ export function buildTown(B) {
     // -- the shopfront ---------------------------------------------------------------------------
     // Brick piers at each end; between them a painted timber front: stall riser, plate glass,
     // a transom of small lights, the fascia with the name, a little cornice.
-    const PIER = 1.3, a0 = y0 + PIER, a1 = y1 - PIER;                 // the timber front runs a0..a1
+    const PIERM = { stone: 'c#b9b2a4/0.9', plaster: 'plaster#d9d0bd', coursed: 'flagstone', iron: PAINT, brick: EXT }[lot.piers ?? 'brick'];
+    const PIER = lot.piers === 'iron' ? 0.8 : 1.2, a0 = y0 + PIER, a1 = y1 - PIER;                 // the timber front runs a0..a1
     const dw = 3.7, dc = a0 + (a1 - a0) * lot.door, d0 = Math.max(a0 + 0.2, Math.min(a1 - dw - 0.2, dc - dw / 2)), d1 = d0 + dw;
     const SILL = FL + 1.9, HEAD = FL + 9.1, TRAN = FL + 10.7, DOORH = FL + 7.9, FASC = SHOPTOP - 0.7;
     const uo = FRONT, um = FRONT + WALL / 2;
     for (const [va, vb] of [[y0, a0], [a1, y1]]) {                     // piers, the full height of the shopfront
-      L(EXT, uo, um, va, vb, 0, SHOPTOP, C); L(INT, um, ui, va + (va === y0 ? SIDE : 0), vb - (vb === y1 ? SIDE : 0), FL, CEIL);
+      L(PIERM, uo, um, va, vb, 0, SHOPTOP, C); L(INT, um, ui, va + (va === y0 ? SIDE : 0), vb - (vb === y1 ? SIDE : 0), FL, CEIL);
+      if (lot.piers === 'stone' || lot.piers === 'plaster') { L(PIERM, uo - 0.14, uo, va, vb, FL + 10.2, FL + 10.9); L(PIERM, uo - 0.08, uo, va + 0.1, vb - 0.1, 0.9, FL + 10.2); }      // a capital and a shallow shaft
       L(TRIM, uo - 0.12, uo, va - (va === y0 ? 0 : 0.06), vb + (vb === y1 ? 0 : 0.06), 0, 0.9);                // plinth
     }
     // above the glass: transom rail, fascia, cornice (outside); a plain bulkhead inside
@@ -136,6 +159,7 @@ export function buildTown(B) {
       for (let i = 0; i < n; i++) L(PAINT, uo - 0.1, uo - 0.06, va + i * w + 0.35, va + (i + 1) * w - 0.35, FL + 0.35, SILL - 0.5, G);
       for (let i = 0; i <= n; i++) { const v = va + i * w, t = i === 0 || i === n ? 0.16 : 0.09; L(PAINT, uo + 0.12, uo + 0.5, v - t, v + t, SILL, TRAN, G); }
       L(PAINT, uo + 0.12, uo + 0.5, va, vb, HEAD, HEAD + 0.24, G);                                                // transom bar
+      if (lot.piers === 'iron') for (let i = 0; i <= n; i++) { const v = va + i * w; B.pcyl(PAINT, s * (uo - 0.16), v, 0.5, TRAN - 0.3, 0.2, 0.15, 10); L(PAINT, uo - 0.42, uo + 0.1, v - 0.3, v + 0.3, TRAN - 0.3, TRAN + 0.05); L(PAINT, uo - 0.4, uo + 0.08, v - 0.27, v + 0.27, 0.5, 0.95); }      // cast-iron columns, cap and base
       L('glass', uo + 0.3, uo + 0.33, va + 0.1, vb - 0.1, SILL, HEAD);
       // the transom: small square lights
       const k = Math.max(2, Math.round((vb - va) / 1.5)), kw = (vb - va) / k;
@@ -165,10 +189,10 @@ export function buildTown(B) {
 
     // -- upstairs: flats over the shops, somebody home in most of them -------------------------------
     {
-      const wallTo = top + 1.6;                                        // parapet
+      const wallTo = top + (lot.roof === 'ridge' ? 0.55 : 1.6);        // parapet (a ridge roof comes down to the cornice)
       const wins = [];
       for (let f = 0; f < lot.up; f++) for (let i = 0; i < lot.bays; i++) {
-        const w = 3.4, c = y0 + (y1 - y0) * (i + 0.5) / lot.bays, h0 = SHOPTOP + 3.2 + f * 11.5, h1 = h0 + 6.2;
+        const w = Math.min(3.4, (y1 - y0) / lot.bays - 1.9), c = y0 + (y1 - y0) * (i + 0.5) / lot.bays, h0 = SHOPTOP + 3.2 + f * 11.5, h1 = h0 + (f === lot.up - 1 && lot.up > 1 ? 5.6 : 6.2);
         wins.push({ v0: c - w / 2, v1: c + w / 2, h0, h1 });
       }
       // the wall, pieced round the windows (rows are regular, so cut by rows and columns)
@@ -180,7 +204,14 @@ export function buildTown(B) {
       }
       for (const w of wins) {
         L(TRIM, uo - 0.16, uo + 0.3, w.v0 - 0.3, w.v1 + 0.3, w.h0 - 0.3, w.h0);                                  // sill
-        L(TRIM, uo - 0.08, uo + 0.3, w.v0 - 0.2, w.v1 + 0.2, w.h1, w.h1 + 0.5);                                  // lintel
+        if (lot.head === 'arch') {                                       // a round-arched hood, in three steps
+          const m = (w.v0 + w.v1) / 2, hw = (w.v1 - w.v0) / 2;
+          L(EXT, uo + 0.04, uo + 0.3, w.v0, w.v1, w.h1, w.h1 + 0.02); L(TRIM, uo - 0.14, uo + 0.3, w.v0 - 0.28, w.v1 + 0.28, w.h1, w.h1 + 0.34);
+          L(TRIM, uo - 0.14, uo + 0.3, m - hw * 0.72, m + hw * 0.72, w.h1 + 0.34, w.h1 + 0.68); L(TRIM, uo - 0.18, uo + 0.3, m - hw * 0.3, m + hw * 0.3, w.h1 + 0.68, w.h1 + 0.92);
+        } else if (lot.head === 'hood') {                                // a pressed-metal cap on little brackets
+          L(TRIM, uo - 0.08, uo + 0.3, w.v0 - 0.2, w.v1 + 0.2, w.h1, w.h1 + 0.36); L(TRIM, uo - 0.3, uo + 0.3, w.v0 - 0.42, w.v1 + 0.42, w.h1 + 0.36, w.h1 + 0.56);
+          for (const v of [w.v0 - 0.18, w.v1 + 0.18]) L(TRIM, uo - 0.24, uo, v - 0.1, v + 0.1, w.h1 - 0.35, w.h1 + 0.36);
+        } else L(TRIM, uo - 0.08, uo + 0.3, w.v0 - 0.2, w.v1 + 0.2, w.h1, w.h1 + 0.5);                           // a plain stone lintel
         for (const v of [w.v0, w.v1]) L(TRIM, uo + 0.1, uo + 0.34, v - 0.1, v + 0.1, w.h0, w.h1);                // sash frame
         L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, (w.h0 + w.h1) / 2 - 0.07, (w.h0 + w.h1) / 2 + 0.07);            // meeting rail
         L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, w.h1 - 0.12, w.h1); L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, w.h0, w.h0 + 0.12);
@@ -188,8 +219,9 @@ export function buildTown(B) {
         upWindows.push({ x: s * (uo + 0.36), y: (w.h0 + w.h1) / 2, z: wz((w.v0 + w.v1) / 2), w: w.v1 - w.v0, h: w.h1 - w.h0, side: s, lot: lot.id });
       }
       // cornice and parapet coping
-      L(TRIM, uo - 0.35, um, y0, y1, top - 0.2, top + 0.25); L(TRIM, uo - 0.75, um, y0 - 0.1, y1 + 0.1, top + 0.25, top + 0.6); L(TRIM, uo - 0.5, um, y0 - 0.05, y1 + 0.05, top + 0.6, top + 0.8);
-      for (let v = y0 + 0.9; v < y1 - 0.5; v += 1.8) L(TRIM, uo - 0.6, uo, v - 0.22, v + 0.22, top - 0.35, top + 0.25);   // brackets under it
+      { const CT = lot.cornice === 'dentil' ? EXT : TRIM, k = lot.cornice === 'dentil' ? 0.55 : 1; L(CT, uo - 0.35 * k, um, y0, y1, top - 0.2, top + 0.25); L(CT, uo - 0.75 * k, um, y0 - 0.1, y1 + 0.1, top + 0.25, top + 0.6); L(CT, uo - 0.5 * k, um, y0 - 0.05, y1 + 0.05, top + 0.6, top + 0.8); }
+      if (lot.cornice === 'dentil') { for (let v = y0 + 0.35; v < y1 - 0.2; v += 0.72) L(EXT, uo - 0.26, uo, v - 0.17, v + 0.17, top - 0.42, top + 0.02); L(EXT, uo - 0.16, uo, y0, y1, top - 0.7, top - 0.42); }      // corbelled brick teeth
+      else for (let v = y0 + 0.9; v < y1 - 0.5; v += 1.8) L(TRIM, uo - 0.6, uo, v - 0.22, v + 0.22, top - 0.35, top + 0.25);   // brackets under it
       L(TRIM, uo - 0.1, um + 0.15, y0, y1, wallTo, wallTo + 0.22);
       // behind the front: a lower parapet round the roof
       for (const v of [y0, y1 - SIDE]) L('brick#8a6a5c', FRONT + 0.4, back, v, v + SIDE, top, top + 0.6);

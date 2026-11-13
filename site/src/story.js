@@ -3,8 +3,8 @@
 // finally sets for you: the sky goes through its colours, the stars come out, the windows glow.
 // A card is stamped as you go (kept in localStorage), so the street remembers you next time.
 
-const SHOPS = ['yoga', 'coffee', 'books', 'grocery', 'plants', 'museum', 'records', 'bakery', 'apothecary', 'noodles'];
-const NAMES = { yoga: 'Low Sun Yoga', museum: 'The Museum of Small Wonders', bakery: 'Tomorrow Bread', noodles: 'Night Noodle', coffee: 'Slow Hand Coffee', books: 'Marginalia', grocery: 'Salt & Larder', plants: 'Frond', records: 'Low Tide Records', apothecary: 'Wick & Sundry' };
+const SHOPS = ['yoga', 'coffee', 'books', 'grocery', 'plants', 'museum', 'records', 'bakery', 'apothecary', 'noodles', 'bikes'];
+const NAMES = { yoga: 'Low Sun Yoga', museum: 'The Museum of Small Wonders', bakery: 'Tomorrow Bread', noodles: 'Night Noodle', bikes: 'Spoke & Sprocket', coffee: 'Slow Hand Coffee', books: 'Marginalia', grocery: 'Salt & Larder', plants: 'Frond', records: 'Low Tide Records', apothecary: 'Wick & Sundry' };
 
 export function setupStory(ctx, { setHour, getHour, dusk, night, flash }) {
   const N = SHOPS.length;

@@ -4,6 +4,14 @@ Vesper Street is built on the engine of Anna's House (a walk-in bungalow) and sh
 Everything not listed here was drawn or built in code for the street: the shopfronts, signs,
 labels, posters, packaging, robots, trees, the sky.
 
+- The buildings follow measured drawings made for the Historic American Buildings Survey (Library of Congress,
+  Prints & Photographs Division; public domain). North side: Mulberry Street Block, 301-315 Mulberry Street,
+  Madison, Indiana, HABS IN-83 (https://www.loc.gov/item/in0038/). South side: South Main Street Block 43,
+  South Norwalk, Connecticut, HABS CT-349 (https://www.loc.gov/item/ct0326/). The chapel: First Baptist
+  Church, 416 Vine Street, Madison, Indiana, HABS IN-127 (https://www.loc.gov/item/in0025/), drawn in 1978 by
+  Richard Berliner, Jon Lourie, Eric Swanson and Peter Whitehead, built here at two thirds size as one room;
+  its bell-cote is after Second Presbyterian Church, Madison, HABS IN-24-15. Plot widths, storeys, openings
+  and cornices follow the sheets; depths, interiors and the order of tenants are ours.
 - three.js r170 (vendor/three), MIT licence.
 - Textures (assets/tex), all CC0: Poly Haven (polyhaven.com) `grey_roof_01`, `red_brick`,
   `brick_wall_001`, `red_brick_pavers`, `terracotta_floor_tiles`, `oak_wood_planks`,
@@ -14,18 +22,14 @@ labels, posters, packaging, robots, trees, the sky.
   source in assets/models/CATALOG.md (the catalogue covers the house's whole collection; only
   some of it is used here). Textures reduced in size.
 - The museum's objects are real: 3D scans from Smithsonian Open Access (CC0): megalodon tooth and
-  trilobite *Coltraneia oufatenensis* (USNM PAL 794206), ammonite *Exiteloceras jenneyi* (USNM PAL 430970),
-  *Smilodon fatalis* canine (USNM V 8570) and coco de mer seed (NMNH); Greek kylix (Cooper Hewitt 1971-48-12);
-  colonoware pot (NMAAHC 2017.108.1.1), Thomas Commeraw's stoneware jug (NMAAHC 2011.61) and stereoscope
+  trilobite *Coltraneia oufatenensis* (USNM PAL 794206), ammonite *Exiteloceras jenneyi* (USNM PAL 430970);
+  Greek kylix (Cooper Hewitt 1971-48-12); Thomas Commeraw's stoneware jug (NMAAHC 2011.61) and stereoscope
   (NMAAHC 2017.111.16); Leonard Volk's life mask of Abraham Lincoln (NPG.71.24); Cher Ami (NMAH AF.30714);
   kneeling winged monster, Northern Qi (National Museum of Asian Art F1916.345). The bronze whale is a Poly
   Haven scan (CC0).
 - The museum's pictures (assets/art) are public-domain works, images from the holding museums' open-access
-  programmes or Wikimedia Commons: William Morris, *Willow Bough* (The Met, CC0); Redouté, *Rosa centifolia
-  foliacea*; Adriaen Coorte, *Strawberries on a Stone Ledge* and Vermeer, *The Milkmaid* and *The Little Street*
-  (Rijksmuseum); Van Gogh, *Almond Blossom* (Van Gogh Museum) and *Grapes, Lemons, Pears, and Apples*,
-  Fantin-Latour, *Roses in a Bowl*, Cézanne, *The Basket of Apples* (Art Institute of Chicago, CC0); Hiroshige,
-  *Plum Garden at Kameido* (Chester Beatty); Dürer, *Young Hare* and *The Great Piece of Turf* (Albertina,
+  programmes or Wikimedia Commons: Adriaen Coorte, *Strawberries on a Stone Ledge* and Vermeer, *The Milkmaid* and *The Little Street*
+  (Rijksmuseum); Van Gogh, *Almond Blossom* (Van Gogh Museum); Dürer, *Young Hare* and *The Great Piece of Turf* (Albertina,
   via Wikimedia Commons, public domain).
 - The animals (assets/models/v_*, q_fox), from Poly Pizza, in the copies prepared for Anna's House. These are
   licensed CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/) and were modified (normals removed, parts
@@ -38,7 +42,7 @@ labels, posters, packaging, robots, trees, the sky.
   Poly by Google; Robin by jeremy (https://poly.pizza/m/53HOg-b1F4r). The fox is by Quaternius, CC0
   (https://poly.pizza/m/Bc97C66HKi). Swallows, butterflies, moths and fireflies are built in code.
 - The chapel's windows are Anna's, from the chapel in the garden of Anna's House, with four more in the same
-  hand; the papers and books they honour are named on the boards inside.
+  hand; Moth, who keeps it, will tell you what each one honours.
 - Dandelion the airship (src/airship) was designed and built for Anna's House and is shared with it.
 - The picture garden shows films from YouTube in YouTube's own player; they remain their makers'.
 - Music (assets/audio): public-domain and CC0 recordings of Satie, Bach, Chopin, Schumann, Mozart

@@ -30,37 +30,16 @@ export function buildPlaces(K, town) {
     // a flagged apron joining the two pavements round the end of the road
     P('pavers', -FRONT, FRONT, -58, -40, -0.6, CURB - 0.012); P('concrete', -FRONT, FRONT, -58.7, -58, -0.6, CURB);
     K.surface(-FRONT, FRONT, 40, 58.7, CURB);
-    // the mooring mast: iron lattice, a ring at the top, a windsock, a ladder nobody has needed
-    const mx = -19, my = -53;
-    K.lathe(IRON, mx, CURB, -my, [[0.01, 0], [1.3, 0], [1.3, 0.3], [0.5, 0.7], [0.36, 3], [0.22, 20], [0.18, 34], [0.3, 34.2], [0.3, 34.6], [0.01, 34.8]], 10);
-    K.put(IRON, new THREE.TorusGeometry(1.1, 0.09, 6, 20).translate(mx, CURB + 35.8, -my));
-    for (let h = 2; h < 20; h += 1.3) K.tube(IRON, [mx - 0.5, CURB + h, -my - 0.45], [mx + 0.5, CURB + h, -my - 0.45], 0.035, 4);
-    for (const dx of [-0.5, 0.5]) K.tube(IRON, [mx + dx, CURB + 1, -my - 0.45], [mx + dx, CURB + 20, -my - 0.45], 0.04, 4);
-    K.windsock = { x: mx, y: CURB + 30, z: -my };
-    lantern(mx, my, CURB + 34.2, 0.34, 'e#ffb866/2.2'); K.collide(mx - 1.3, mx + 1.3, -my - 1.3, -my + 1.3, 30);
-    // the stop: a little shelter with a bench and the timetable
-    const sx = 17.5, sy = -30;
-    for (const [dx, dy] of [[-3, -5], [3, -5], [-3, 5], [3, 5]]) post(sx + dx, sy + dy, CURB, CURB + 8.4, 0.12, GREEN);
-    P(GREEN, sx - 3.6, sx + 3.6, sy - 5.8, sy + 5.8, CURB + 8.4, CURB + 8.6); P('c#b98f7c/0.8', sx - 3.9, sx + 3.9, sy - 6.1, sy + 6.1, CURB + 8.6, CURB + 8.75);
-    P('glass', sx + 2.95, sx + 3.0, sy - 5, sy + 5, CURB + 1, CURB + 8); K.collide(sx + 2.8, sx + 3.2, -(sy + 5), -(sy - 5), 8);
-    K.bench(sx + 1.6, -sy, -Math.PI / 2, { y: CURB, w: 6, mat: 'c#7d8a72/0.8' }); K.seat(sx + 1.6, CURB + 1.4, -sy, Math.PI / 2, 'sit and wait for the airship');
-    lantern(sx, sy, CURB + 8.0, 0.24, 'e#ffe2b4/1.7'); K.lamp(sx, CURB + 7.6, -sy, 0.8);
-    sign(sx + 2.9, sy - 2.2, CURB + 5, 1, 2.6, 3.4, (g, w, h) => {
-      paper(g, w, h, '#efe7d2'); rect(g, 0, 0, w, h * 0.17, '#2f4a40'); T(g, 'AIRSHIP', w / 2, h * 0.09, h * 0.09, '#efe7d2', { f: F.bebas, ls: 6 });
-      T(g, 'LINE 6  ·  VESPER STREET', w / 2, h * 0.24, h * 0.05, '#2f4a40', { f: F.bebas, ls: 2 });
-      const rows = [['arrives', 'at dusk'], ['departs', 'at dusk'], ['next one', 'shortly'], ['after that', 'also shortly'], ['fare', 'a nice thought']];
-      rows.forEach(([a, b], i) => { const y = h * (0.36 + i * 0.1); T(g, a, w * 0.1, y, h * 0.052, '#2a1c13', { f: F.elite, a: 'left' }); T(g, b, w * 0.9, y, h * 0.052, '#2a1c13', { f: F.elite, a: 'right' }); line(g, [[w * 0.1, y + h * 0.04], [w * 0.9, y + h * 0.04]], 'rgba(42,28,19,.25)', 1); });
-      T(g, 'Please do not feed the clouds.', w / 2, h * 0.92, h * 0.045, '#a8361f', { f: F.fraunces, it: 1, w: 600 });
-    }, { cw: 300, ch: 392 });
-    // Where the airship goes. The line to Anna's House is painted on the board already; when the two places
-    // are joined, give TRANSIT.house an address and the board becomes a way of travelling (placesLife).
-    sign(sx + 2.9, sy + 2.3, CURB + 5, 1, 2.6, 3.4, (g, w, h) => {
-      paper(g, w, h, '#efe7d2'); rect(g, 0, 0, w, h * 0.17, '#a8361f'); T(g, 'DESTINATIONS', w / 2, h * 0.09, h * 0.075, '#efe7d2', { f: F.bebas, ls: 4 });
-      [["Anna's House", 'the bungalow under the oaks', '#24382f'], ['Vesper Street', 'you are here', '#a8361f'], ['Elsewhere', 'by arrangement with the wind', '#5b4636']].forEach(([a, b, c], i) => { const y = h * (0.3 + i * 0.2); disc(g, w * 0.14, y, h * 0.028, c); T(g, a, w * 0.24, y - h * 0.02, h * 0.066, c, { f: F.playfair, w: 700, it: 1, a: 'left' }); T(g, b, w * 0.24, y + h * 0.045, h * 0.04, '#2a1c13', { f: F.elite, a: 'left' }); if (i < 2) line(g, [[w * 0.14, y + h * 0.04], [w * 0.14, y + h * 0.16]], '#2a1c13', 3); });
-      T(g, 'Ring the bell and it comes.', w / 2, h * 0.92, h * 0.045, '#2a1c13', { f: F.fraunces, it: 1, w: 600 });
-    }, { cw: 300, ch: 392 });
-    K.put(PAINT.brass, new THREE.SphereGeometry(0.34, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.6).translate(sx - 2.9, CURB + 6.6, -(sy + 4.9))); K.tube(IRON, [sx - 2.9, CURB + 8.4, -(sy + 4.9)], [sx - 2.9, CURB + 6.9, -(sy + 4.9)], 0.03, 4);
-    K.transit = { x: sx - 2.9, y: CURB + 6.4, z: -(sy + 4.9), arrive: { x: sx - 1, y: CURB, z: -(sy), yaw: Math.PI / 2 } };
+    // The stop is one post: a bell, a small enamel plate, a windsock at the top. Dandelion does the rest.
+    // (It was a shelter, a mast, a timetable and a destinations board. Too much.)
+    const sx = 14.2, sy = -44;
+    K.lathe(IRON, sx, CURB, -sy, [[0.01, 0], [0.55, 0], [0.55, 0.22], [0.3, 0.5], [0.16, 1.4], [0.12, 13.6], [0.2, 13.7], [0.01, 13.9]], 10);
+    K.tube(IRON, [sx, CURB + 6.9, -sy], [sx - 0.9, CURB + 6.9, -sy], 0.035, 5);
+    K.put(PAINT.brass, new THREE.SphereGeometry(0.3, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.6).translate(sx - 0.9, CURB + 6.55, -sy));
+    K.collide(sx - 0.5, sx + 0.5, -sy - 0.5, -sy + 0.5, 10);
+    sign(sx - 0.14, sy, CURB + 5.2, 1, 1.5, 1.0, (g, w, h) => { fill(g, w, h, '#24382f'); g.strokeStyle = '#efe7d2'; g.lineWidth = 3; g.strokeRect(5, 5, w - 10, h - 10); T(g, 'AIRSHIP', w / 2, h * 0.32, h * 0.26, '#efe7d2', { f: F.bebas, ls: 4 }); T(g, 'LINE 6 · ring the bell', w / 2, h * 0.7, h * 0.15, '#efe7d2', { f: F.fraunces, it: 1, w: 600 }); }, { cw: 180, ch: 120 });
+    K.windsock = { x: sx, y: CURB + 13.2, z: -sy };
+    K.transit = { x: sx - 0.9, y: CURB + 6.4, z: -sy, arrive: { x: 12.4, y: CURB, z: 42.6, yaw: 0 } };
     // the town's sign, and a fingerpost
     const tx = -17.5, ty = -27;
     for (const dy of [-3.4, 3.4]) post(tx, ty + dy, CURB, CURB + 7.6, 0.16, WOODD);
@@ -69,14 +48,6 @@ export function buildPlaces(K, town) {
     const TOWN = (g, w, h) => { board(g, w, h, '#24382f', '#d2ae62', { inset: h * 0.05 }); ICON.sun(g, w / 2, h * 0.22, h * 0.26, '#e9b44c'); T(g, 'Vesper Street', w / 2, h * 0.5, h * 0.19, '#efe6cf', { f: F.playfair, w: 700, it: 1 });
       T(g, 'POP. 9 ROBOTS & YOU   ·   ELEV. CONSIDERABLE', w / 2, h * 0.7, h * 0.062, '#d2ae62', { f: F.bebas, ls: 2 }); T(g, 'evenings a speciality', w / 2, h * 0.84, h * 0.085, '#efe6cf', { f: F.caveat, w: 600 }); };
     sign(tx + 0.14, ty, CURB + 5.7, 3, 7.6, 4, TOWN, { cw: 760, ch: 400 }); sign(tx - 0.14, ty, CURB + 5.7, 1, 7.6, 4, TOWN, { cw: 760, ch: 400 });
-    const fx = 13.4, fy = -11; post(fx, fy, CURB, CURB + 10.5, 0.13, CREAM); K.collide(fx - 0.3, fx + 0.3, -fy - 0.3, -fy + 0.3, 10);
-    // boards point the way they say: west down the street, or east back to the airship; each reads right from both sides
-    [['coffee', 'w'], ['records', 'w'], ['tinned fish, 150 ft', 'w'], ['the chapel, 190 ft', 'w'], ['the edge, 260 ft (mind it)', 'w'], ['the airship', 'e']].forEach(([name, dir], i) => {
-      const h = CURB + 9.8 - i * 0.95, w = 4.6, yc = fy + (dir === 'e' ? -w / 2 - 0.1 : w / 2 + 0.1);
-      P(CREAM, fx - 0.06, fx + 0.06, yc - w / 2, yc + w / 2, h - 0.36, h + 0.36);
-      for (const [q, dx] of [[3, 0.07], [1, -0.07]]) { const right = (q === 3) === (dir === 'w'), txt = right ? `${name}  →` : `←  ${name}`;
-        sign(fx + dx, yc, h, q, w, 0.72, (g, cw, ch) => { fill(g, cw, ch, '#ece4d0'); T(g, txt, cw / 2, ch * 0.54, ch * 0.5, '#24382f', { f: F.fraunces, w: 600, it: 1, max: cw * 0.94 }); }, { cw: 368, ch: 58 }); }
-    });
     for (let i = 0; i < 9; i++) K.F.add(K.pick(['cosmos', 'lavender', 'catmint', 'grass']), -27 + (r() - 0.5) * 3, 27 + (r() - 0.5) * 9, 0.8 + r() * 0.3, { y: 0 });
   }
 
@@ -85,7 +56,7 @@ export function buildPlaces(K, town) {
   // ======================================================================================
   {
     const gro = town.lots.grocery, cin = town.lots.cinema, a0 = 112, a1 = 120;
-    P('pavers', FRONT, 60, a0, a1, -0.6, CURB - 0.012); K.surface(FRONT, 60, -a1, -a0, CURB);
+    P('pavers', FRONT, 69, a0, a1, -0.6, CURB - 0.012); K.surface(FRONT, 69, -a1, -a0, CURB);
     // the mural on the grocer's wall
     sign(40, a1 - 0.06, CURB + 6.4, 2, 24, 10, (g, w, h) => {
       const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#34405a'); sky.addColorStop(0.45, '#c9705a'); sky.addColorStop(0.75, '#f0b060'); sky.addColorStop(1, '#f6d58a'); g.fillStyle = sky; g.fillRect(0, 0, w, h);
@@ -107,10 +78,10 @@ export function buildPlaces(K, town) {
     lantern(FRONT + 16, a0 + 0.5, CURB + 9, 0.26); K.lamp(FRONT + 16, CURB + 8.6, -(a0 + 1.5), 0.9);
 
     // ---- the picture garden: an open-air cinema on the lawn behind the false front -------------------------
-    const bx = cin.back, sc = { x: bx + 0.2, y0: 86.5, y1: 109.5, h0: CURB + 4.6, h1: CURB + 15.4 };       // the screen, on the back of the cinema
+    const bx = cin.back, sc = { x: bx + 0.2, y0: cin.y0 + 1.2, y1: cin.y1 - 1.2, h0: CURB + 4.6, h1: CURB + 14.6 };       // the screen, on the back of the cinema
     P('c#17140f/0.9', bx, bx + 0.18, sc.y0 - 0.6, sc.y1 + 0.6, sc.h0 - 0.6, sc.h1 + 0.6);
     K.screen = sc;
-    K.G.poly('lawn', [[bx, -84], [72, -84], [72, -112], [bx, -112]], {});
+    K.G.poly('lawn', [[bx, -88.6], [72, -88.6], [72, -112], [bx, -112]], {});
     // deck chairs and benches in rows, facing the screen
     const chair = (x, y, col) => {
       const z = -y; for (const dz of [-0.95, 0.95]) { K.tube(WOOD, [x + 1.5, 0, z + dz], [x - 1.4, 3.3, z + dz], 0.06, 4); K.tube(WOOD, [x - 1.3, 0, z + dz], [x + 0.6, 1.9, z + dz], 0.06, 4); }
@@ -119,7 +90,7 @@ export function buildPlaces(K, town) {
       K.seat(x - 0.1, 1.5, z, Math.PI / 2 + 0.0, 'sit and watch the picture'); K.collide(x - 1.4, x + 1.5, z - 1, z + 1, 1.5);
     };
     const cols = ['c#b8452e/0.9', 'c#e9e0cc/0.9', 'c#34405a/0.9', 'c#c9952a/0.9', 'c#2f4a40/0.9'];
-    for (let row = 0; row < 3; row++) for (let i = 0; i < 5; i++) { if (row === 1 && i === 2) continue; chair(bx + 15 + row * 6.5, 89.5 + i * 4.3 + (row % 2) * 1.6, cols[(row * 2 + i) % cols.length]); }
+    for (let row = 0; row < 3; row++) for (let i = 0; i < 5; i++) { if (row === 1 && i === 2) continue; chair(bx + 15 + row * 6.5, 91 + i * 4.1 + (row % 2) * 1.4, cols[(row * 2 + i) % cols.length]); }
     // the projector on its stand at the back, and the popcorn
     const px = bx + 35, py = 98;
     for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) K.tube(WOODD, [px + dx * 1.3, 0, -(py + dy * 1.3)], [px + dx * 0.3, 5.2, -(py + dy * 0.3)], 0.07, 4);
@@ -147,11 +118,10 @@ export function buildPlaces(K, town) {
     });
     sign(cx, cy - 1.12, 2.0, 2, 2.6, 1.3, (g, w, h) => { fill(g, w, h, '#b8452e'); g.strokeStyle = '#f6e6c0'; g.lineWidth = 4; g.strokeRect(6, 6, w - 12, h - 12); T(g, 'POPCORN', w / 2, h * 0.36, h * 0.36, '#f6e6c0', { f: F.limelight }); T(g, 'real butter · help yourself', w / 2, h * 0.74, h * 0.17, '#f6e6c0', { f: F.fraunces, it: 1, w: 600 }); }, { cw: 300, ch: 150 });
     // lights on poles round the lawn, a hedge of shrubs, the back way out
-    const poles = [[bx + 12, 85.5], [bx + 36, 85.5], [bx + 36, 110.8], [bx + 12, 110.8]];
+    const poles = [[bx + 12, 89.6], [bx + 36, 89.6], [bx + 36, 110.8], [bx + 12, 110.8]];
     for (const [x, y] of poles) { post(x, y, 0, 13, 0.11, WOODD); K.collide(x - 0.3, x + 0.3, -y - 0.3, -y + 0.3, 12); }
     for (let i = 0; i < 4; i++) { const a = poles[i], b = poles[(i + 1) % 4]; if (i !== 3) K.strand([a[0], 12.6, -a[1]], [b[0], 12.6, -b[1]], 1.8, 12); }
-    for (let x = bx + 3; x < 72; x += 4.5) K.F.add(r() < 0.5 ? 'hydrangea' : 'shrub', x, -83 - r() * 1.5, 0.7 + r() * 0.3);
-    for (let y = 86; y < 112; y += 4.5) K.F.add(r() < 0.6 ? 'shrub' : 'rose', 73 + r() * 1.5, -y, 0.7 + r() * 0.3);
+    for (let y = 91; y < 112; y += 4.5) K.F.add(r() < 0.6 ? 'shrub' : 'rose', 73 + r() * 1.5, -y, 0.7 + r() * 0.3);
     K.F.drift('wildflowers', bx + 44, -98, 5, 12, 26, 0.8); K.F.drift('grass', bx + 46, -98, 4, 12, 14, 0.9);
   }
 
@@ -380,10 +350,10 @@ export function placesLife(ctx, K) {
         // once round, just off the rim, the island always on the right-hand side, where the windows are
         { p: [-6, 14, 26] }, { p: [-70, 62, 30] },
         { p: [-158, 92, -50], say: 'Below us, the Yard. That thread of steam is Bao. Wave; he will not see, but he will know.' },
-        { p: [-160, 98, -165], say: 'The chapel, and the Humming Stones behind it. They hum whether or not anyone is listening.' },
+        { p: [-160, 98, -165], say: 'The chapel. Somebody carried it here from Indiana, brick by brick, and lost a third of them on the way.' },
         { p: [-95, 112, -300], say: 'The Overlook. See the last bench, out past the rail? People sit there for a long time.' },
         { p: [10, 122, -338] }, { p: [118, 112, -288] },
-        { p: [160, 100, -150], say: 'On the grocer\'s roof, the Gloaming. And behind the picture house, the picture. I have seen it from here. Twice.' },
+        { p: [160, 100, -150], say: 'On the last roof, the Gloaming. And behind the picture house, the picture. I have seen it from here. Twice.' },
         { p: [158, 96, -40] }, { p: [112, 84, 96], say: 'And the street, end to end. Somebody has put the lights on. Somebody always does.' },
         { p: [44, 42, 150] }, { p: [5, 9, 100] }, { p: [5, 1.0, 62] },
       ],

@@ -1,9 +1,9 @@
 # Vesper Street
 
 A little main street you can walk down, in the browser: an island in the sky with the sun going down
-at the end of the street. It keeps the visitor's clock. Ten shops are open (coffee, records, yoga, a
+at the end of the street. It keeps the visitor's clock. Eleven shops are open (coffee, records, yoga, a
 small museum of real things, books, bread, a grocer of tinned fish and good oil, plants, candles, a
-noodle bar), there is a chapel beside the Overlook, a bar on the grocer's roof, a dumpling cart in the
+noodle bar, bicycles), there is a chapel at the far end, a bar on the plant shop's roof, a dumpling cart in the
 Yard, and a picture house whose screen is round the back. Robots keep the shops and like to be talked to;
 what they make you can eat and drink. Live at https://town.brezgis.com/.
 

@@ -81,13 +81,13 @@ const STREET_TREES = [];
   // behind the buildings and round the rim
   const wild = [
     ['oak', 92, -30, 46], ['maple', 86, -76, 40], ['pine', 104, -112, 52], ['oak', 96, -150, 44], ['birch', 84, -176, 30], ['birch', 90, -182, 33], ['pine', 78, -206, 48],
-    ['maple', 72, -18, 36], ['cherry', 66, 34, 20], ['pine', 88, 22, 50], ['oak', 60, -222, 40],
+    ['maple', 72, -18, 36], ['cherry', 66, 34, 20], ['pine', 88, 22, 50], ['apple', 60, -222, 15],
     ['oak', -104, -40, 48], ['pine', -112, -84, 54], ['maple', -118, -122, 42], ['oak', -100, -164, 46], ['birch', -86, -196, 30], ['birch', -92, -204, 32], ['pine', -74, -220, 48],
     ['maple', -78, -8, 38], ['cherry', -66, 36, 21], ['pine', -96, 26, 50], ['willow', -98, -128, 34],
     // round the churchyard
     ['oak', 48, 64, 44], ['maple', -46, 70, 40], ['birch', 40, 96, 28], ['birch', 45, 102, 30], ['pine', -44, 118, 48], ['copper', 42, 136, 42], ['cherry', -36, 92, 20], ['oak', -30, 160, 44], ['pine', 24, 166, 46], ['maple', 76, 70, 36], ['pine', -78, 78, 50],
     ['lilac', 66, -116, 12], ['magnolia', 74, -100, 16], ['apple', 80, -128, 15],
-    ['jmaple', 34, -214, 13], ['copper', -38, -226, 40], ['maple', 50, -240, 36], ['pine', -44, -262, 44], ['birch', 40, -258, 28],
+    ['jmaple', 34, -214, 13], ['copper', -38, -226, 40], ['lilac', 50, -240, 12], ['pine', -44, -262, 44], ['birch', 66, -252, 28],
   ];
   for (const [kind, x, z, height] of wild) TREES.push({ kind, x: x + (r() - 0.5) * 3, z: z + (r() - 0.5) * 3, seed: Math.floor(r() * 900), height });
   TREES.push({ kind: 'oak', x: -52, z: -98, seed: 77, height: 46, trunk: 2.3, y: CURB });          // the Yard's oak
@@ -192,8 +192,8 @@ export function layStreet(B, items, town) {
   K.bench(-13.4, -124, Math.PI / 2, { y: CURB }); K.seat(-13.4, CURB + 1.4, -124, -Math.PI / 2, 'sit on the bench');
   K.bench(13.4, -128, -Math.PI / 2, { y: CURB }); K.seat(13.4, CURB + 1.4, -128, Math.PI / 2, 'sit on the bench');
   K.bench(-13.4, -42, Math.PI / 2, { y: CURB }); K.seat(-13.4, CURB + 1.4, -42, -Math.PI / 2, 'sit on the bench');
-  rack(13.3, 60); rack(-13.3, 176); rack(13.3, 160);
-  bike(13.9, 60.4, Math.PI / 2, 'c#3f6a5a/0.4', CURB, { basket: true }); bike(13.9, 62.9, -Math.PI / 2 + 0.1, 'c#c9a02a/0.4'); bike(-13.9, 176.4, Math.PI / 2, 'c#34405a/0.4'); bike(13.9, 160.5, Math.PI / 2 - 0.08, 'c#b8452e/0.4', CURB, { basket: true });
+  rack(13.3, 60); rack(-13.3, 164); rack(13.3, 160);
+  bike(13.9, 60.4, Math.PI / 2, 'c#3f6a5a/0.4', CURB, { basket: true }); bike(13.9, 62.9, -Math.PI / 2 + 0.1, 'c#c9a02a/0.4'); bike(-13.9, 164.4, Math.PI / 2, 'c#34405a/0.4'); bike(13.9, 160.5, Math.PI / 2 - 0.08, 'c#b8452e/0.4', CURB, { basket: true });
   bin(13.2, 86); bin(-13.2, 60); bin(-13.2, 150); bin(13.2, 150);
   // pillar box, in the town's own green
   K.lathe('c#2f4a40/0.5', -13.3, CURB, 14, [[0.01, 0], [0.8, 0], [0.8, 0.3], [0.7, 0.4], [0.7, 4.2], [0.82, 4.3], [0.82, 4.5], [0.5, 4.9], [0.01, 5.0]], 16); K.box('c#17140f/0.5', -12.62, -12.58, CURB + 3.5, CURB + 3.65, 13.55, 14.45); K.collide(-14.1, -12.5, 13.2, 14.8, 5);

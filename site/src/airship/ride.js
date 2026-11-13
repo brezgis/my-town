@@ -108,6 +108,24 @@ export class Passenger {
 // ---- A horn like a brass band's tuba: two low notes, oom-PAH. Its own tiny audio graph, made on the
 // first call (the bell is a gesture, so the browser allows it); quiet, and silent when the house is muted.
 let AC = null;
+// A soft engine purr while she flies with you aboard: two low detuned oscillators through a lowpass, faded in and out.
+// Uses the horn's audio context (so only once there has been a gesture), and is silent when the house is muted.
+let purrNodes = null;
+export function purr(sound, on) {
+  try {
+    if (!AC && !on) return;
+    AC ??= new (window.AudioContext || window.webkitAudioContext)();
+    if (!purrNodes) {
+      const g2 = AC.createGain(), lp = AC.createBiquadFilter(), a = AC.createOscillator(), b = AC.createOscillator(), lfo = AC.createOscillator(), lg = AC.createGain();
+      a.type = 'sawtooth'; a.frequency.value = 46; b.type = 'triangle'; b.frequency.value = 46.7; lp.type = 'lowpass'; lp.frequency.value = 170;
+      lfo.frequency.value = 7.5; lg.gain.value = 0.25; lfo.connect(lg); lg.connect(g2.gain);
+      g2.gain.value = 0; a.connect(lp); b.connect(lp); lp.connect(g2); g2.connect(AC.destination); for (const o of [a, b, lfo]) o.start();
+      purrNodes = { g2, lg };
+    }
+    const v = on && !sound?.isMuted?.() ? 0.035 * (sound?.volume?.() ?? 1) : 0;
+    purrNodes.g2.gain.setTargetAtTime(v, AC.currentTime, 0.6); purrNodes.lg.gain.setTargetAtTime(v * 0.3, AC.currentTime, 0.6);
+  } catch { /* no sound here */ }
+}
 export function horn(sound, vol = 0.5, notes = [[41, 0, 0.32], [46, 0.4, 0.8]]) {
   try {
     if (sound?.isMuted?.()) return;
@@ -144,7 +162,7 @@ export function makeAirship(ctx, D) {
   const speak = k => { const s = pick(L[k]); if (s) D.say?.(s); };
   const veil = makeVeil();
   let bus = null, flight = null, rider = null, state = 'away', timer = 0, dwell = 0, door = 0, doorAim = 0, armAim = 0, veilAim = 0, veilRate = 1;
-  let passT = D.firstPass ?? 120 + Math.random() * 120, shownHint = undefined, started = false, ret = 0, tipped = 1, fromAway = false;
+  let passT = D.firstPass ?? 120 + Math.random() * 120, shownHint = undefined, started = false, ret = 0, tipped = 1, fromAway = false, purring = false;
   const open = () => !!D.transit?.url;
   function make() {
     if (bus) return bus;
@@ -160,14 +178,14 @@ export function makeAirship(ctx, D) {
 
   function docked(first = true) {
     flight.place(dock); show(true); state = 'docked'; setDoor(true); dwell = SECS.dwell; blind(open() ? 'transit' : 'tour');
-    bus.setFace('happy'); if (first) speak('arrive');
+    bus.setFace('happy'); if (first) { speak('arrive'); bus.wave?.(); }
   }
   function call() {
     if (state === 'away' || state === 'passing') {
       make(); state = 'wait'; timer = D.wait ?? 3; flight.leg = null; show(false); return 'rung';
     }
     if (state === 'wait' || state === 'coming') { speak('coming'); return 'coming'; }
-    if (state === 'docked' || state === 'unloading') { speak('here'); return 'here'; }
+    if (state === 'docked' || state === 'unloading') { bus.wave?.(); speak('here'); return 'here'; }
     if (state === 'leaving') { state = 'coming'; setDoor(false); blind(open() ? 'transit' : 'tour'); flight.go([...lineup(), dockP], 12, { ease: 'inout', onDone: docked }); speak('rung'); return 'rung'; }
     return 'busy';
   }
@@ -194,7 +212,7 @@ export function makeAirship(ctx, D) {
   }
   // back at the stage with the visitor aboard: open up, then set them down
   function home() { flight.place(dock); state = 'unloading'; setDoor(true); timer = 1.6; blind(open() ? 'transit' : 'tour'); veilAim = 0; }
-  function setDown() { rider.alight(D.alight); speak(fromAway ? 'landed' : 'alight'); fromAway = false; state = 'docked'; dwell = 40; bus.setFace('happy'); }
+  function setDown() { rider.alight(D.alight); bus.wave?.(); speak(fromAway ? 'landed' : 'alight'); fromAway = false; state = 'docked'; dwell = 40; bus.setFace('happy'); }
   function getOff() {
     if (!rider?.on) return false;
     if (state === 'closing' || state === 'unloading' || state === 'docked') { const was = state; flight.place(dock); setDoor(true); door = Math.max(door, 0.3); rider.alight(D.alight); state = 'docked'; dwell = 40; if (was === 'closing') speak('stay'); veilAim = 0; return true; }
@@ -248,6 +266,8 @@ export function makeAirship(ctx, D) {
       case 'blink': if ((timer -= dt) <= 0) { home(); door = 1; setDown(); veilAim = 0; veilRate = 2.5; } break;
     }
     if (state === 'touring' && rider.on && tipped < 1 && D.pitchOnTour !== undefined && ctx.walker) { tipped = Math.min(1, tipped + dt / 7); ctx.walker.pitch += (D.pitchOnTour - ctx.walker.pitch) * Math.min(1, dt * 0.7); }      // as it rises, the view tips down to the island
+    const flying = !!rider?.on && ['touring', 'departing', 'returning', 'arriving'].includes(state);
+    if (flying !== purring) { purring = flying; purr(ctx.sound, flying); }
     flight.update(dt);
     door += (doorAim - door) * Math.min(1, dt * 2.2); bus.setDoor(door);
     const arm = bus.armOut + (armAim - bus.armOut) * Math.min(1, dt * 1.8); bus.setArm(arm);
@@ -276,8 +296,8 @@ export function makeAirship(ctx, D) {
       if (name === 'docked') { docked(false); door = 1; bus.setDoor(1); bus.setArm(1); dwell = 1e9; return; }
       if (name === 'coming') { come(); flight.seek(k); return; }
       if (name === 'pass') { pass(); flight.seek(k); return; }
-      if (name === 'arrive') { arrive(); flight.seek(k); veil.set(0); veilAim = 0; return; }
-      if (name === 'tour' || name === 'depart') { docked(false); door = 1; board(); timer = 0; setOff(); flight.seek(k); door = 0; bus.setDoor(0); bus.setArm(0); return; }
+      if (name === 'arrive') { arrive(); flight.seek(k); rider.lastYaw = bus.root.rotation.y; veil.set(0); veilAim = 0; return; }
+      if (name === 'tour' || name === 'depart') { docked(false); door = 1; board(); timer = 0; setOff(); flight.seek(k); rider.lastYaw = bus.root.rotation.y; door = 0; bus.setDoor(0); bus.setArm(0); return; }
     },
   };
   return api;

@@ -20,7 +20,7 @@ export function furnish(B, town = {}) {
   const kit = makeKit(B);
   kit.house = town; kit.town = town; kit.spots = []; kit.clerks = []; kit.eats = []; kit.later = [];      // later: functions (ctx) run once the scene exists
   for (const [id, shop] of Object.entries(SHOPS)) { const lot = town.lots[id]; if (lot) shop(kit, lot, town); }
-  rooftop(kit, town.lots.grocery, town);      // the bar on the grocer's roof
+  rooftop(kit, town.lots.plants, town);      // the bar on Frond's flat roof (315 Mulberry Street really has one)
   furnishChapel(kit, town);
   const { lamps, seats, candles, models, extras, books, steam } = kit;
   return { kit, lamps, seats, candles, models, extras, books, steam, hinged: kit.hinged, spots: kit.spots, clerks: kit.clerks, eats: kit.eats, later: kit.later };
