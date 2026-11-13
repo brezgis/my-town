@@ -392,7 +392,7 @@ export function placesLife(ctx, K) {
     const boardSpot = { x: 0, y: -999, z: 0, reach: 7, size: 1.6, label: () => (TRANSIT.house ? "board the airship to Anna's House" : 'board the airship'), act: () => air.board() };
     ctx.interact.push(boardSpot);
     addEventListener('keydown', e => { if (e.code === 'Escape' && air.aboard) air.getOff(); });
-    animated.push(() => { const d = air.canBoard ? air.doorAt : null; if (d) { boardSpot.x = d.x; boardSpot.y = d.y + 3.4; boardSpot.z = d.z; } else boardSpot.y = -999; });
+    animated.push(() => { const d = air.canBoard ? air.doorAt : null; if (d) { const R = air.bus.root, lx = Math.cos(R.rotation.y), lz = -Math.sin(R.rotation.y), sg = Math.sign((R.position.x - d.x) * lx + (R.position.z - d.z) * lz) || 1; boardSpot.x = d.x + sg * lx * 2.2; boardSpot.y = d.y + 4.2; boardSpot.z = d.z + sg * lz * 2.2; } else boardSpot.y = -999; });      // in the doorway, so it shows from the kerb as well as on the way up
     if (new URLSearchParams(location.search).get('from') === 'house') setTimeout(() => air.arrive(), 0);
     const stage = new URLSearchParams(location.search).get('airship'); if (stage) setTimeout(() => air.stage(...stage.split(',').map((v, i) => (i ? Number(v) : v))), 500);      // ?airship=docked or tour,0.4 for test views
   }
