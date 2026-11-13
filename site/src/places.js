@@ -15,7 +15,7 @@ const IRON = PAINT.iron, WOOD = 'c#8a6a48/0.85', WOODD = 'c#5a4432/0.85', CREAM 
 // Travel between this street and Anna's House. Set `house` to the house's address (for example
 // 'https://house.brezgis.com/site/') to open the line; the house should send people here with ?from=house,
 // which sets them down at the airship stop (main.js).
-export const TRANSIT = { house: null };
+export const TRANSIT = { house: 'https://house.brezgis.com/site/' };
 
 export function buildPlaces(K, town) {
   const kit = K.kit, P = K.P2, r = K.r;
@@ -40,6 +40,22 @@ export function buildPlaces(K, town) {
     sign(sx - 0.14, sy, CURB + 5.2, 1, 1.5, 1.0, (g, w, h) => { fill(g, w, h, '#24382f'); g.strokeStyle = '#efe7d2'; g.lineWidth = 3; g.strokeRect(5, 5, w - 10, h - 10); T(g, 'AIRSHIP', w / 2, h * 0.32, h * 0.26, '#efe7d2', { f: F.bebas, ls: 4 }); T(g, 'LINE 6 · ring the bell', w / 2, h * 0.7, h * 0.15, '#efe7d2', { f: F.fraunces, it: 1, w: 600 }); }, { cw: 180, ch: 120 });
     K.windsock = { x: sx, y: CURB + 13.2, z: -sy };
     K.transit = { x: sx - 0.9, y: CURB + 6.4, z: -sy, arrive: { x: 12.4, y: CURB, z: 42.6, yaw: 0 } };
+    // The waiting shelter, back by request: four posts, a roof, a bench and the timetable. Nothing else.
+    {
+      const hx = 17.5, hy = -30;
+      for (const [dx, dy] of [[-3, -5], [3, -5], [-3, 5], [3, 5]]) post(hx + dx, hy + dy, CURB, CURB + 8.4, 0.12, GREEN);
+      P(GREEN, hx - 3.6, hx + 3.6, hy - 5.8, hy + 5.8, CURB + 8.4, CURB + 8.6); P('c#b98f7c/0.8', hx - 3.9, hx + 3.9, hy - 6.1, hy + 6.1, CURB + 8.6, CURB + 8.75);
+      P('glass', hx + 2.95, hx + 3.0, hy - 5, hy + 5, CURB + 1, CURB + 8); K.collide(hx + 2.8, hx + 3.2, -(hy + 5), -(hy - 5), 8);
+      K.bench(hx + 1.6, -hy, -Math.PI / 2, { y: CURB, w: 6, mat: 'c#7d8a72/0.8' }); K.seat(hx + 1.6, CURB + 1.4, -hy, Math.PI / 2, 'sit and wait for the airship');
+      lantern(hx, hy, CURB + 8.0, 0.24, 'e#ffe2b4/1.7'); K.lamp(hx, CURB + 7.6, -hy, 0.8);
+      sign(hx + 2.9, hy - 2.6, CURB + 5, 1, 2.6, 3.4, (g, w, h) => {
+        paper(g, w, h, '#efe7d2'); rect(g, 0, 0, w, h * 0.17, '#2f4a40'); T(g, 'AIRSHIP', w / 2, h * 0.09, h * 0.09, '#efe7d2', { f: F.bebas, ls: 6 });
+        T(g, "LINE 6  ·  TO ANNA'S HOUSE", w / 2, h * 0.24, h * 0.05, '#2f4a40', { f: F.bebas, ls: 2 });
+        const rows = [['arrives', 'at dusk'], ['departs', 'at dusk'], ['next one', 'shortly'], ['after that', 'also shortly'], ['fare', 'a nice thought']];
+        rows.forEach(([a, b], i) => { const y = h * (0.36 + i * 0.1); T(g, a, w * 0.1, y, h * 0.052, '#2a1c13', { f: F.elite, a: 'left' }); T(g, b, w * 0.9, y, h * 0.052, '#2a1c13', { f: F.elite, a: 'right' }); line(g, [[w * 0.1, y + h * 0.04], [w * 0.9, y + h * 0.04]], 'rgba(42,28,19,.25)', 1); });
+        T(g, 'Please do not feed the clouds.', w / 2, h * 0.92, h * 0.045, '#a8361f', { f: F.fraunces, it: 1, w: 600 });
+      }, { cw: 300, ch: 392 });
+    }
     // the town's sign, and a fingerpost
     const tx = -17.5, ty = -27;
     for (const dy of [-3.4, 3.4]) post(tx, ty + dy, CURB, CURB + 7.6, 0.16, WOODD);
