@@ -4,8 +4,8 @@
 // its face, and the black-striped body is rounded like a toy. Wheels tucked up as if it never needed
 // them, a stop-sign arm that swings out, red and amber lamps that flash in turn while the door is open,
 // a folding door, a destination blind over the windscreen, two brass propellers, fins at the tail, a
-// brass tuba bell on the roof for a horn. Inside: two rows of green bench seats, round windows to see
-// out of, a brass rail, a ticket machine (the fare is a nice thought), and a mirror in which the bus's
+// brass tuba bell on the roof for a horn. Inside: two rows of green bench seats, round windows (and a long one on the door side) to see
+// out of, panelled walls, a ribbed floor, hand-straps, a map of the line, a brass rail, a ticket machine (the fare is a nice thought), and a mirror in which the bus's
 // eyes look back at you.
 //
 // Shared by Anna's House and Vesper Street: it imports nothing but three. ONE draw call: every part is
@@ -48,13 +48,13 @@ export const DANDELION = {
 // ---- the canvas: where each picture lives (pixels; the canvas is 512 square) ----------------------
 const S = 512;
 const REG = {
-  face: [0, 0, 512, 256], blind: [0, 256, 512, 320], side: [0, 320, 512, 384],
+  face: [0, 0, 512, 192], map: [0, 192, 512, 256], blind: [0, 256, 512, 320], side: [0, 320, 512, 384],
   mirror: [0, 384, 160, 448], white: [0, 448, 160, 512], six: [160, 384, 288, 512], ticket: [288, 384, 416, 512], stop: [416, 384, 512, 480],
 };
 const YELLOW = '#f3b21b', BLACK = '#1d1b1a', CREAM = '#efe4cf', BRASS = '#c9a45c', GREEN = '#2f6048', GREEN2 = '#264d3a', SILVER = '#bdbdb4', GLASS = '#1b2a30', ROPE = '#a8956c';
 const FONT = '"Arial Narrow", "Helvetica Neue", Arial, sans-serif', SERIF = 'Georgia, "Times New Roman", serif';
 
-export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) {
+export function buildBus({ ring = DANDELION.ring, name = DANDELION.name, plank = 8 } = {}) {
   // ---- the canvas -------------------------------------------------------------------------------
   const cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d');
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
@@ -93,6 +93,15 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
     g.textAlign = 'center'; g.fillText(t, x0 + 52 + (w - 52) / 2, y0 + h / 2 + 2); g.restore();
   }
   function drawStatic() {
+    { const [x0, y0, x1, y1] = REG.map, w = x1 - x0, h = y1 - y0, my = y0 + h * 0.42; g.fillStyle = '#efe6d0'; g.fillRect(x0, y0, w, h); g.fillStyle = '#2f4a40'; g.fillRect(x0, y0, 70, h);
+      g.fillStyle = '#efe6d0'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `bold 13px ${FONT}`; g.fillText('LINE', x0 + 35, y0 + 18); g.font = `bold 30px ${SERIF}`; g.fillText('6', x0 + 35, y0 + 44);
+      g.strokeStyle = '#2f4a40'; g.lineWidth = 5; g.beginPath(); g.moveTo(x0 + 100, my); g.lineTo(x0 + 470, my); g.stroke();
+      g.lineWidth = 3; g.beginPath(); g.ellipse(x0 + 200, my - 1, 34, 13, 0, 0, 7); g.stroke();                                    // the loop round the island
+      g.setLineDash([5, 5]); g.strokeStyle = '#a8361f'; g.beginPath(); g.moveTo(x0 + 300, my); g.lineTo(x0 + 400, my); g.stroke(); g.setLineDash([]);
+      for (const [x, label, col] of [[100, 'Anna’s House', '#a8361f'], [200, 'round the island', null], [350, 'the clouds', null], [470, 'Vesper Street', '#24382f']]) {
+        if (col) { g.fillStyle = '#efe6d0'; g.strokeStyle = col; g.lineWidth = 4; g.beginPath(); g.arc(x0 + x, my, 8, 0, 7); g.fill(); g.stroke(); }
+        g.fillStyle = '#2a1c13'; g.font = `${col ? 'italic bold ' : 'italic '}13px ${SERIF}`; g.fillText(label, x0 + Math.min(x, 430), y0 + h - 12);
+      } }
     { const [x0, y0, x1, y1] = REG.white; g.fillStyle = '#ffffff'; g.fillRect(x0, y0, x1 - x0, y1 - y0); }
     { const [x0, y0, x1, y1] = REG.side, w = x1 - x0, h = y1 - y0; g.fillStyle = YELLOW; g.fillRect(x0, y0, w, h); g.fillStyle = BLACK; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `bold ${h * 0.5}px ${FONT}`;
       const t = `${name.toUpperCase()}  ·  LINE ${DANDELION.line}`; if ('letterSpacing' in g) g.letterSpacing = '3px'; g.fillText(t, x0 + w / 2, y0 + h / 2 + 2); if ('letterSpacing' in g) g.letterSpacing = '0px'; }
@@ -157,20 +166,23 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
   // The chassis, under the cabin floor (y -1.3 .. 0)
   add(T(rbox(8.1, 1.4, 18.5, 0.55, 6), { p: [0, -0.68, -0.5] }), (p) => (p.y < -1.05 ? '#2a2826' : YELLOW));
   add(box(-3.82, 3.82, -0.06, 0.04, -9.45, 8.45), '#3d4a3c', { glow: 6 });                                                    // the floor: green rubber
-  for (let z = -9; z < 8.4; z += 0.9) add(box(-0.75, 0.75, 0.04, 0.05, z, z + 0.08), '#33402f');               // ribs down the aisle
+  for (let z = -9.2; z < 8.4; z += 0.7) add(box(-3.75, 3.75, 0.04, 0.06, z, z + 0.1), '#2e3a2c', { glow: 6 });   // a ribbed rubber floor
   // The sides: one panel each, cut with round windows (and on the right, the doorway)
   const HOLE_Z = [-7.5, -4.6, -1.7, 1.2], HOLE_Y = 4.0, HOLE_R = 1.15;
-  const sidePanel = (side, z0, z1, holes) => {
+  const sidePanel = (side, z0, z1, holes, ribbon = null) => {
     const sh = new THREE.Shape(); const rb = 0.35;
     sh.moveTo(z0, rb); sh.quadraticCurveTo(z0, 0, z0 + rb, 0); sh.lineTo(z1 - rb, 0); sh.quadraticCurveTo(z1, 0, z1, rb); sh.lineTo(z1, 6.3); sh.lineTo(z0, 6.3); sh.closePath();
     for (const hz of holes) { const h = new THREE.Path(); h.absarc(hz, HOLE_Y, HOLE_R, 0, Math.PI * 2, true); sh.holes.push(h); }
+    if (ribbon) { const [za, zb, r] = ribbon, h = new THREE.Path(); h.moveTo(za, HOLE_Y - r); h.lineTo(zb, HOLE_Y - r); h.absarc(zb, HOLE_Y, r, -Math.PI / 2, Math.PI / 2, false); h.lineTo(za, HOLE_Y + r); h.absarc(za, HOLE_Y, r, Math.PI / 2, Math.PI * 1.5, false); sh.holes.push(h);
+      for (const y of [HOLE_Y - r - 0.08, HOLE_Y + r + 0.08]) add(box(side * 4.0, side * 4.1, y - 0.07, y + 0.07, za, zb), BRASS);
+      for (const [zc, rz] of [[za, -Math.PI / 2], [zb, Math.PI / 2]]) add(T(new THREE.TorusGeometry(r + 0.08, 0.07, 3, 10, Math.PI).rotateZ(rz).rotateY(Math.PI / 2), { p: [side * 4.05, HOLE_Y, zc] }), BRASS); }
     const g2 = new THREE.ExtrudeGeometry(sh, { depth: 0.18, bevelEnabled: false, curveSegments: 10 });
     g2.rotateY(-Math.PI / 2); g2.translate(side > 0 ? 4.0 : -3.82, 0, 0);
     add(g2, (p, nrm) => (nrm.x * side > 0.5 ? YELLOW : nrm.x * side < -0.5 ? CREAM : '#d8cbb0'), { perFace: true, glow: (p, nrm) => (nrm.x * side > 0.5 ? 0 : 6) });
     for (const hz of holes) add(T(new THREE.TorusGeometry(HOLE_R + 0.04, 0.08, 3, 14), { p: [side * 4.04, HOLE_Y, hz], r: [0, Math.PI / 2, 0] }), BRASS);
   };
   sidePanel(1, -9.5, 8.5, [...HOLE_Z, 4.1, 6.9]);
-  sidePanel(-1, -9.5, 5.0, HOLE_Z); sidePanel(-1, 7.8, 8.5, []);
+  sidePanel(-1, -9.5, 5.0, [], [-8.1, 3.75, 1.12]); sidePanel(-1, 7.8, 8.5, []);      // the island side: one long window with round ends
   add(box(-4.0, -3.82, 6.0, 6.3, 5.0, 7.8), YELLOW);                                                              // over the doorway
   // black rub rails, and the lettering above the windows
   for (const y of [1.2, 2.0, 2.62]) { add(box(4.0, 4.1, y, y + 0.15, -9.4, 8.4), BLACK); add(box(-4.1, -4.0, y, y + 0.15, -9.4, 4.95), BLACK); add(box(-4.1, -4.0, y, y + 0.15, 7.85, 8.4), BLACK); }
@@ -205,7 +217,7 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
   for (const s of [-1, 1]) add(T(cylZ(0.3, 0.14, 12), { p: [s * 3.25, 1.25, -9.8] }), '#d42a1e', { glow: 4 });
   add(T(rbox(7.6, 0.6, 0.6, 0.2, 4), { p: [0, 0.45, -10.0] }), BLACK);
   // wheels, tucked up into the body; the brass cap underneath, and the ring of light
-  for (const s of [-1, 1]) for (const z of [-6.4, 5.2]) { add(T(new THREE.TorusGeometry(0.92, 0.36, 6, 14), { p: [s * 3.72, -1.15, z], r: [0, Math.PI / 2, 0] }), '#232323'); add(T(cylX(0.55, 0.5, 12), { p: [s * 3.75, -1.15, z] }), SILVER); add(T(cylX(0.2, 0.62, 8), { p: [s * 3.75, -1.15, z] }), BRASS); }
+  for (const s of [-1, 1]) for (const z of [-6.4, 5.2]) { add(T(new THREE.TorusGeometry(0.92, 0.36, 5, 12), { p: [s * 3.72, -1.15, z], r: [0, Math.PI / 2, 0] }), '#232323'); add(T(cylX(0.55, 0.5, 12), { p: [s * 3.75, -1.15, z] }), SILVER); add(T(cylX(0.2, 0.62, 8), { p: [s * 3.75, -1.15, z] }), BRASS); }
   add(T(new THREE.SphereGeometry(2.3, 14, 4, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), { p: [0, -1.28, -0.5], s: [1, 0.42, 1.5] }), BRASS);
   add(T(new THREE.TorusGeometry(3.3, 0.17, 6, 32), { p: [0, -2.45, -0.5], r: [Math.PI / 2, 0, 0], s: [1, 1.5, 1] }), new THREE.Color(ring).getStyle(), { glow: 1 });
   // the door: two leaves that fold in
@@ -221,6 +233,12 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
     add(box(4.1, 4.18, 2.18, 2.32, 6.4, 7.6), BLACK, o);
     for (const s of [1, -1]) add(T(new THREE.CircleGeometry(0.7, 8, Math.PI / 8), { p: [4.22 + s * 0.02, 2.25, 5.75], r: [0, s * Math.PI / 2, 0] }), '#ffffff', { ...o, region: 'stop', fit: true });
     add(T(cylX(0.71, 0.03, 8).rotateX(Math.PI / 8), { p: [4.22, 2.25, 5.75] }), '#b3201c', o); }
+  // her own gangplank: it slides out from under the floor at the door, level with the floor, when the door opens
+  { const o = { part: 6, pivot: [plank, 0, 0] }, x0 = -4.05 - plank, x1 = -3.95;
+    add(box(x0, x1, -0.2, -0.1, 5.3, 7.5), '#8a6f55', o);      // (just under the floor, so that stowed it is out of sight)
+    for (let x = x0 + 0.25; x < x1; x += 0.5) add(box(x - 0.04, x + 0.04, -0.1, -0.075, 5.32, 7.48), '#6b5440', o);      // cleats
+    for (const z of [5.25, 7.55]) for (let x = x0; x < x1 - 0.1; x += 0.6) add(box(x, Math.min(x1, x + 0.3), -0.21, -0.075, z - 0.05, z + 0.05), (Math.round((x - x0) / 0.6) % 2) ? BLACK : YELLOW, o);
+  }
   // mitten hands, either side of the face
   for (const s of [-1, 1]) { add(T(new THREE.SphereGeometry(0.34, 9, 6), { p: [s * 4.5, 3.35, 8.95], s: [0.7, 1.05, 0.85] }), '#f4eee2', { part: 5 }); add(T(new THREE.SphereGeometry(0.14, 8, 6), { p: [s * 4.44, 3.32, 9.27], s: [0.8, 1.3, 0.8], r: [0.5, 0, 0] }), '#f4eee2', { part: 5 }); }
   // the horn: a tuba's bell on the roof, pointing forward
@@ -236,13 +254,21 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
     add(T(new THREE.ConeGeometry(0.32, 0.6, 12).rotateX(-Math.PI / 2), { p: [hub[0], hub[1], hub[2] - 0.35] }), BRASS, o);
     for (let k = 0; k < 3; k++) { const a = k * Math.PI * 2 / 3; add(T(new THREE.BoxGeometry(0.34, 1.9, 0.05).translate(0, 1.05, 0).rotateY(0.35 * s), { p: hub, r: [0, 0, a] }), '#b8913f', o); }
   }
-  // inside: the green bench seats, the brass rail, the ticket machine, the mirror, the wheel nobody holds
+  // inside: panelled lower walls, a route map over the windows, hand-straps
+  for (const [sd, z1] of [[1, 7.5], [-1, 4.95]]) {
+    add(box(sd > 0 ? 3.7 : -3.82, sd > 0 ? 3.82 : -3.7, 0.05, 2.7, -9.4, z1), GREEN, { glow: 6 });
+    add(box(sd > 0 ? 3.62 : -3.84, sd > 0 ? 3.84 : -3.62, 2.7, 2.8, -9.4, z1), BRASS);
+    for (let z = -8.6; z < z1 - 0.3; z += 1.45) add(box(sd > 0 ? 3.66 : -3.71, sd > 0 ? 3.71 : -3.66, 0.1, 2.7, z - 0.05, z + 0.05), GREEN2, { glow: 6 });
+    add(new THREE.PlaneGeometry(5.6, 0.62).rotateY(-sd * Math.PI / 2).translate(sd * 3.79, 5.64, -2.6), '#ffffff', { region: 'map', glow: 6 });
+    for (const z of [-6.6, -3.0, 0.4, 3.0]) { add(box(sd * 0.95 - 0.03, sd * 0.95 + 0.03, 5.62, 6.12, z - 0.07, z + 0.07), '#3a2a20'); add(T(new THREE.TorusGeometry(0.14, 0.025, 3, 8), { p: [sd * 0.95, 5.5, z], r: [0, Math.PI / 2, 0] }), '#3a2a20'); }
+  }
+  // the green bench seats, the brass rail, the ticket machine, the mirror, the wheel nobody holds
   for (const c of [-7.3, -4.4, -1.5, 1.4]) for (const s of [-1, 1]) {
     const xa = s * 0.95, xb = s * 3.75, lo = Math.min(xa, xb), hi = Math.max(xa, xb);
     add(box(lo, hi, 1.05, 1.5, c - 0.68, c + 0.68), GREEN);
     add(T(box(lo, hi, -1.07, 1.07, -0.16, 0.16), { p: [0, 2.55, c - 0.72], r: [-0.08, 0, 0] }), GREEN);
-    add(box(lo + 0.05, hi - 0.05, 3.55, 3.68, c - 0.86, c - 0.6), GREEN2);
-    add(tube([s * 1.0, 0, c - 0.4], [s * 1.0, 1.05, c - 0.4], 0.05, 5), SILVER); add(tube([s * 1.0, 0, c + 0.45], [s * 1.0, 1.05, c + 0.45], 0.05, 5), SILVER);
+    add(tube([lo + 0.02, 3.62, c - 0.76], [hi - 0.02, 3.62, c - 0.76], 0.17, 6), GREEN); add(box(lo + 0.08, hi - 0.08, 1.12, 3.4, c - 0.92, c - 0.88), GREEN2);      // a rolled top, a seam down the back
+    add(tube([s * 1.0, 0, c - 0.4], [s * 1.0, 1.05, c - 0.4], 0.05, 4), SILVER); add(tube([s * 1.0, 0, c + 0.45], [s * 1.0, 1.05, c + 0.45], 0.05, 4), SILVER);
     add(tube([s * 0.95, 3.5, c - 0.72], [s * 0.95, 3.5, c - 0.71], 0.09, 6), BRASS);
   }
   for (const s of [-1, 1]) { add(tube([s * 0.95, 6.15, -9.3], [s * 0.95, 6.15, 7.9], 0.05, 6), BRASS); for (const z of [-5.85, -0.05, 3.6]) add(tube([s * 0.95, 0, z], [s * 0.95, 6.15, z], 0.045, 6), BRASS); }
@@ -250,18 +276,19 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
   add(box(-3.8, -2.55, 2.4, 5.2, 7.95, 8.45), '#8a6a3c'); add(box(-3.85, -2.5, 5.2, 5.35, 7.9, 8.45), BRASS);
   add(new THREE.PlaneGeometry(0.95, 0.95).rotateY(Math.PI).translate(-3.17, 4.35, 7.93), '#ffffff', { region: 'ticket', glow: 5 });
   add(box(-3.4, -2.95, 3.3, 3.42, 7.9, 7.96), '#1a1714');                                                          // the slot for the thought
-  add(box(0.8, 3.8, 2.4, 3.3, 7.6, 8.45), '#3a3330');                                                              // the dashboard
+  add(T(rbox(3.0, 0.95, 0.9, 0.3, 4), { p: [2.3, 2.95, 8.0] }), '#4a3b30');                                          // the dashboard, and two dials
+  for (const x of [1.6, 3.0]) { add(new THREE.CircleGeometry(0.2, 12).rotateY(Math.PI).translate(x, 3.12, 7.54), '#efe4cf', { glow: 6 }); add(T(new THREE.TorusGeometry(0.21, 0.03, 3, 12), { p: [x, 3.12, 7.54] }), BRASS); add(T(new THREE.BoxGeometry(0.02, 0.15, 0.01).translate(0, 0.07, 0), { p: [x, 3.12, 7.52], r: [0, 0, x < 2 ? 0.7 : -0.4] }), '#a8361f'); }
   add(T(new THREE.TorusGeometry(0.55, 0.06, 5, 20), { p: [2.3, 3.75, 7.35], r: [-0.9, 0, 0] }), '#2a2622'); add(tube([2.3, 3.2, 7.75], [2.3, 3.7, 7.4], 0.06, 5), '#2a2622');
   add(new THREE.PlaneGeometry(1.6, 0.62).rotateY(Math.PI).translate(0, 5.95, 8.35), '#ffffff', { region: 'mirror', glow: 5 });
   add(tube([0, 6.26, 8.4], [0, 6.62, 8.4], 0.04, 4), BRASS);
   // the envelope: cream gores, ribs, a rope net over its lower half, and the ropes down to the roof
   const EC = [0, 18.5, -1], ER = [8.5, 7.5, 21];
   const gore = (p) => { const a = Math.atan2(p.y - EC[1], p.x); return Math.floor((a + Math.PI) / (Math.PI / 6)) % 2 ? '#efe6d2' : '#e5d8bd'; };
-  add(T(new THREE.SphereGeometry(1, 22, 14).rotateX(Math.PI / 2), { p: EC, s: ER }), gore, { perFace: true });
+  add(T(new THREE.SphereGeometry(1, 20, 12).rotateX(Math.PI / 2), { p: EC, s: ER }), gore, { perFace: true });
   add(T(new THREE.SphereGeometry(0.9, 10, 6), { p: [0, EC[1], EC[2] + ER[2] - 0.3] }), BRASS);
   add(T(new THREE.SphereGeometry(0.55, 8, 5), { p: [0, EC[1], EC[2] - ER[2] + 0.2] }), BRASS);
   const sAt = z => Math.sqrt(Math.max(0, 1 - ((z - EC[2]) / ER[2]) ** 2));
-  for (const z of [-14, -6.5, 1, 8.5, 15]) add(T(new THREE.TorusGeometry(1, 0.022, 3, 24), { p: [0, EC[1], z], s: [ER[0] * sAt(z) * 1.004, ER[1] * sAt(z) * 1.004, 1] }), '#d6c8aa');
+  for (const z of [-12, 1, 13]) add(T(new THREE.TorusGeometry(1, 0.022, 3, 24), { p: [0, EC[1], z], s: [ER[0] * sAt(z) * 1.004, ER[1] * sAt(z) * 1.004, 1] }), '#d6c8aa');
   const surf = (phi, z, out = 0.07) => { const s = sAt(z); return new THREE.Vector3(Math.sin(phi) * (ER[0] * s + out), EC[1] - Math.cos(phi) * (ER[1] * s + out), z); };
   { const pos = []; const strand = (phi0, slope) => {
       let prev = null;
@@ -272,10 +299,10 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
         prev = cur;
       }
     };
-    for (let k = -8; k <= 8; k++) { strand(k * 0.34, 0.075); strand(k * 0.34, -0.075); }
+    for (let k = -7; k <= 7; k++) { strand(k * 0.38, 0.075); strand(k * 0.38, -0.075); }
     const ng = new THREE.BufferGeometry(); ng.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); ng.computeVertexNormals(); add(ng, ROPE);
   }
-  for (const s of [-1, 1]) for (const z of [-8.5, -4.5, -0.5, 3.5, 7.0]) { const top = surf(s * 1.0, z, 0.05); add(tube(top.toArray(), [s * 3.7, 6.95, z * 0.95], 0.045, 4), ROPE); add(T(new THREE.SphereGeometry(0.1, 6, 4), { p: [s * 3.7, 6.95, z * 0.95] }), BRASS); }
+  for (const s of [-1, 1]) for (const z of [-8.5, -4.5, -0.5, 3.5, 7.0]) { const top = surf(s * 1.0, z, 0.05); add(tube(top.toArray(), [s * 3.7, 6.95, z * 0.95], 0.045, 4), ROPE); }
   // fins at the tail, school-bus yellow with black tips
   for (let k = 0; k < 4; k++) {
     const a = k * Math.PI / 2, rr = z => (k % 2 ? ER[0] : ER[1]) * sAt(z), sh = new THREE.Shape();
@@ -291,14 +318,14 @@ export function buildBus({ ring = DANDELION.ring, name = DANDELION.name } = {}) 
   // ---- one mesh, one material -------------------------------------------------------------------
   const geo = mergeGeometries(list, false); for (const l of list) l.dispose();
   geo.computeBoundingSphere();
-  const u = { uProp: { value: 0 }, uArm: { value: 0 }, uDoor: { value: 0 }, uHand: { value: 0 }, uRing: { value: 1.2 }, uRed: { value: 0 }, uAmber: { value: 0 }, uLamp: { value: 0.3 }, uScreen: { value: 1.3 }, uFill: { value: 0.3 } };
+  const u = { uProp: { value: 0 }, uArm: { value: 0 }, uDoor: { value: 0 }, uHand: { value: 0 }, uPlank: { value: 0 }, uRing: { value: 1.2 }, uRed: { value: 0 }, uAmber: { value: 0 }, uLamp: { value: 0.3 }, uScreen: { value: 1.3 }, uFill: { value: 0.3 } };
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, map: tex, roughness: 0.45, metalness: 0.1, envMapIntensity: 0.8, side: THREE.DoubleSide });
   mat.onBeforeCompile = sh => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>
 attribute vec4 aRig; attribute float aGlow; varying float vGlow;
-uniform float uProp, uArm, uDoor, uHand;
+uniform float uProp, uArm, uDoor, uHand, uPlank;
 mat3 rY(float a) { float c = cos(a), s = sin(a); return mat3(c, 0.0, -s, 0.0, 1.0, 0.0, s, 0.0, c); }
 mat3 rZ(float a) { float c = cos(a), s = sin(a); return mat3(c, s, 0.0, -s, c, 0.0, 0.0, 0.0, 1.0); }`)
       .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>
@@ -311,7 +338,8 @@ objectNormal = rigR * objectNormal;
 vGlow = aGlow;`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>
 transformed = rigR * (transformed - aRig.xyz) + aRig.xyz;
-if (part > 4.5 && part < 5.5) transformed.y += uHand;`);
+if (part > 4.5 && part < 5.5) transformed.y += uHand;
+if (part > 5.5 && part < 6.5) transformed.x += (1.0 - uPlank) * aRig.x;`);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying float vGlow;\nuniform float uRing, uRed, uAmber, uLamp, uScreen, uFill;')
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
@@ -329,10 +357,10 @@ if (vGlow > 0.5) {
   let flashing = false, nextBlink = 2, blinkT = 0, door = 0, arm = 0;
   const api = {
     root, mesh, material: mat, uniforms: u, tex,
-    seat: new THREE.Vector3(-3.4, 3.95, 1.2),        // the passenger's eye: right-hand front seat, at the window end, nose nearly to the round window
-    door: new THREE.Vector3(-4.6, 0, 6.4),           // just outside the door, at the floor
+    seat: new THREE.Vector3(-3.35, 3.95, 1.2),       // the passenger's eye: right-hand front seat, at the window end of the long window
+    door: new THREE.Vector3(-3.7 - plank, 0, 6.4),   // the far end of her gangplank, where you step aboard
     length: 45, triangles: geo.attributes.position.count / 3,
-    setDoor(v) { door = v; u.uDoor.value = 1.35 * v; },
+    setDoor(v) { door = v; u.uDoor.value = 1.35 * v; const k = Math.min(1, Math.max(0, (v - 0.25) / 0.75)); u.uPlank.value = k * k * (3 - 2 * k); },      // the gangplank follows the door out
     setArm(v) { arm = v; u.uArm.value = -1.5 * v; },
     flash(on) { flashing = on; },
     setBlind(text) { if (text === blindText) return; blindText = text; drawBlind(); tex.needsUpdate = true; },

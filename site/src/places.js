@@ -392,7 +392,7 @@ export function placesLife(ctx, K) {
       arrive: [[600, 420, 900], [330, 220, 520], [120, 70, 230], [5, 9, 100], [5, 1.0, 62]],
       passes: [[[-1100, 240, -560], [-200, 270, -820], [900, 230, -600]], [[1000, 180, 560], [100, 220, 800], [-1000, 200, 520]], [[820, 160, 300], [760, 190, -320], [600, 210, -900]]],
       blind: { tour: 'ROUND THE ISLAND', transit: 'ANNA’S HOUSE', home: 'VESPER STREET' },
-      secs: { tour: 120 },
+      secs: { tour: 120 }, bus: { plank: 3 },                                // a short gangplank from her door to the kerb
       lines: { welcome: ['Vesper Street. Mind the kerb, and the sunset.'] },
       lookOnBoard: -1.4, pitchOnBoard: -0.2, pitchOnTour: -0.6, lookOnArrive: -1.3, pitchOnArrive: -0.35,
       say, hint: text => { airHint = text || null; }, hintAboard: 'E or Esc · get off (she takes you back to the stop) · the mouse looks about',

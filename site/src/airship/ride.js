@@ -30,6 +30,7 @@
 //   say(text)          how the bus speaks (a toast, a bubble); lines: extra or replacement lines (see DANDELION)
 //   hint(text|null)    optional: what to show while aboard; onDock(open) optional: the stage's gate
 //   secs:     { approach, tour, transit, arrive, leave, pass, dwell } seconds (defaults below)
+//   bus:      options for buildBus (e.g. { plank: 9 }, the gangplank's length to reach the ground from the dock)
 
 import * as THREE from 'three';
 import { buildBus, DANDELION } from './bus.js';
@@ -147,7 +148,7 @@ export function makeAirship(ctx, D) {
   const open = () => !!D.transit?.url;
   function make() {
     if (bus) return bus;
-    bus = buildBus({}); bus.root.visible = false; ctx.scene.add(bus.root);
+    bus = buildBus(D.bus ?? {}); bus.root.visible = false; ctx.scene.add(bus.root);
     flight = new Flight(bus.root); rider = new Passenger(ctx, bus);
     return bus;
   }
