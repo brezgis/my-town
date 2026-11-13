@@ -1,0 +1,6 @@
+# Working material that stays on the build machine: test screenshots, the first version, notes.
+shots/
+archive/
+node_modules/
+.DS_Store
+__pycache__/
