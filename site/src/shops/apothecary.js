@@ -60,7 +60,7 @@ const SCENTS = [
   ['Sunday, About Four', 'toast, a radio in another room, absolutely nothing due.', 'c#e8e2d4/0.6'],
   ['Pencil Case', 'cedar shavings, graphite, a pink eraser you were told not to chew.', 'c#e88aa8/0.6'],
   ['Campfire, Far Shore', 'woodsmoke from across the lake, and somebody else’s guitar.', 'c#9a9590/0.6'],
-  ['Bread Tomorrow', 'yeast, a warm crust, patience. for the bakery that is never open.', 'c#c9b48a/0.6'],
+  ['Bread Tomorrow', 'yeast, a warm crust, patience. for the bakery, which is finally open.', 'c#c9b48a/0.6'],
 ];
 const DRAWERS = ['lavender', 'chamomile', 'rosehip', 'bay', 'cloves', 'orris root', 'beeswax',
   'wicks, long', 'wicks, short', 'wicks, odd', 'matches', 'string', 'string, too short', 'buttons',

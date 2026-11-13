@@ -25,17 +25,19 @@ export const F1 = FL, F2 = FL + 14;     // names the furnishing kit expects
 export const STREET = { y0: -58, y1: 232, lotsFrom: -8, lotsTo: 191 };
 // The chapel stands beyond the Landing, closing the east end of the street (chapel.js builds it here):
 // centred on the street's line, its west door at y1, running back east to y0.
-export const CHAPEL_SITE = { x: 0, y1: -74, y0: -150, halfW: 19 };
+export const CHAPEL_SITE = { x: 0, y1: -74, y0: -150, halfW: 19,
+  // where it is to stand instead: the last plot on the south side, beside the Overlook, its door on the street
+  street: { side: -1, y0: 168, y1: 198, front: FRONT } };
 const WALL = 0.8, SIDE = 0.5;
 
 // face: the upper wall;  paint: the timber shopfront;  trim: sills, cornice, piers' caps
 // inside: plaster tint;  floor: floor material;  up: upper storeys (1 or 2);  bays: windows upstairs
 export const LOTS = [
   // ---- north side (odd numbers, as it should be) ------------------------------------------------
-  { id: 'yoga', name: 'Low Sun Yoga', side: 1, y0: -8, y1: 24, depth: 30, door: 0.5, enter: true, up: 1, bays: 4,
-    face: 'plaster#e6dccb', paint: 'painted_wood#c98a6a', trim: 'c#f1ebdd/0.7', inside: 'plaster#f3ece0', floor: 'floor' },
-  { id: 'coffee', name: 'Slow Hand Coffee', side: 1, y0: 24, y1: 56, depth: 30, door: 0.5, enter: true, up: 1, bays: 4,
+  { id: 'coffee', name: 'Slow Hand Coffee', side: 1, y0: -8, y1: 24, depth: 30, door: 0.5, enter: true, up: 1, bays: 4,
     face: 'brick#b98f7c', paint: 'painted_wood#2f4a40', trim: 'c#e6dcc6/0.7', inside: 'plaster#f0e8d6', floor: 'floor', awning: ['c#2f4a40/0.9', 'c#e9e0cc/0.9'] },
+  { id: 'yoga', name: 'Low Sun Yoga', side: 1, y0: 24, y1: 56, depth: 30, door: 0.5, enter: true, up: 1, bays: 4,
+    face: 'plaster#e6dccb', paint: 'painted_wood#c98a6a', trim: 'c#f1ebdd/0.7', inside: 'plaster#f3ece0', floor: 'floor' },
   { id: 'books', name: 'Marginalia', side: 1, y0: 56, y1: 84, depth: 30, door: 0.24, enter: true, up: 2, bays: 3,
     face: 'plaster#d9c9a8', paint: 'painted_wood#7a2f2a', trim: 'c#efe7d6/0.7', inside: 'plaster#e9dcc2', floor: 'floor' },
   { id: 'cinema', name: 'The Lantern', side: 1, y0: 84, y1: 112, depth: 10, show: 6, door: 0.5, enter: false, up: 1, bays: 0,
@@ -46,19 +48,21 @@ export const LOTS = [
   { id: 'plants', name: 'Frond', side: 1, y0: 154, y1: 182, depth: 28, door: 0.72, enter: true, up: 2, bays: 3,
     face: 'brick#8f6a5c', paint: 'painted_wood#d9d2bf', trim: 'c#efe7d6/0.7', inside: 'plaster#ece6d6', floor: 'pavers' },
   // ---- south side ----------------------------------------------------------------------------------
-  { id: 'museum', name: 'The Museum of Small Wonders', side: -1, y0: -8, y1: 24, depth: 32, door: 0.5, enter: true, up: 1, bays: 4,
-    face: 'brick#a08474', paint: 'painted_wood#3a4a44', trim: 'c#e8dfcc/0.7', inside: 'plaster#ece6da', floor: 'floor' },
-  { id: 'records', name: 'Low Tide Records', side: -1, y0: 24, y1: 54, depth: 28, door: 0.3, enter: true, up: 2, bays: 3,
+  { id: 'records', name: 'Low Tide Records', side: -1, y0: -8, y1: 22, depth: 28, door: 0.3, enter: true, up: 2, bays: 3,
     face: 'brick#96705f', paint: 'painted_wood#1d1d1f', trim: 'c#d8c9a8/0.7', inside: 'plaster#e6dccb', floor: 'floor' },
+  { id: 'museum', name: 'The Museum of Small Wonders', side: -1, y0: 22, y1: 54, depth: 32, door: 0.5, enter: true, up: 1, bays: 4,
+    face: 'brick#a08474', paint: 'painted_wood#3a4a44', trim: 'c#e8dfcc/0.7', inside: 'plaster#ece6da', floor: 'floor' },
   { id: 'bakery', name: 'Tomorrow Bread', side: -1, y0: 54, y1: 78, depth: 26, door: 0.74, enter: true, up: 1, bays: 3,
     face: 'plaster#e9d6c2', paint: 'painted_wood#d8b7a6', trim: 'c#f1ebdd/0.7', inside: 'plaster#efe6d4', floor: 'tile_hex', awning: ['c#d59a8a/0.9', 'c#f3ecdd/0.9'] },
   // (78 to 118: the Yard, with the dumpling cart)
   { id: 'apothecary', name: 'Wick & Sundry', side: -1, y0: 118, y1: 146, depth: 28, door: 0.5, enter: true, up: 1, bays: 3,
     face: 'shake#c9bfae', paint: 'painted_wood#34405a', trim: 'c#e8dfcc/0.7', inside: 'plaster#e4dfd2', floor: 'floor' },
-  { id: 'noodles', name: 'Night Noodle', side: -1, y0: 146, y1: 168, depth: 26, show: 6, door: 0.26, enter: false, up: 2, bays: 2,
+  { id: 'noodles', name: 'Night Noodle', side: -1, y0: 146, y1: 168, depth: 26, door: 0.26, enter: true, up: 2, bays: 2,
     face: 'brick#7d5a50', paint: 'painted_wood#2a2320', trim: 'c#c8402f/0.6', inside: 'plaster#c9a070', floor: 'tile' },
-  { id: 'bikes', name: 'Spoke & Sprocket', side: -1, y0: 168, y1: 191, depth: 24, show: 7, door: 0.2, enter: false, up: 1, bays: 3,
-    face: 'plaster#c8d2c4', paint: 'painted_wood#d4a02a', trim: 'c#2a2a26/0.6', inside: 'plaster#e6e2d6', floor: 'floor' },
+  // (168 to 198: the chapel, its own building: chapel.js)
+  // Spoke & Sprocket, the bicycle shop, is set aside for now (shops/bikes.js is still there):
+  // { id: 'bikes', name: 'Spoke & Sprocket', side: -1, y0: 168, y1: 191, depth: 24, door: 0.2, enter: true, up: 1, bays: 3,
+  // face: 'plaster#c8d2c4', paint: 'painted_wood#d4a02a', trim: 'c#2a2a26/0.6', inside: 'plaster#e6e2d6', floor: 'floor' },
 ];
 
 export function buildTown(B) {

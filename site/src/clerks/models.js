@@ -49,6 +49,7 @@ export function makeFace(spec) {
     const arc = (x, yy, w, up = true) => { g.lineWidth = 9; g.beginPath(); up ? g.arc(x, yy + 8, w, Math.PI * 1.15, Math.PI * 1.85) : g.arc(x, yy - 10, w, Math.PI * 0.15, Math.PI * 0.85); g.stroke(); };
     const heart = (x, yy, s) => { g.beginPath(); g.moveTo(x, yy + s * 0.9); g.bezierCurveTo(x - s * 1.4, yy - s * 0.1, x - s * 0.7, yy - s * 1.2, x, yy - s * 0.4); g.bezierCurveTo(x + s * 0.7, yy - s * 1.2, x + s * 1.4, yy - s * 0.1, x, yy + s * 0.9); g.fill(); };
     const ew = spec.eyeW, eh = spec.eyeH;
+    const er = spec.eyeR ?? ew * 0.42;      // corner radius: small for square eyes, large for round
     if (blink || expr === 'blink') { g.lineWidth = 7; for (const x of [lx, rx]) { g.beginPath(); g.moveTo(x - ew / 2, y + 6); g.lineTo(x + ew / 2, y + 6); g.stroke(); } }
     else if (expr === 'happy') { arc(lx, y, ew * 0.62); arc(rx, y, ew * 0.62); }
     else if (expr === 'love') { heart(lx, y, ew * 0.55); heart(rx, y, ew * 0.55); }
@@ -62,14 +63,18 @@ export function makeFace(spec) {
       g.lineWidth = 6;
       for (const [x, dy] of [[lx, eh * 0.62 - eh * 0.55 / 2 - 6], [rx, eh * 0.62 - eh * 0.62 / 2 - 8]]) { g.beginPath(); g.moveTo(x - ew * 0.62, y - dy + 10); g.lineTo(x + ew * 0.62, y - dy + 10); g.stroke(); }
       g.beginPath(); g.moveTo(rx - ew * 0.5, y - eh * 0.55); g.quadraticCurveTo(rx + 2, y - eh * 0.95, rx + ew * 0.6, y - eh * 0.62); g.stroke();
-    } else { rr(lx, y, ew, eh, ew * 0.42); rr(rx, y, ew, eh, ew * 0.42); }
+    } else { rr(lx, y, ew, eh, er); rr(rx, y, ew, eh, er); }
     // mouth
     g.lineWidth = 5;
     if (['happy', 'love', 'wink'].includes(expr)) { g.beginPath(); g.arc(128 + look * 10, y + 22, 13, Math.PI * 0.2, Math.PI * 0.8); g.stroke(); }
     else if (expr === 'sass') { g.beginPath(); g.moveTo(118 + look * 10, y + 38); g.quadraticCurveTo(134, y + 41, 146 + look * 10, y + 32); g.stroke(); }
     else if (expr === 'surprised') { g.beginPath(); g.arc(128, y + 38, 6, 0, 7); g.stroke(); }
     g.shadowBlur = 0;
-    if (spec.specs) { g.strokeStyle = spec.specs; g.lineWidth = 3.5; for (const x of [lx, rx]) { g.beginPath(); g.arc(x, y, ew * 0.95, 0, 7); g.stroke(); } g.beginPath(); g.moveTo(lx + ew * 0.95, y - 4); g.quadraticCurveTo(128 + look * 14, y - 14, rx - ew * 0.95, y - 4); g.stroke(); }
+    if (spec.lashes && !blink) { g.strokeStyle = col; g.lineWidth = 4; for (const [x, s] of [[lx, -1], [rx, 1]]) for (const k of [0, 1, 2]) { g.beginPath(); g.moveTo(x + s * (ew * 0.3 + k * 5), y - eh * 0.42 + k * 4); g.lineTo(x + s * (ew * 0.5 + k * 7), y - eh * 0.62 + k * 7); g.stroke(); } }
+    if (spec.brows) { g.strokeStyle = col; g.lineWidth = 7; for (const [x, s] of [[lx, 1], [rx, -1]]) { g.beginPath(); g.moveTo(x - ew * 0.6, y - eh * 0.72 - s * spec.brows * 6); g.lineTo(x + ew * 0.6, y - eh * 0.72 + s * spec.brows * 6); g.stroke(); } }
+    if (spec.moustache) { g.fillStyle = spec.moustache; const mx = 128 + look * 10, my = y + 34; g.beginPath(); g.moveTo(mx, my - 4); g.bezierCurveTo(mx - 14, my - 14, mx - 34, my - 2, mx - 44, my - 12); g.bezierCurveTo(mx - 36, my + 10, mx - 14, my + 8, mx, my + 2); g.bezierCurveTo(mx + 14, my + 8, mx + 36, my + 10, mx + 44, my - 12); g.bezierCurveTo(mx + 34, my - 2, mx + 14, my - 14, mx, my - 4); g.fill(); }
+    if (spec.freckles) { g.fillStyle = spec.freckles; for (const [dx, dy] of [[-10, 26], [-2, 32], [6, 25], [14, 31]]) for (const x of [lx - 6, rx - 6]) { g.beginPath(); g.arc(x + dx, y + dy, 2.2, 0, 7); g.fill(); } }
+    if (spec.specs) { g.strokeStyle = spec.specs; g.lineWidth = 3.5; for (const x of (spec.monocle ? [rx] : [lx, rx])) { g.beginPath(); g.arc(x, y, Math.max(ew, eh) * 0.62 + 8, 0, 7); g.stroke(); } if (spec.monocle) { g.lineWidth = 2; g.beginPath(); g.moveTo(rx + 20, y + 22); g.quadraticCurveTo(rx + 34, y + 50, rx + 22, y + 70); g.stroke(); } else { g.beginPath(); g.moveTo(lx + Math.max(ew, eh) * 0.62 + 8, y - 4); g.quadraticCurveTo(128 + look * 14, y - 14, rx - Math.max(ew, eh) * 0.62 - 8, y - 4); g.stroke(); } }
     if (spec.blush) { g.fillStyle = spec.blush; for (const x of [lx - 8, rx + 8]) { g.beginPath(); g.ellipse(x, y + 30, 15, 7, 0, 0, 7); g.fill(); } }
     tex.needsUpdate = true;
   }

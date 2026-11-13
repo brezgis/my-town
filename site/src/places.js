@@ -70,7 +70,7 @@ export function buildPlaces(K, town) {
     sign(tx + 0.14, ty, CURB + 5.7, 3, 7.6, 4, TOWN, { cw: 760, ch: 400 }); sign(tx - 0.14, ty, CURB + 5.7, 1, 7.6, 4, TOWN, { cw: 760, ch: 400 });
     const fx = 13.4, fy = -11; post(fx, fy, CURB, CURB + 10.5, 0.13, CREAM); K.collide(fx - 0.3, fx + 0.3, -fy - 0.3, -fy + 0.3, 10);
     // boards point the way they say: west down the street, or east back to the airship; each reads right from both sides
-    [['coffee', 'w'], ['records', 'w'], ['tinned fish, 150 ft', 'w'], ['the edge, 260 ft (mind it)', 'w'], ['the chapel', 'e'], ['the airship', 'e']].forEach(([name, dir], i) => {
+    [['coffee', 'w'], ['records', 'w'], ['tinned fish, 150 ft', 'w'], ['the chapel, 190 ft', 'w'], ['the edge, 260 ft (mind it)', 'w'], ['the airship', 'e']].forEach(([name, dir], i) => {
       const h = CURB + 9.8 - i * 0.95, w = 4.6, yc = fy + (dir === 'e' ? -w / 2 - 0.1 : w / 2 + 0.1);
       P(CREAM, fx - 0.06, fx + 0.06, yc - w / 2, yc + w / 2, h - 0.36, h + 0.36);
       for (const [q, dx] of [[3, 0.07], [1, -0.07]]) { const right = (q === 3) === (dir === 'w'), txt = right ? `${name}  →` : `←  ${name}`;
@@ -137,7 +137,7 @@ export function buildPlaces(K, town) {
         idle: ['*whispering* This is the good part.', '*straightens a deck chair by one degree*', '*whispering* I have seen it four thousand times. I still gasp.'],
         bye: ['*whispering* Mind the hedge on your way out.'],
         topics: [
-          { q: '*whisper* What is showing?', a: '*whispering* The Longest Sunset. Four hours, no interval. The critics called it "long". They were not wrong, and they stayed.' },
+          { q: '*whisper* What is showing?', a: '*whispering* Between sunsets, the short features: crabs, a sphere turned inside out, a rabbit and some tomatoes. Take a deck chair and it starts. The projector changes the reel.' },
           { q: '*whisper* Why is the cinema outside?', a: '*whispering* The front of the building was all we could afford. Then we noticed the sky was free.' },
           { q: '*whisper* How does it end?', a: '*whispering* I will not spoil it. But walk to the far end of the street, past the rail, to the last bench. That is all I will say.' },
           { q: 'IS THE POPCORN FREE?', a: '*whispering, pained* Yes. It is free. Please. People are watching a sunset.', expr: 'surprised' },
@@ -201,7 +201,7 @@ export function buildPlaces(K, town) {
           { q: 'What is good today?', a: 'Pork and chive, if you want to be happy. Mushroom, if you want to be happy and a bit smug about it.' },
           { q: 'What is "the spicy one"?', a: 'It is the spicy one. I do not name it. Naming it only encourages it.', next: [{ q: 'I will risk it.', a: 'Brave. There is a fire pit behind you if you need to compare.' }, { q: 'Perhaps not.', a: 'Wise. It respects you more for that.' }] },
           { q: 'How do you fold them so fast?', a: 'Eighteen pleats, two hands, and I do not think about it. The moment you think about a dumpling, it knows.' },
-          { q: 'Why is the noodle shop shut?', a: 'Night Noodle opens when the sun goes down. They have been wiping the same counter since lunch. I bring them dumplings. They are fine.' },
+          { q: 'Are you and Night Noodle rivals?', a: 'Rivals! We share a stock pot. I do dumplings, they do noodles, and on slow days we argue about which one soup belongs to.' },
           { q: 'Does the sun ever set here?', a: 'They say it does, for people who have been everywhere and then sit down at the very edge. I have never had the time. Dumplings.' },
         ],
       },
@@ -251,7 +251,7 @@ export function buildPlaces(K, town) {
     K.rock?.(PAINT.stone, -27, CURB + 0.6, -(y1 - 5), 1.8, 1.5, 1.3, 0.4);
     kit.sign(kit.fr(-27, y1 - 6.22, 0, 2), 0, 0, CURB + 1.5, 1.7, 1.1, (g, w, h) => { fill(g, w, h, '#5a4a2c'); grain(g, w, h, 0.1); g.strokeStyle = '#d9b96a'; g.lineWidth = 3; g.strokeRect(6, 6, w - 12, h - 12); T(g, 'ON THIS SPOT', w / 2, h * 0.2, h * 0.12, '#e9cf8a', { f: F.bebas, ls: 3 }); para(g, 'the sun has been about to set for as long as anyone can remember. Nobody has complained.', w * 0.1, h * 0.34, h * 0.105, '#e9cf8a', w * 0.8, { f: F.fraunces, it: 1, w: 600, a: 'left' }); }, { cw: 240, ch: 156, tilt: 0.5 });
     // planters at the corners, and the meadow running on to the edge with one last bench
-    for (const [x, y] of [[-hw + 2.5, y0 + 2.5], [hw - 2.5, y0 + 2.5]]) { K.box('c#4a4640/0.8', x - 2, x + 2, CURB, CURB + 1.6, -(y + 2), -(y - 2), { collide: true }); for (let i = 0; i < 12; i++) K.F.add(K.pick(['lavender', 'catmint', 'cosmos', 'grass']), x + (r() - 0.5) * 3.2, -(y + (r() - 0.5) * 3.2), 0.7 + r() * 0.3, { y: CURB + 1.55 }); }
+    for (const [x, y] of [[-hw + 2.5, y1 - 3.2], [hw - 2.5, y0 + 2.5]]) { K.box('c#4a4640/0.8', x - 2, x + 2, CURB, CURB + 1.6, -(y + 2), -(y - 2), { collide: true }); for (let i = 0; i < 12; i++) K.F.add(K.pick(['lavender', 'catmint', 'cosmos', 'grass']), x + (r() - 0.5) * 3.2, -(y + (r() - 0.5) * 3.2), 0.7 + r() * 0.3, { y: CURB + 1.55 }); }
     K.G.ribbon('gravel', [[0, -(y1 + 0.5)], [1.5, -(y1 + 12)], [-1, -(y1 + 24)], [0.5, -(y1 + 36)]], 3.2, { wobble: 0.15 });
     K.bench(0.5, -(y1 + 39), Math.PI, { w: 5 }); K.seat(0.5, 1.4, -(y1 + 39), 0, 'sit at the edge of everything');
     K.F.drift('wildflowers', -16, -(y1 + 18), 14, 12, 50, 0.9); K.F.drift('wildflowers', 17, -(y1 + 20), 13, 13, 46, 0.9); K.F.drift('grass', 0, -(y1 + 26), 30, 14, 60, 1); K.F.drift('cosmos', 8, -(y1 + 10), 8, 5, 16, 0.9); K.F.drift('lavender', -9, -(y1 + 9), 7, 4, 14, 0.9);
@@ -289,8 +289,37 @@ export function placesLife(ctx, K) {
       if (Math.hypot(camera.position.x - sc.x - 20, camera.position.z + (sc.y0 + sc.y1) / 2) > 150) return;
       const i = Math.floor(t / 5.5) % CARDS.length; flick += dt;
       if (i !== last || flick > 0.12) { last = i; flick = 0; draw(i, t); }
-      const k = 0.5 + 0.5 * on(); mat.color.setScalar(k * (0.92 + 0.08 * Math.sin(t * 31) * Math.sin(t * 7.3))); cone.material.opacity = 0.05 * k * (0.9 + 0.1 * Math.sin(t * 31));
+      const k = 0.5 + 0.5 * on(); mat.color.setScalar((reel.on ? 0.02 : 1) * k * (0.92 + 0.08 * Math.sin(t * 31) * Math.sin(t * 7.3))); cone.material.opacity = 0.05 * k * (0.9 + 0.1 * Math.sin(t * 31));
+      reel.update();
     });
+    // ---- the real pictures. Take a deck chair and the Lantern shows one of Anna's favourite strange films
+    // (the list is the "Amazing Videos" page of her recursite). They are YouTube's own players, laid exactly
+    // over the screen while you sit; get up and the reel stops. E at the projector changes the reel.
+    const FILMS = [['W92SB_SW9E0', 'Crabs LOVE Science!'], ['sKqt6e7EcCs', 'How to Theoretically Turn a Sphere Inside Out'], ['9mDngl11P3k', 'Pet Crab Eating Onion Ring'], ['Bs8vLmo7Rsc', 'Will Elmo Survive the Particle Accelerator?'], ['p2HipedgM3I', 'Spiders On Drugs'],
+      ['hRlmn_w1qck', 'Do You Still Want to Take This Train?'], ['P6GyeDQTZlk', 'Waking a Sleeping Rabbit by Surrounding Him with Tomatoes'], ['8cn0kf8mhS4', 'Whales Evolution'], ['VNM7Z7hir_I', 'Ice Cube, Kevin Hart and Conan Share a Car']];
+    let first = Math.floor(Math.random() * FILMS.length);
+    CARDS.push(['NOW SHOWING', ''], ['take a deck chair', 'and the picture starts']);
+    const nowCard = CARDS.length - 2, corners = [[sc.y0, sc.h0], [sc.y1, sc.h0], [sc.y0, sc.h1], [sc.y1, sc.h1]].map(([y, hh]) => new THREE.Vector3(sc.x + 0.03, hh, -y)), v = new THREE.Vector3();
+    const reel = { on: false, el: null,
+      start() {
+        const ids = FILMS.map((_, i) => FILMS[(first + i) % FILMS.length][0]), el = document.createElement('iframe');
+        el.src = `https://www.youtube-nocookie.com/embed/${ids[0]}?autoplay=1&playsinline=1&rel=0&modestbranding=1&playlist=${ids.slice(1).join(',')}`;
+        el.allow = 'autoplay; encrypted-media; picture-in-picture'; el.title = 'The picture at the Lantern';
+        el.style.cssText = 'position:fixed;border:0;z-index:1;pointer-events:none;background:#000;left:0;top:0;width:10px;height:10px';
+        document.body.appendChild(el); reel.el = el; reel.on = true; ctx.sound?.setDuck?.(true);
+        ctx.flash(`Now showing: ${FILMS[first][1]}. (The projector changes the reel.)`);
+      },
+      stop() { reel.el?.remove(); reel.el = null; reel.on = false; ctx.sound?.setDuck?.(false); },
+      update() {
+        CARDS[nowCard][1] = FILMS[first][1];
+        const watching = /watch the picture/.test(ctx.walker?.seated?.label ?? '');
+        if (watching && !reel.on) reel.start(); else if (!watching && reel.on) reel.stop();
+        if (!reel.el) return;
+        let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, ok = true;                 // the screen's outline as the eye sees it
+        for (const c of corners) { v.copy(c).project(camera); if (v.z > 1) ok = false; const x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+        const st = reel.el.style; st.display = ok ? '' : 'none'; st.left = x0.toFixed(1) + 'px'; st.top = y0.toFixed(1) + 'px'; st.width = (x1 - x0).toFixed(1) + 'px'; st.height = (y1 - y0).toFixed(1) + 'px';
+      } };
+    if (K.projector) ctx.interact.push({ x: K.projector.x + 1.5, y: K.projector.y, z: K.projector.z, reach: 8, size: 1.6, label: () => 'change the reel', act: () => { first = (first + 1) % FILMS.length; ctx.flash(`Next reel: ${FILMS[first][1]}.`); if (reel.on) { reel.stop(); reel.start(); } } });
   }
   // The fire in the Yard
   if (K.fire) {

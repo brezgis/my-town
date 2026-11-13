@@ -1041,7 +1041,7 @@ function* darwinTree(g, W, H, seed = 303) {
   };
   grow(root[0], root[1], -Math.PI / 2 + 0.08, unit * 4.2, 0);
   g.lineCap = 'round';
-  for (const [xa, ya, xb, yb, d] of twigs) { g.strokeStyle = paint(0.92); g.lineWidth = Math.max(1.6, unit * (0.34 - d * 0.045)); g.beginPath(); g.moveTo(xa, ya); g.quadraticCurveTo((xa + xb) / 2 + (yb - ya) * 0.08, (ya + yb) / 2 - (xb - xa) * 0.08, xb, yb); g.stroke(); }
+  for (const [xa, ya, xb, yb, d] of twigs) { g.strokeStyle = paint(0.92); g.lineWidth = Math.max(2.4, unit * (0.52 - d * 0.07)); g.beginPath(); g.moveTo(xa, ya); g.quadraticCurveTo((xa + xb) / 2 + (yb - ya) * 0.08, (ya + yb) / 2 - (xb - xa) * 0.08, xb, yb); g.stroke(); }
   yield;
   const hues = [350, 24, 46, 128, 160, 184, 206, 276, 300, 96];
   tips.forEach(([x, y, a, alive], i) => {
@@ -1050,7 +1050,7 @@ function* darwinTree(g, W, H, seed = 303) {
   });
   // "I think", as he wrote it over the sketch, and the 1 at the root
   g.fillStyle = paint(0.95); g.strokeStyle = paint(0.95);
-  setLine(g, 'I think', x0 + unit * 1.0, y0 + unit * 2.0, unit * 1.5, { italic: true, align: 'left', bold: 0.03 });
+  setLine(g, 'I think', x0 + unit * 0.9, y0 + unit * 2.3, unit * 2.0, { italic: true, align: 'left', bold: 0.05 });
   const one = circle(root[0], root[1] + unit * 0.75, unit * 0.62, 18); glass(g, one, C.white, r, { mattW: 3, matt: 0.2 }); pieces.push(one);
   g.fillStyle = paint(0.95); setLine(g, '1', root[0], root[1] + unit * 1.08, unit * 0.95, {});
   yield;

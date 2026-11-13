@@ -11,9 +11,11 @@ import bakery from './bakery.js';
 import yoga from './yoga.js';
 import museum from './museum.js';
 import rooftop from './rooftop.js';
+import noodles from './noodles.js';
+import bikes from './bikes.js';
 import { furnishChapel } from '../chapel.js';
 
-const SHOPS = { coffee, records, grocery, books, plants, apothecary, bakery, yoga, museum };
+const SHOPS = { coffee, records, grocery, books, plants, apothecary, bakery, yoga, museum, noodles, bikes };
 export function furnish(B, town = {}) {
   const kit = makeKit(B);
   kit.house = town; kit.town = town; kit.spots = []; kit.clerks = []; kit.eats = []; kit.later = [];      // later: functions (ctx) run once the scene exists

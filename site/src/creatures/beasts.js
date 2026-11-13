@@ -4,12 +4,12 @@
 //              up the trunk if you come near, and peers round at you until you have gone
 //   hedgehog   along the foot of the hedge in the picture garden, dusk and night: snuffles, roots about;
 //              curls up if you come close
-//   rabbits    two on the lawn just beyond the Overlook's rail, by day: graze, hop, sit up and watch you;
-//              bolt into the long grass if you come down to them, and come back when it is quiet
+//   rabbits    two at the near edge of the meadow, just beyond the Overlook's rail, by day: graze, hop, sit up
+//              and watch you; bolt into the long grass if you go down to them, and come back when it is quiet
 //   hare       by the last bench at the edge, dusk and night: sits up, watches, lollops off
 //   fox        along the back lawns (behind the Yard, or behind the grocer and Frond), at night: trots,
 //              sniffs, sits, turns to look at you; slips away if approached
-//   tortoise   crossing the churchyard, by day, very slowly: head in if you come close
+//   tortoise   on the chapel's path in the churchyard, by day, very slowly: head in if you come close
 //   mouse      among the pickle barrels in Pickle Alley, dusk and night: darts along the foot of the
 //              grocer's wall, freezes, washes; behind the barrels if you come close
 //
@@ -20,7 +20,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { FT, TAU, Walk, splitHead, vcMat, turnTo, wrapA, clamp, clamp01, rng } from './kit.js';
 
 export function beasts(kit) {
-  const { day, cam, scene, mesh, glb, tag, free, clear, onIsland, groundAt, dist, dist3, add, feet, plant } = kit, r = rng(31337);
+  const { day, cam, scene, mesh, glb, tag, free, clear, blocked, onIsland, groundAt, dist, dist3, add, feet, plant } = kit, r = rng(31337);
   const LAWN = 0.03, PAVE = 0.488;
 
   // ---- The squirrel on the oak's ring bench ----------------------------------------------------------------
@@ -137,9 +137,9 @@ export function beasts(kit) {
 
   // ---- Two rabbits on the lawn beyond the Overlook's rail, by day -------------------------------------------------
   {
-    const fields = [{ x0: -30, x1: -13, hide: [-43, -252] }, { x0: 13, x1: 30, hide: [44, -254] }], Z0 = -243.6, Z1 = -238.9;
+    const fields = [{ x0: -30, x1: -13, hide: [-43, -252] }, { x0: 13, x1: 30, hide: [44, -254] }], Z0 = -246.5, Z1 = -241.8;      // (the rail is at z = -235.6: from there they are watched, not startled)
     for (let n = 0; n < 2; n++) {
-      const F = fields[n], x0 = n ? 21 : -22, z0 = -241;
+      const F = fields[n], x0 = n ? 21 : -22, z0 = -243.5;
       let o, w, fp, state = 'graze', until = 0, gone = false, back = 0, face = r() * TAU, look = face;
       add({
         name: 'rabbit' + (n + 1), x: x0, z: z0, load: 150, live: 110, when: () => day.light > 0.2,
@@ -148,7 +148,7 @@ export function beasts(kit) {
         think: t => {
           const p = o.position, d = dist(p.x, p.z);
           if (gone) { back += 0.25; if (back > 35 && dist(x0, z0) > 24) { gone = false; o.visible = true; const x = F.x0 + r() * (F.x1 - F.x0); o.position.set(F.hide[0], LAWN, F.hide[1]); w.go([[x, LAWN, Z0 + r() * (Z1 - Z0)]], 3.2, 0.25, 1.1, 6, LAWN); state = 'hop'; } return; }
-          if (d < 10 && state !== 'bolt') { w.go([[F.hide[0] + (r() - 0.5) * 4, LAWN, F.hide[1] + (r() - 0.5) * 6]], 9, 0.4, 2.6, 10, LAWN); state = 'bolt'; return; }
+          if (d < 7.5 && state !== 'bolt') { w.go([[F.hide[0] + (r() - 0.5) * 4, LAWN, F.hide[1] + (r() - 0.5) * 6]], 9, 0.4, 2.6, 10, LAWN); state = 'bolt'; return; }
           if (state === 'bolt') { if (!w.busy) { gone = true; back = 0; o.visible = false; } return; }
           if (w.busy || t < until) return;
           const k = r();
@@ -210,20 +210,20 @@ export function beasts(kit) {
   {
     // two beats, well out from the backs of the buildings; each is walked in three-foot steps, and only its
     // longest stretch that is free of buildings and of everything the visitor bumps into is used
-    const beats = [[[-100, -52], [-102, -70], [-103, -88], [-104, -102], [-104, -113]], [[64, -127], [66, -141], [70, -157], [72, -172], [68, -188], [59, -199], [49, -206]]];
+    const beats = [[[-99, -52], [-100, -70], [-99.5, -88], [-100, -102], [-101, -113]], [[64, -127], [66, -141], [70, -157], [72, -172], [68, -188], [59, -199], [49, -206]]];
     const runs = beats.map(P => {
       const pts = []; for (let i = 0; i < P.length - 1; i++) { const n = Math.ceil(Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]) / 3); for (let k = 0; k < n; k++) pts.push({ x: P[i][0] + (P[i + 1][0] - P[i][0]) * k / n, z: P[i][1] + (P[i + 1][1] - P[i][1]) * k / n }); }
       let best = [], cur = []; for (const p of pts) { if (free(p.x, p.z, 1.6)) { cur.push(p); if (cur.length > best.length) best = cur; } else cur = []; }
       return best;
     }).filter(run => run.length > 8);
     if (runs.length) {
-      let o, mixer, acts = {}, cur = null, prev = null, run = runs[0], idx = Math.floor(run.length / 2), dir = 1, state = 'sit', until = 0, gone = false, back = 0, goal = idx, speed = 0, groundY = LAWN;
+      let o, mixer, acts = {}, cur = null, prev = null, run = runs[0], idx = Math.floor(run.length / 2), dir = 1, state = 'sit', until = 0, gone = false, back = 0, goal = idx, speed = 0, groundY = LAWN, far = false;
       const low = {}, USED = ['Idle', 'Idle2', 'IdleHeadLow', 'Eat', 'Walk', 'Run'], REST = ['Idle', 'Idle2', 'IdleHeadLow', 'Eat'];
       const lowOf = a => { const tab = low[a.getClip().name], f = (a.time / a.getClip().duration % 1) * 16, i = Math.floor(f); return tab ? tab[i] + (tab[Math.min(16, i + 1)] - tab[i]) * (f - i) : 0; };
       const paws = () => (!cur ? 0 : prev && prev.getEffectiveWeight() > 0.02 ? Math.min(lowOf(cur), lowOf(prev)) : lowOf(cur));      // while two clips blend, the lower
       const play = (n, ts = 1) => { const a = acts[n]; if (!a) return; a.timeScale = ts; if (cur === a) return; a.reset().fadeIn(0.35).play(); cur?.fadeOut(0.35); prev = cur; cur = a; };
       const member = add({
-        name: 'fox', x: run[idx].x, z: run[idx].z, load: 190, live: 160, when: () => day.light < 0.45,
+        name: 'fox', x: 0, z: -120, load: 900, live: 900, when: () => day.light < 0.45 && (member.loaded || runs.some(q => dist(q[q.length >> 1].x, q[q.length >> 1].z) < 190)),
         init: async () => {
           const g = await glb('q_fox'); o = g.scene;
           // its five flat colours into one skinned mesh (vertex colours): one draw
@@ -247,11 +247,11 @@ export function beasts(kit) {
             } }
           const p = run[idx]; o.position.set(p.x, groundY, p.z); o.rotation.y = Math.atan2(run[idx + 1].x - p.x, run[idx + 1].z - p.z); scene.add(o); play('Idle');
         },
-        show: on => { o.visible = on && !gone; },
+        show: on => { o.visible = on && !gone && !far; },
         think: t => {
           const p = o.position, d = dist(p.x, p.z);
-          if (gone) { back += 0.25; if (back > 50) { const r2 = runs[Math.floor(r() * runs.length)], j = Math.floor(r() * r2.length), q2 = r2[j]; if (dist(q2.x, q2.z) > 60 && dist(q2.x, q2.z) < 150) { run = r2; idx = goal = j; gone = false; o.visible = true; o.position.set(q2.x, groundY, q2.z); member.x = q2.x; member.z = q2.z; state = 'sit'; play('Idle'); until = t + 3; } else if (back > 90) { member.x = q2.x; member.z = q2.z; back = 50; } } return; }
-          member.x = p.x; member.z = p.z;
+          if (gone) { back += 0.25; if (back > 50) { const r2 = runs[Math.floor(r() * runs.length)], j = Math.floor(r() * r2.length), q2 = r2[j], dd = dist(q2.x, q2.z); if (dd > 60 && dd < 160) { run = r2; idx = goal = j; gone = false; far = false; o.visible = true; o.position.set(q2.x, groundY, q2.z); state = 'sit'; play('Idle'); until = t + 3; } } return; }
+          far = d > 190; o.visible = !far; if (far) return;                          // too far off to be seen: it stands where it is
           if (d < 22 && state !== 'flee') {                                         // off, away from her along its beat
             const ahead = run[clamp(idx + 6, 0, run.length - 1)], behind = run[clamp(idx - 6, 0, run.length - 1)];
             dir = dist(ahead.x, ahead.z) > dist(behind.x, behind.z) ? 1 : -1; goal = dir > 0 ? run.length - 1 : 0; state = 'flee'; speed = 11; play('Run', 1.1); return;
@@ -264,6 +264,7 @@ export function beasts(kit) {
           else { state = 'pause'; until = t + 3 + r() * 5; play(REST[Math.floor(r() * 4)]); }
         },
         tick: (t, dt) => {
+          if (gone || far) return;
           mixer.update(dt);
           if (state === 'trot' || state === 'flee') {
             const tgt = run[idx + Math.sign(goal - idx)] ?? run[idx], p = o.position, dx = tgt.x - p.x, dz = tgt.z - p.z, dd = Math.hypot(dx, dz), mv = speed * dt;
@@ -281,35 +282,39 @@ export function beasts(kit) {
     }
   }
 
-  // ---- The tortoise, crossing the churchyard, by day --------------------------------------------------------------
+  // ---- The tortoise on the chapel's path, by day ---------------------------------------------------------------------
   {
-    const X0 = -32, X1 = 32, Z0 = 62.2, Z1 = 68.5, S = 1.5;                           // the lawn between the Landing and the chapel's door
-    let o, head, fp, w, state = 'pause', until = 0, k = 1, shy = 0, headZ = 0, gy = LAWN, dir = 1;
+    // (chapel.js: the flagged path from the lych-gate to the chapel's steps, x -4 to 4, z 58.7 to 70.2, its top at 0.5;
+    // lavender either side of it.) It goes up the path and down again, very slowly, in everybody's way.
+    // (The chapel now stands on the street: its yard path runs along x from -41 to -75 at z -208 to -212, top at 0.12.
+    // Here Z0..Z1 is the long way, along x, and X1 the half-width, across z about ZC.)
+    const X1 = 1.3, ZC = -210, Z0 = -74, Z1 = -42, GY = 0.12, S = 1.5;
+    let o, head, fp, w, state = 'pause', until = 0, k = 1, shy = 0, headZ = 0, dir = 1;
     add({
-      name: 'tortoise', x: -6, z: 65, load: 130, live: 90, when: () => day.light > 0.45,
+      name: 'tortoise', x: -58, z: -210, load: 130, live: 90, when: () => day.light > 0.45,
       init: async () => {
-        const src = await mesh('v_tortoise', S), g = src.geometry, bb = g.boundingBox, L = bb.max.z - bb.min.z;
+        const src = await mesh('v_tortoise', S, 0xe0bc7c), g = src.geometry, bb = g.boundingBox, L = bb.max.z - bb.min.z;
         headZ = bb.max.z - L * 0.24;
         const [bodyG, headG] = splitHead(g, (x, y, z) => z > headZ && Math.abs(x) < 0.12 * S, [0, 0, headZ]);
         o = new THREE.Group(); const body = tag(new THREE.Mesh(bodyG, src.material)); head = tag(new THREE.Mesh(headG, src.material)); head.position.z = headZ; o.add(body, head);
-        let x = -6, z = 65; for (let i = 0; i < 20 && !free(x, z, 1); i++) { x = X0 + r() * (X1 - X0); z = Z0 + r() * (Z1 - Z0); }
-        fp = feet(bodyG); gy = groundAt(x, z); o.position.set(x, gy, z); o.rotation.y = Math.PI / 2; plant(o, fp, gy); o.name = 'tortoise'; scene.add(o); w = new Walk(o); w.base = gy;
+        fp = feet(bodyG); o.position.set(-52, GY, -209.6); o.rotation.y = 1.4; plant(o, fp, GY); o.name = 'tortoise'; scene.add(o); w = new Walk(o); w.base = GY;
       },
       show: on => { o.visible = on; },
       think: t => {
         if (dist3(o.position.x, o.position.y, o.position.z) < 6) shy = t + 5;
         if (t < shy || w.busy || t < until) return;
-        if (r() < 0.7) {                                                             // on across, a few feet at a time
-          const p = o.position; let x = p.x + dir * (2 + r() * 4), z = clamp(p.z + (r() - 0.5) * 2.4, Z0, Z1);
-          if (x < X0 || x > X1 || !clear(p.x, p.z, x, z, 0.8)) { dir = -dir; x = p.x + dir * 2; if (!clear(p.x, p.z, x, z, 0.8)) { until = t + 4; return; } }
-          w.go([[x, groundAt(x, z), z]], 0.16, 0, 1, 0.5, gy); state = 'walk';
+        if (r() < 0.7) {                                                             // on along the path, a few feet at a time
+          const p = o.position; let x = p.x + dir * (1.5 + r() * 3.5); const z = clamp(p.z + (r() - 0.5) * 2, ZC - X1, ZC + X1);
+          if (x < Z0 || x > Z1) { dir = -dir; x = clamp(p.x + dir * 2, Z0, Z1); }
+          if (!clear(p.x, p.z, x, z, 0.5)) { until = t + 4; return; }
+          w.go([[x, GY, z]], 0.16, 0, 1, 0.5, GY); state = 'walk';
         } else { state = 'pause'; until = t + 4 + r() * 8; }
       },
       tick: (t, dt) => {
         const hide = t < shy; k = hide ? Math.max(0, k - dt * 2) : Math.min(1, k + dt * 0.25);
         head.position.z = headZ - (1 - k) * 0.22 * S; head.rotation.x = state === 'pause' ? 0.1 * Math.sin(t * 0.8) : 0;
-        if (!hide && k > 0.95 && w.step(dt)) { gy = w.base; o.rotation.z = 0.025 * Math.sin(t * 2.4); } else o.rotation.z *= 0.9;
-        plant(o, fp, gy);
+        if (!hide && k > 0.95 && w.step(dt)) o.rotation.z = 0.025 * Math.sin(t * 2.4); else o.rotation.z *= 0.9;
+        plant(o, fp, GY);
       },
       check: () => ({ x: o.position.x, y: o.position.y, z: o.position.z, state }),
     });
@@ -318,7 +323,7 @@ export function beasts(kit) {
   // ---- The mouse among the pickle barrels, dusk and night ------------------------------------------------------------
   {
     // (places.js: the barrels stand against the grocer's wall, x 27 to 31.8; the wall's foot runs on east along z = -120)
-    const spots = [[33.4, -119.5], [35.8, -119.45], [38.6, -119.5], [41.5, -119.4], [44.6, -119.5], [34.6, -118.5], [37.4, -118.3]].filter(([x, z]) => free(x, z, 0.25)), den = [32.05, -119.55];
+    const spots = [[33.4, -119.5], [35.8, -119.45], [38.6, -119.5], [41.5, -119.4], [44.6, -119.5], [34.6, -118.5], [37.4, -118.3]].filter(([x, z]) => !blocked(x, z, 0.2)), den = [32.05, -119.55];
     let o, w, fp, state = 'freeze', until = 0, gone = false, safe = 0, pitch = 0;
     const dart = () => { const s = spots[Math.floor(r() * spots.length)]; w.go([[s[0], PAVE, s[1]]], 3.6, 0.02, 0.2, 20, PAVE); state = 'dart'; };
     add({
@@ -327,8 +332,8 @@ export function beasts(kit) {
       show: on => { o.visible = on && !gone; },
       think: t => {
         const p = o.position, d = dist(p.x, p.z);
-        if (gone) { safe = d > 12 ? safe + 0.25 : 0; if (safe > 5) { gone = false; o.visible = true; o.position.set(den[0], PAVE, den[1]); dart(); } return; }
-        if (d < 7.5 && state !== 'flee') { w.go([[den[0], PAVE, den[1]]], 5.5, 0.02, 0.2, 25, PAVE); state = 'flee'; return; }      // behind the barrels
+        if (gone) { safe = d > 9 ? safe + 0.25 : 0; if (safe > 5) { gone = false; o.visible = true; o.position.set(den[0], PAVE, den[1]); dart(); } return; }
+        if (d < 5.5 && state !== 'flee') { w.go([[den[0], PAVE, den[1]]], 5.5, 0.02, 0.2, 25, PAVE); state = 'flee'; return; }      // behind the barrels
         if (state === 'flee') { if (!w.busy) { gone = true; safe = 0; o.visible = false; } return; }
         if (w.busy || t < until) return;
         const k = r();

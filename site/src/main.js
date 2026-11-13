@@ -22,6 +22,11 @@ import { makeShade } from './shade.js';
 
 import { loadFonts } from './fonts.js';
 
+// Every sign, label, leaf and face on the street is painted on a 2D canvas and handed to the renderer as
+// a texture. Browsers keep such canvases on the graphics card unless told otherwise, and a card that is
+// short of memory can silently drop them: the canvas comes back blank, and trees lose their leaves or signs
+// go black. Kept in ordinary memory they cannot be lost, and they upload to WebGL without a read-back.
+{ const get = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (type, opts) { return get.call(this, type, type === '2d' ? { willReadFrequently: true, ...opts } : opts); }; }
 await loadFonts();      // signs are painted at start-up: their typefaces first (fonts.js)
 const Q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -341,6 +346,7 @@ renderer.setAnimationLoop(() => {
   warmer.update(dt);
   perf.frames++; perf.lastCalls = renderer.info.render.calls; perf.lastTris = renderer.info.render.triangles;
   if (perf.firstFrameMs === undefined) perf.firstFrameMs = Math.round(performance.now());
+  if (Q.has('stages') && perf.frames === 3) console.log('STAGES', JSON.stringify(STAGE), 'first frame', perf.firstFrameMs, 'calls', renderer.info.render.calls, 'tris', renderer.info.render.triangles, 'tex', renderer.info.memory.textures, 'geo', renderer.info.memory.geometries, 'programs', renderer.info.programs.length);
 
   // Keep it quick: if most frames run slow for two seconds together, draw at a lower resolution.
   // (One slow second is not enough: a single hitch, as when a room's pictures first load, used

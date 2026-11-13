@@ -251,8 +251,10 @@ export function bringToLife({ scene, outdoors = scene, vis = null, quality = {},
   animated.push(() => { const k = Math.min(1, 1.7 / renderer.toneMappingExposure); for (const m of screenMats) m.emissiveIntensity = m.userData.glow * k; });
   for (const e of extras) {
     let map, mesh;
-    if (e.draw && !e.glow && vis) {
-      const key = zoneAt(e.x, e.y, e.z, Math.max(e.w, e.h) / 2) + '|label|' + (e.rough ?? 0.7);
+    if (e.draw && vis && !(e.glow && (e.flat || e.onModel))) {
+      // (signs on the buildings' own walls all belong to the one always-drawn zone: kept in sheets by neighbourhood,
+      // so each sheet is small and is made when its own stretch of street is near)
+      const zn = zoneAt(e.x, e.y, e.z, Math.max(e.w, e.h) / 2), key = zn + (e.glow ? '|lit|' : '|label|') + ((e.rough ?? 0.7) > 0.5 ? 0.85 : 0.35) + (zn === 'shell' ? '|' + Math.floor(e.x / 70) + ',' + Math.floor(e.z / 50) : '');
       if (!sheets.has(key)) sheets.set(key, []);
       sheets.get(key).push({ e, c: null, w: e.w, h: e.h });      // drawn when its sheet is made (below): not all at once at start-up
       continue;
@@ -342,6 +344,8 @@ export function bringToLife({ scene, outdoors = scene, vis = null, quality = {},
     const [zone, kind, rough] = key.split('|');
     const { geo, tex } = packSheet(list);
     const mat = kind === 'rug' ? new THREE.MeshStandardMaterial({ map: tex, color: 0xb0aaa0, roughness: 1, envMapIntensity: 0.08 }) : new THREE.MeshStandardMaterial({ map: tex, roughness: Number(rough), envMapIntensity: 0.15, ...DECAL });
+    // lit signs (menus, neon, screens) share a sheet too: one glow for the sheet, the mean of what its signs asked for
+    if (kind === 'lit') lit(mat, tex, list.reduce((a, it) => a + (it.e.glow || 0.8), 0) / list.length);
     const mesh = new THREE.Mesh(geo, mat); mesh.receiveShadow = true;      // or the sun and moon reach it through the roof (pale labels shone at night)
     mesh.userData.cat = kind === 'rug' ? 'rugs' : 'extras'; scene.add(mesh); track(mesh, zone);
     for (const it of list) if (it.rug) it.c.width = it.c.height = 0;      // the rugs' own canvases are no longer needed

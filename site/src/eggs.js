@@ -11,7 +11,7 @@
 
 import * as THREE from 'three';
 import { PAINT } from './street/tools.js';
-import { T, F, fill, grain, paper, slate, chalk, disc, rect, line, para, ICON, TAU } from './draw.js';
+import { T, F, fill, grain, paper, disc, rect, line, para, ICON, TAU } from './draw.js';
 
 const WOOD = 'c#8a6a48/0.85', WOODD = 'c#5a4432/0.85', WHITE = 'c#f1efe8/0.6', CREAM = 'c#ece4d0/0.75', IRON = PAINT.iron, BRASS = PAINT.brass, STEEL = 'c#b9bcc0/0.3/1';
 const RED = 'c#b8452e/0.7', GREEN = 'c#2f4a40/0.6', SOIL = 'c#4a3626/1', ROPE = PAINT.rope, STONEP = 'c#8f887c/0.95';
@@ -31,6 +31,13 @@ export function hideEggs(K, town) {
   const E = K.eggs = { things: [], stones: [] };
   const r = K.r;
   const tree = (x, z) => K.trees.reduce((b, t) => (Math.hypot(t.x - x, t.z - z) < Math.hypot(b.x - x, b.z - z) ? t : b));
+  // Where a single-stemmed tree's trunk really is at height y (trees.js leans each one by its seed)
+  const SP = { oak: [2.1, 0.22, 46], maple: [1.5, 0.3, 44], copper: [1.9, 0.2, 48] };
+  const trunkAt = (t, y) => {
+    const [tr, bole, H] = SP[t.kind] ?? SP.oak; let s = (t.seed ?? Math.round(t.x * 13 + t.z * 7)) >>> 0; const rr = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+    const lx = (rr() - 0.5) * 0.22, lz = (rr() - 0.5) * 0.22, n = Math.hypot(lx, 1, lz), k = Math.max(0, y - 0.9), len = t.height * bole;
+    return { x: t.x + lx * k, z: t.z + lz * k, r: (tr * t.height / H) * (1 - 0.28 * Math.min(1, (k * n) / len)) };
+  };
   // any geometry, turned (yaw, then tilt, then roll) and set down
   const put = (mat, g, x, y, z, ry = 0, rx = 0, rz = 0) => { if (ry || rx || rz) g.applyMatrix4(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(rx, ry, rz, 'YXZ'))); g.translate(x, y, z); K.put(mat, g); };
   // a drawn face in the world: centre (x, y, z), facing yaw; o: { cw, ch, flat, tilt, round }
@@ -106,8 +113,8 @@ export function hideEggs(K, town) {
     C.forEach(([a, b, rad], j) => { let prev = null; for (let i = 0; i <= 32; i++) { const t = (i / 32) * TAU, u = a + Math.cos(t) * rad, v = b + Math.sin(t) * rad, ok = v > -1.6 && !C.some((c, m) => m !== j && Math.hypot(u - c[0], v - c[1]) < c[2] - 0.02); if (ok && prev) seg(prev, [u, v]); prev = ok ? [u, v] : null; } });
     seg([-3.53, -1.6], [3.89, -1.6]);
     K.sphere('c#f4f2ec/1', cx + 0.6, 0.2, cz + 1.2, 0.34, 0.6, 1, 1.3, 1);                                                    // a bit it left behind
-    put('c#e9b44c/0.8', new THREE.CylinderGeometry(0.3, 0.3, 0.5, 3).rotateX(Math.PI / 2).rotateZ(Math.PI / 2), cx - 3.4, 0.2, cz - 2.4, 0.5);      // evidence marker
-    face(cx - 3.56, 0.24, cz - 2.31, S + 0.5, 0.26, 0.24, (g, w, h) => { fill(g, w, h, '#e9b44c'); T(g, '1', w / 2, h * 0.55, h * 0.8, '#17140f', { f: F.archivo }); }, { cw: 40, ch: 40, tilt: 0.52 });
+    put('c#e9b44c/0.8', new THREE.CylinderGeometry(0.3, 0.3, 0.5, 3).rotateX(-Math.PI / 2), cx - 3.4, 0.2, cz - 2.4, 0.5);      // evidence marker
+    face(cx - 3.528, 0.283, cz - 2.33, S + 0.5, 0.3, 0.3, (g, w, h) => { fill(g, w, h, '#e9b44c'); T(g, '1', w / 2, h * 0.55, h * 0.8, '#17140f', { f: F.archivo }); }, { cw: 40, ch: 40, tilt: 0.52 });
     card(cx - 4.2, cz + 0.4, S, 1.5, 1.05, ticket('INCIDENT REPORT', 'At about dusk one (1) cloud, cumulus, medium, bumped the island at this spot. The cloud was unhurt. The island said sorry.', 'please do not feed the clouds', { tc: '#a8361f', bs: 0.074 }), { cw: 300, ch: 210 });
     say(cx, 0.3, cz, 'examine the scene', ['Soft, damp, smells faintly of rain that has not happened. Verdict: cloud.', 'No skid marks. It was not going fast. Clouds never are.'], { reach: 7.5, size: 2.5 });
   }
@@ -122,10 +129,11 @@ export function hideEggs(K, town) {
     K.B.mesh('e#ffe2b4/1.7', new THREE.CylinderGeometry(0.15, 0.15, 0.03, 14).rotateZ(Math.PI / 2).translate(fx + 0.005, 2.1, z)); K.glowDots.push([fx + 0.1, 2.1, z, 1.1]);      // somebody is in
     K.box('c#a8956c/1', fx + 0.05, fx + 0.75, G0, 0.09, z - 0.5, z + 0.5);                                                    // the mat
     face(fx + 0.4, 0.095, z, N, 0.9, 0.6, (g, w, h) => { fill(g, w, h, '#a8956c'); grain(g, w, h, 0.2, 7); T(g, 'WIPE YOUR', w / 2, h * 0.34, h * 0.24, '#3a2c1c', { f: F.bebas, ls: 1 }); T(g, 'FEET (ALL OF THEM)', w / 2, h * 0.68, h * 0.2, '#3a2c1c', { f: F.bebas, ls: 1, max: w * 0.9 }); }, { cw: 130, ch: 86, flat: true });
-    face(fx + 0.012, 1.5, z + 0.08, N, 0.62, 0.42, (g, w, h) => { paper(g, w, h, '#f6e9a8'); T(g, 'GONE TO CHOIR', w / 2, h * 0.24, h * 0.2, '#17140f', { f: F.caveat, w: 600 }); T(g, 'back after Tuesday', w / 2, h * 0.52, h * 0.17, '#2a1c13', { f: F.caveat, w: 600 }); T(g, 'parcels: under the mat', w / 2, h * 0.8, h * 0.14, '#a8361f', { f: F.caveat, w: 600 }); disc(g, w / 2, h * 0.07, 3, '#c8402f'); }, { cw: 170, ch: 116 });
+    face(fx + 0.012, 1.45, z + 0.1, N, 0.74, 0.5, (g, w, h) => { paper(g, w, h, '#f6e9a8'); T(g, 'GONE TO CHOIR', w / 2, h * 0.24, h * 0.2, '#17140f', { f: F.caveat, w: 600 }); T(g, 'back after Tuesday', w / 2, h * 0.52, h * 0.17, '#2a1c13', { f: F.caveat, w: 600 }); T(g, 'parcels: under the mat', w / 2, h * 0.8, h * 0.14, '#a8361f', { f: F.caveat, w: 600 }); disc(g, w / 2, h * 0.07, 3, '#c8402f'); }, { cw: 190, ch: 128 });
     for (const [dx, dz, s] of [[1.6, 0.3, 0.42], [2.6, -0.5, 0.36], [3.3, -1.8, 0.4], [3.4, -3.3, 0.34], [2.7, -4.6, 0.38]]) K.cyl(STONEP, fx + dx, G0, 0.1, z + dz, s, s * 0.9, 7);      // stepping stones, leading round
     mushroom(fx + 0.5, z + 1.1, 0.8, 0.1); mushroom(fx + 0.2, z + 1.4, 0.55, -0.1);
     K.F.add('fern', fx + 0.3, z - 1.5, 0.5); K.F.add('fern', fx + 0.1, z + 1.9, 0.45);
+    K.tube(IRON, [t.x + R * 0.9, 6.3, z], [fx + 0.5, 6.15, z], 0.035, 4); K.tube(IRON, [fx + 0.5, 6.15, z], [fx + 0.5, 5.95, z], 0.02, 4);      // a bracket, waiting for a lantern
     E.door = { x: fx + 0.5, y: 5.6, z };
     say(fx, 1.2, z, 'knock on the little door', ['Knock knock. A pause. A very small voice: "We are at choir."', 'Knock. "STILL at choir." (The voice is coming from inside.)', 'Knock. Silence, of the kind that is holding its breath.', 'Knock. The letterbox opens. An acorn is pushed out. That is all you are getting.'], { reach: 7, snd: 'knock' });
   }
@@ -192,25 +200,25 @@ export function hideEggs(K, town) {
     put(STEEL, new THREE.CylinderGeometry(0.07, 0.07, 0.58, 8).rotateZ(Math.PI / 2), x, 1.53, z + 0.44); K.tube(STEEL, [x + 0.29, 1.53, z + 0.44], [x + 0.5, 1.53, z + 0.44], 0.015, 4); put(STEEL, new THREE.TorusGeometry(0.06, 0.015, 4, 10), x + 0.56, 1.53, z + 0.44);      // the lid, rolled back on its key
     K.F.add('herbs', x - 0.05, z - 0.18, 0.34, { y: 1.44 }); K.F.add('herbs', x + 0.08, z + 0.14, 0.3, { y: 1.44 }); K.F.add('strawberry', x - 0.1, z - 0.02, 0.4, { y: 1.44 });
     face(x - 0.305, 1.37, z, S, 0.86, 0.15, (g, w, h) => { fill(g, w, h, '#26364f'); T(g, 'SEREIA SONOLENTA  ·  SARDINES', w / 2, h * 0.54, h * 0.52, '#f0d48a', { f: F.bebas, ls: 1, max: w * 0.94 }); }, { cw: 200, ch: 34 });
-    card(x - 1.5, z + 0.9, S, 1.05, 0.72, (g, w, h) => { paper(g, w, h, '#efe7d2'); T(g, 'thyme', w / 2, h * 0.2, h * 0.24, '#24382f', { f: F.caveat, w: 600 }); para(g, '(was: sardines. They were very good, and they would have wanted this.)', w * 0.09, h * 0.38, h * 0.105, '#2a1c13', w * 0.82, { f: F.caveat, w: 600 }); T(g, 'O.', w * 0.84, h * 0.88, h * 0.14, '#a8361f', { f: F.caveat, w: 600 }); }, { cw: 200, ch: 138 });
+    card(x - 1.4, z + 1.7, S + 0.3, 1.05, 0.72, (g, w, h) => { paper(g, w, h, '#efe7d2'); T(g, 'thyme', w / 2, h * 0.2, h * 0.24, '#24382f', { f: F.caveat, w: 600 }); para(g, '(was: sardines. They were very good, and they would have wanted this.)', w * 0.09, h * 0.38, h * 0.105, '#2a1c13', w * 0.82, { f: F.caveat, w: 600 }); T(g, 'O.', w * 0.84, h * 0.88, h * 0.14, '#a8361f', { f: F.caveat, w: 600 }); }, { cw: 200, ch: 138 });
     mushroom(x + 0.9, z - 0.8, 0.7, 0.1);
   }
 
   // ---- A hammock, between the oak and a tree that is not there yet -----------------------------------------
   {
-    const t = tree(96, -150), R = 2.1 * (t.height / 46), x = t.x, zA = t.z - R * 0.96, zB = t.z - 14.2, L = zA - zB, H = 5.1, SAG = 2.9;
+    const t = tree(96, -150), H = 5.1, c = trunkAt(t, H), R = c.r, x = c.x, zA = c.z - R * 0.98, zB = c.z - 14.2, L = zA - zB, SAG = 2.9;
     const yAt = u => H - SAG * 4 * u * (1 - u), zAt = u => zA - u * L, u0 = 0.2, u1 = 0.8, n = 10;
-    put(ROPE, new THREE.TorusGeometry(R * 1.04, 0.05, 5, 18).rotateX(Math.PI / 2), t.x, H, t.z);
+    for (const dy of [-0.07, 0.07]) put(ROPE, new THREE.TorusGeometry(R * 1.02, 0.055, 5, 18).rotateX(Math.PI / 2), c.x, H + dy, c.z);
     K.cyl(WOODD, x, 0, 5.7, zB, 0.24, 0.2, 9); K.cyl(WOODD, x, 5.7, 5.78, zB, 0.26, 0.26, 9); K.collide(x - 0.3, x + 0.3, zB - 0.3, zB + 0.3, 5.7);
     for (const u of [u0, u1]) { K.tube(WOOD, [x - 1.3, yAt(u), zAt(u)], [x + 1.3, yAt(u), zAt(u)], 0.055, 6); for (const dx of [-1.2, -0.6, 0, 0.6, 1.2]) K.tube(ROPE, [x, H, u < 0.5 ? zA : zB + 0.2], [x + dx, yAt(u), zAt(u)], 0.02, 4); }
     for (let i = 0; i < n; i++) {
       const a = u0 + ((u1 - u0) * i) / n, b = u0 + ((u1 - u0) * (i + 1)) / n, dy = yAt(b) - yAt(a), dz = zAt(b) - zAt(a), len = Math.hypot(dy, dz), ang = Math.atan2(-dy, dz);
       for (const [x0, x1, col] of [[-1.25, -0.8, 'c#96492f/1'], [-0.8, -0.55, 'c#ddd6c4/1'], [-0.55, 0.55, 'c#ddd6c4/1'], [0.55, 0.8, 'c#ddd6c4/1'], [0.8, 1.25, 'c#96492f/1']])
-        put(col, new THREE.BoxGeometry(x1 - x0, 0.05, len + 0.03), x + (x0 + x1) / 2, (yAt(a) + yAt(b)) / 2 - (Math.abs(x0) > 0.7 ? 0 : 0.0), (zAt(a) + zAt(b)) / 2, 0, ang);
+        put(col, new THREE.BoxGeometry(x1 - x0, 0.05, len + 0.03), x + (x0 + x1) / 2, (yAt(a) + yAt(b)) / 2, (zAt(a) + zAt(b)) / 2, 0, ang);
     }
     K.sphere('c#34405a/1', x, yAt(0.3) + 0.2, zAt(0.3), 0.55, 0.36, 1, 1.5, 0.9);                                                // a pillow
     K.collide(x - 1.2, x + 1.2, zAt(u1), zAt(u0), 3.3, 1.7);
-    K.seat(x, yAt(0.5) - 0.25, zAt(0.5), S, 'lie back in the hammock');
+    K.seat(x, yAt(0.5) - 0.5, zAt(0.5), S, 'lie back in the hammock');
     face(x - 0.25, 4.3, zB, S, 1.0, 0.34, (g, w, h) => { paper(g, w, h, '#efe7d2'); T(g, 'TREE', w * 0.3, h * 0.52, h * 0.6, '#24382f', { f: F.bebas, ls: 2 }); T(g, '(temporary)', w * 0.7, h * 0.54, h * 0.4, '#a8361f', { f: F.caveat, w: 600 }); }, { cw: 190, ch: 64 });
     card(x - 2.6, zAt(0.5) + 0.4, S, 1.5, 1.15, (g, w, h) => {
       paper(g, w, h, '#efe7d2'); T(g, 'THE HAMMOCK', w / 2, h * 0.13, h * 0.12, '#24382f', { f: F.bebas, ls: 3 });
@@ -253,7 +261,7 @@ export function hideEggs(K, town) {
   // ---- A fairy ring (it chimes: eggsLife) ---------------------------------------------------------------
   {
     const x = 42, z = -272, R = 3.6;
-    put('c#3f6a35/1', new THREE.RingGeometry(R - 0.55, R + 0.55, 40).rotateX(-Math.PI / 2), x, 0.065, z);                           // the darker grass a real ring leaves
+    put('c#4c7430/1', new THREE.RingGeometry(R - 0.42, R + 0.42, 40).rotateX(-Math.PI / 2), x, 0.065, z);                           // the darker grass a real ring leaves
     for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU; mushroom(x + Math.cos(a) * R, z + Math.sin(a) * R, 1.25 + (i % 3) * 0.15, (i % 2 ? 0.08 : -0.06)); }
     for (let i = 0; i < 14; i++) { const a = (i / 14) * TAU + 0.2, d = R + (r() - 0.5) * 0.7; mushroom(x + Math.cos(a) * d, z + Math.sin(a) * d, 0.5 + r() * 0.35, (r() - 0.5) * 0.3); }
     card(x - 5.6, z + 3.2, S + 0.9, 1.5, 1.05, ticket('FAIRY RING', 'Marasmius oreades, the fairy ring champignon. The ring widens by a hand or so every year. Walk all the way round: it likes that.', 'eight notes. mind the F sharp.', { bs: 0.074, tc: '#3f5f43' }), { cw: 300, ch: 210 });
@@ -277,17 +285,17 @@ export function hideEggs(K, town) {
     K.tube(RUSTD, [x + 0.2, 3.55, zf + 0.6], [x + 0.36, 4.2, zf + 0.6], 0.025, 4); K.tube(RUSTD, [x + 0.36, 4.2, zf + 0.6], [x + 0.72, 4.3, zf + 0.5], 0.025, 4); K.sphere(RUST, x + 0.74, 4.3, zf + 0.5, 0.08, 1, 1);
     put(PAINT.straw, new THREE.TorusGeometry(0.26, 0.09, 5, 12).rotateX(Math.PI / 2), x - 0.12, 3.62, zf + 0.55);                            // a nest, and in it
     for (const [dx, dz] of [[-0.2, 0.5], [-0.05, 0.63], [-0.1, 0.46]]) K.sphere('c#bcd6d8/0.5', x + dx, 3.66, zf + dz, 0.075, 1.25, 1);
-    face(x, 1.62, zf - 0.035, WEST, 0.6, 0.3, (g, w, h) => { fill(g, w, h, '#c9b98a'); grain(g, w, h, 0.25, 4); T(g, 'UNIT 0', w / 2, h * 0.55, h * 0.6, '#3a2a1c', { f: F.bebas, ls: 3 }); }, { cw: 96, ch: 48, tilt: -0.06 });
+    face(x, 1.62, zf - 0.07, WEST, 0.6, 0.3, (g, w, h) => { fill(g, w, h, '#c9b98a'); grain(g, w, h, 0.25, 4); T(g, 'UNIT 0', w / 2, h * 0.55, h * 0.6, '#3a2a1c', { f: F.bebas, ls: 3 }); }, { cw: 96, ch: 48 });
     K.F.add('marigold', x - 0.15, zf - 0.7, 0.9, { y: 0.4 }); K.F.add('marigold', x + 0.5, zf - 1.3, 0.8, { y: 0.4 }); K.F.add('cosmos', x + 1.3, zf + 0.5, 0.75); K.F.add('wildflowers', x - 1.25, zf + 0.2, 0.7);
     K.F.add('catmint', x - 0.1, zf - 2.6, 0.7); K.F.add('fern', x - 0.9, zb - 0.1, 0.6); K.F.add('marigold', x + 0.55, zf + 0.6, 0.6, { y: 2.3 }); K.F.add('cosmos', x - 1.0, zf - 1.7, 0.6);
     K.collide(x - 0.8, x + 0.8, zf - 0.2, zb, 3);
-    card(x + 2.3, zf - 1.3, WEST - 0.75, 1.5, 1.1, (g, w, h) => {
+    card(x + 2.2, zf - 1.5, WEST - 0.3, 1.5, 1.1, (g, w, h) => {
       fill(g, w, h, '#5a4a2c'); grain(g, w, h, 0.1); g.strokeStyle = '#d9b96a'; g.lineWidth = 3; g.strokeRect(6, 6, w - 12, h - 12);
       T(g, 'UNIT 0', w / 2, h * 0.17, h * 0.15, '#e9cf8a', { f: F.bebas, ls: 4 });
       para(g, 'The first robot on Vesper Street. Kept every shop at once, badly, and with great love. Retired to watch the sun set.', w * 0.1, h * 0.3, h * 0.082, '#e9cf8a', w * 0.8, { f: F.fraunces, it: 1, w: 600 });
       T(g, 'still watching', w / 2, h * 0.89, h * 0.085, '#e9cf8a', { f: F.fraunces, it: 1, w: 600 });
     }, { cw: 290, ch: 212, board: 'c#3d3222/0.8' });
-    K.seat(x - 2.1, -0.6, zf - 0.2, 0, 'sit with Unit 0 for a while');
+    K.seat(x - 2.1, 0.15, zf - 0.2, 0, 'sit with Unit 0 for a while');
     say(x, 3.0, zf, 'say good evening to Unit 0', ['A fan turns, once. That is "good evening".', 'Somewhere inside, one very old program is still running: WAIT FOR SUNSET. It reports 99%.', 'The eye brightens a little. It has noticed you noticing the nest. It would like you to say nothing.'], { reach: 8, size: 1.6, snd: 'old' });
   }
 
@@ -308,7 +316,7 @@ export function hideEggs(K, town) {
     K.cyl('c#7a8f4a/0.3', x + 0.3, y + 0.02, y + 0.5, z + 0.1, 0.2, 0.2, 10); K.cyl(BRASS, x + 0.3, y + 0.5, y + 0.56, z + 0.1, 0.21, 0.21, 10);
     K.box(STEEL, x - 1.8, x - 1.2, y + 0.02, y + 0.14, z - 0.5, z - 0.1, { rot: [0, 0.3, 0] });
     K.box('c#34405a/0.8', x + 1.2, x + 1.75, y + 0.02, y + 0.1, z - 1.6, z - 0.8, { rot: [0, -0.3, 0] }); K.box('c#f1ead6/0.9', x + 1.22, x + 1.73, y + 0.0, y + 0.06, z - 1.58, z - 0.82, { rot: [0, -0.3, 0] });
-    card(x - 0.2, z - 1.5, WEST, 1.3, 0.8, (g, w, h) => { paper(g, w, h, '#f6e9a8'); T(g, 'BACK SOON', w / 2, h * 0.2, h * 0.2, '#17140f', { f: F.archivo }); T(g, 'help yourself', w / 2, h * 0.46, h * 0.2, '#2a1c13', { f: F.caveat, w: 600 }); T(g, '(not the last dumpling.', w / 2, h * 0.68, h * 0.13, '#a8361f', { f: F.caveat, w: 600 }); T(g, 'you know which one it is.)', w / 2, h * 0.84, h * 0.13, '#a8361f', { f: F.caveat, w: 600 }); }, { y: 0.62, y0: y, tilt: 0.3, cw: 250, ch: 154, board: 'c#f1ead6/0.9', stake: false });
+    card(x - 0.2, z - 1.55, EAST, 1.3, 0.8, (g, w, h) => { paper(g, w, h, '#f6e9a8'); T(g, 'BACK SOON', w / 2, h * 0.2, h * 0.2, '#17140f', { f: F.archivo }); T(g, 'help yourself', w / 2, h * 0.46, h * 0.2, '#2a1c13', { f: F.caveat, w: 600 }); T(g, '(not the last dumpling.', w / 2, h * 0.68, h * 0.13, '#a8361f', { f: F.caveat, w: 600 }); T(g, 'you know which one it is.)', w / 2, h * 0.84, h * 0.13, '#a8361f', { f: F.caveat, w: 600 }); }, { y: 0.62, y0: y, tilt: 0.3, cw: 250, ch: 154, board: 'c#f1ead6/0.9', stake: false });
     say(x - 0.6, 0.5, z + 0.5, 'help yourself', ['A dumpling, still warm. Eighteen pleats. Bao has been here.', 'A pickle from the jar. You pay with a nice thought, out of habit.', 'One dumpling left. It looks at you. You know which one it is. You leave it.'], { reach: 8, size: 2.4 });
   }
 
@@ -335,7 +343,7 @@ export function hideEggs(K, town) {
   // ---- The time capsule ------------------------------------------------------------------------------
   {
     const x = -54, z = 50;
-    K.box(STONEP, x - 1.0, x + 1.0, 0, 0.42, z - 0.7, z + 0.7, { rot: [0.05, 0.3, 0.04] });
+    K.box(STONEP, x - 1.0, x + 1.0, 0, 0.42, z - 0.7, z + 0.7, { rot: [0, 0.3, 0] });
     face(x, 0.455, z, WEST + 0.3, 1.5, 0.95, brassPlate([['TIME CAPSULE', 0.16, F.bebas], ['sealed at nearly evening', 0.105], ['to be opened at evening', 0.105], ['contents: one perfectly good afternoon', 0.085]], { y0: 0.2, step: 0.2 }), { cw: 280, ch: 178, flat: true });
     for (let i = 0; i < 4; i++) K.F.add(K.pick(['catmint', 'marigold']), x + 1.5 * Math.cos(i * 1.9), z + 1.3 * Math.sin(i * 1.9) + 0.4, 0.6);
     say(x, 0.5, z, 'put your ear to the time capsule', ['Ticking. No: purring. Whatever is in there is having a lovely time.', 'A muffled voice: "Is it evening yet?" You say: nearly. "Right you are."'], { reach: 7, size: 1.6 });
@@ -343,12 +351,12 @@ export function hideEggs(K, town) {
 
   // ---- The lost sock, up the maple behind the records ------------------------------------------------------
   {
-    const t = tree(-78, -8), bx = t.x - 3.3, by = 8.4, bz = t.z - 0.5, SOCK = 'c#8f8f96/1';
-    K.tube(PAINT.bark, [t.x, 7.4, t.z], [bx, by, bz], 0.15, 6); K.tube(PAINT.bark, [bx, by, bz], [bx - 0.9, by + 0.5, bz + 0.3], 0.07, 5);
-    K.box(SOCK, bx + 0.42, bx + 0.72, by - 1.25, by + 0.2, bz - 0.07, bz + 0.07, { rot: [0, 0, 0.06] }); K.box(SOCK, bx + 0.44, bx + 0.74, by - 0.25, by + 0.2, bz + 0.05, bz + 0.19);
-    K.box(SOCK, bx + 0.42, bx + 1.2, by - 1.52, by - 1.22, bz - 0.07, bz + 0.07, { rot: [0, 0, 0.06] });
-    K.box('c#b8452e/1', bx + 0.4, bx + 0.74, by - 0.5, by - 0.38, bz - 0.08, bz + 0.08); K.box('c#ece4d0/1', bx + 1.08, bx + 1.24, by - 1.52, by - 1.2, bz - 0.08, bz + 0.08, { rot: [0, 0, 0.06] });
-    say(bx + 0.6, by - 0.6, bz, 'reach for the sock', ['Grey. Left foot (probably). Too high to reach. It has gone up in the world.', 'Sentimental value: immense. Altitude: also immense. Otis ought to be told. Gently.', 'How does a sock get up a maple? The laundrette that does not exist is saying nothing.'], { reach: 13, size: 1.6 });
+    const t = tree(-78, -8), c = trunkAt(t, 7.4), bx = c.x - 0.5, by = 8.4, bz = c.z - 3.6, zs = bz + 0.7, ys = by - 0.1, SOCK = 'c#8f8f96/1';
+    K.tube(PAINT.bark, [c.x, 7.4, c.z], [bx, by, bz], 0.15, 6); K.tube(PAINT.bark, [bx, by, bz], [bx + 0.3, by + 0.5, bz - 0.9], 0.07, 5);
+    K.box(SOCK, bx - 0.07, bx + 0.07, ys - 1.3, ys + 0.22, zs - 0.16, zs + 0.16); K.box(SOCK, bx - 0.07, bx + 0.21, ys + 0.16, ys + 0.24, zs - 0.16, zs + 0.16); K.box(SOCK, bx + 0.13, bx + 0.21, ys - 0.25, ys + 0.2, zs - 0.16, zs + 0.16);      // hung over the branch by its cuff
+    K.box(SOCK, bx - 0.07, bx + 0.07, ys - 1.6, ys - 1.28, zs - 0.75, zs + 0.16);
+    K.box('c#b8452e/1', bx - 0.085, bx + 0.085, ys - 0.3, ys - 0.18, zs - 0.175, zs + 0.175); K.box('c#ece4d0/1', bx - 0.08, bx + 0.08, ys - 1.61, ys - 1.27, zs - 0.78, zs - 0.6); K.box('c#ece4d0/1', bx - 0.08, bx + 0.08, ys - 1.61, ys - 1.4, zs + 0.02, zs + 0.175);
+    say(bx, ys - 0.7, zs, 'reach for the sock', ['Grey. Left foot (probably). Too high to reach. It has gone up in the world.', 'Sentimental value: immense. Altitude: also immense. Otis ought to be told. Gently.', 'How does a sock get up a maple? The laundrette that does not exist is saying nothing.'], { reach: 13, size: 1.6 });
   }
 
   // ---- A well with an echo -----------------------------------------------------------------------------
@@ -387,7 +395,7 @@ export function hideEggs(K, town) {
     const z = -64, x = rimX(z, -1, 0.93);
     K.cyl(CREAM, x, 0, 8.6, z, 0.14, 0.12, 8); K.sphere(CREAM, x, 8.7, z, 0.2, 1, 1); K.collide(x - 0.3, x + 0.3, z - 0.3, z + 0.3, 8);
     const boardAt = (y, zc, w, h, draw, cw, ch) => { K.box(CREAM, x - 0.03, x + 0.05, y - h / 2, y + h / 2, zc - w / 2, zc + w / 2); face(x + 0.06, y, zc, N, w, h, draw, { cw, ch }); };
-    boardAt(4.0, z + 0.55, 0.8, 4.4, (g, w, h) => { fill(g, w, h, '#ece4d0'); T(g, 'THE GROUND  ·  2 MILES', w / 2, h * 0.44, w * 0.5, '#24382f', { f: F.fraunces, w: 600, it: 1, rot: Math.PI / 2 }); T(g, '↓', w / 2, h * 0.93, w * 0.7, '#a8361f', { f: F.fraunces, w: 600 }); }, 76, 418);
+    boardAt(4.0, z + 0.55, 0.8, 4.4, (g, w, h) => { fill(g, w, h, '#ece4d0'); T(g, 'THE GROUND  ·  2 MILES', w / 2, h * 0.44, w * 0.5, '#24382f', { f: F.fraunces, w: 600, it: 1, rot: Math.PI / 2, max: h * 0.78 }); T(g, '↓', w / 2, h * 0.93, w * 0.7, '#a8361f', { f: F.fraunces, w: 600 }); }, 76, 418);
     boardAt(7.6, z - 2.2, 4.2, 0.72, (g, w, h) => { fill(g, w, h, '#ece4d0'); T(g, 'the sunset (any minute)  →', w / 2, h * 0.54, h * 0.5, '#24382f', { f: F.fraunces, w: 600, it: 1, max: w * 0.94 }); }, 336, 58);
     boardAt(6.65, z + 2.2, 4.2, 0.72, (g, w, h) => { fill(g, w, h, '#ece4d0'); T(g, '←  the airship, eventually', w / 2, h * 0.54, h * 0.5, '#24382f', { f: F.fraunces, w: 600, it: 1, max: w * 0.94 }); }, 336, 58);
     boardAt(5.6, z - 0.75, 1.1, 0.72, (g, w, h) => { fill(g, w, h, '#ece4d0'); T(g, '↑ sky', w / 2, h * 0.54, h * 0.5, '#24382f', { f: F.fraunces, w: 600, it: 1 }); }, 88, 58);
@@ -411,8 +419,8 @@ export function hideEggs(K, town) {
   {
     const t = tree(-98, -128), x = t.x - 3.4, z = t.z + 0.8, BOX = 'c#4a5a3a/0.7';
     K.box(BOX, x - 0.6, x + 0.6, 0.03, 0.62, z - 0.35, z + 0.35, { rot: [0, 0.35, 0] }); K.box('c#3d4a30/0.7', x - 0.63, x + 0.63, 0.62, 0.7, z - 0.38, z + 0.38, { rot: [0, 0.35, 0] });
-    put(STEEL, new THREE.BoxGeometry(0.1, 0.22, 0.04), x - 0.13, 0.52, z + 0.33, 0.35 - Math.PI / 2 + Math.PI / 2);
-    face(x, 0.708, z, N + 0.35 - Math.PI / 2, 0.62, 1.1, (g, w, h) => { fill(g, w, h, '#3d4a30'); g.save(); g.translate(w / 2, h / 2); g.rotate(Math.PI / 2); T(g, 'VESPER CACHE', 0, -w * 0.2, w * 0.24, '#e9cf8a', { f: F.bebas, ls: 2 }); T(g, 'No. 1 (of 1)', 0, w * 0.04, w * 0.17, '#e9cf8a', { f: F.elite }); T(g, 'take a thought, leave a thought', 0, w * 0.27, w * 0.13, '#efe7d2', { f: F.caveat, w: 600 }); g.restore(); }, { cw: 110, ch: 196, flat: true });
+    put(STEEL, new THREE.BoxGeometry(0.1, 0.22, 0.04), x - 0.13, 0.52, z + 0.33, 0.35);
+    face(x, 0.708, z, 0.35, 1.1, 0.62, (g, w, h) => { fill(g, w, h, '#3d4a30'); T(g, 'VESPER CACHE', w / 2, h * 0.24, h * 0.24, '#e9cf8a', { f: F.bebas, ls: 2 }); T(g, 'No. 1 (of 1)', w / 2, h * 0.52, h * 0.17, '#e9cf8a', { f: F.elite }); T(g, 'take a thought, leave a thought', w / 2, h * 0.8, h * 0.14, '#efe7d2', { f: F.caveat, w: 600, max: w * 0.92 }); }, { cw: 196, ch: 110, flat: true });
     K.box('c#efe7d2/0.9', x - 1.25, x - 0.75, 0.04, 0.12, z + 0.3, z + 0.95, { rot: [0, -0.2, 0] }); K.box('c#34405a/0.8', x - 1.27, x - 0.73, 0.03, 0.07, z + 0.28, z + 0.97, { rot: [0, -0.2, 0] }); K.tube('c#e9b44c/0.6', [x - 1.1, 0.15, z + 0.45], [x - 0.85, 0.15, z + 0.9], 0.022, 5);
     K.F.add('fern', x + 0.9, z - 0.8, 0.6); K.F.add('fern', x - 0.4, z - 1.0, 0.5);
     E.cache = { x: x - 0.4, y: 0.5, z: z + 0.3 };
@@ -422,8 +430,9 @@ export function hideEggs(K, town) {
   {
     const x = -113, z = -150, R = 4.6;
     for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU + 0.2, sx = x + Math.cos(a) * R, sz = z + Math.sin(a) * R, h = 0.75 + (i * 37 % 5) * 0.09; K.rock(i % 3 ? PAINT.stoneDark : PAINT.stone, sx, h * 0.33, sz, 0.42, h, 0.36, a); K.glowDots.push([sx, h * 1.35 + 0.25, sz, 0.75]); }
-    K.cyl(STONEP, x, 0, 0.3, z, 1.0, 1.1, 14);
-    face(x, 0.312, z, N, 1.8, 1.8, (g, w, h) => {
+    K.cyl(STONEP, x, 0, 0.3, z, 1.3, 1.4, 14);
+    face(x, 0.312, z, N, 2.4, 2.4, (g, w, h) => {
+      g.scale(1.5, 1.5); w /= 1.5; h /= 1.5;
       disc(g, w / 2, h / 2, w / 2, '#2a2f38'); grain(g, w, h, 0.1, 6);
       // The Plough, and the way from its pointers to Polaris (positions from right ascension and declination)
       const stars = [[11.06, 61.75, 'Dubhe'], [11.03, 56.38, 'Merak'], [11.9, 53.69, 'Phecda'], [12.26, 57.03, 'Megrez'], [12.9, 55.96, 'Alioth'], [13.4, 54.93, 'Mizar'], [13.79, 49.31, 'Alkaid']];
@@ -433,18 +442,18 @@ export function hideEggs(K, town) {
       pts.forEach(([px, py], i) => { disc(g, px, py, 3.2, '#f6e9c0'); T(g, stars[i][2], px + (i < 2 ? -6 : 0), py + (i < 2 ? 0 : 11), 8.5, '#c9b98a', { f: F.fraunces, it: 1, a: i < 2 ? 'right' : 'center' }); });
       ICON.star(g, pol[0], pol[1], 13, '#f6e9c0'); T(g, 'Polaris', pol[0] + 10, pol[1], 9.5, '#e9cf8a', { f: F.fraunces, it: 1, a: 'left' });
       T(g, 'THE PLOUGH', w / 2, h * 0.86, 11, '#e9cf8a', { f: F.bebas, ls: 3 }); T(g, 'for when the sun does go', w / 2, h * 0.92, 9, '#c9b98a', { f: F.caveat, w: 600 });
-    }, { cw: 220, ch: 220, flat: true, round: true });
+    }, { cw: 330, ch: 330, flat: true, round: true });
     card(x + R + 1.6, z + 2.5, N - 0.4, 1.4, 0.95, ticket('THE HUMMING STONES', 'Eight of them. Nobody has ever counted nine. They hum at dusk, which up here is most of the time. Mostly D.', 'robot choir: tuesdays. these: always.', { bs: 0.08 }), { cw: 280, ch: 190 });
     E.circle = { x, z, R };
   }
 
   // ---- The 10 mm socket ----------------------------------------------------------------------------------
   {
-    const x = -78, z = -182;
+    const x = -91, z = -187;
     put(STEEL, new THREE.CylinderGeometry(0.11, 0.11, 0.26, 6), x, 0.14, z, 0.4, 1.35, 0.2); put('c#17140f/0.6', new THREE.CylinderGeometry(0.065, 0.065, 0.265, 6), x, 0.14, z, 0.4, 1.35, 0.2);
     K.glowDots.push([x, 0.3, z, 0.6]);
     for (const [dx, dz] of [[1.6, 0.4], [-1.2, 1.3], [0.4, -1.7], [-1.6, -0.9]]) K.F.add('grass', x + dx, z + dz, 0.9);
-    say(x, 0.15, z, 'pick up the 10 mm socket', ['The 10 mm! So this is where they go. You put it down again somewhere safe. (Here.)', 'If you took it back, the bike shop would have nothing left to look for. It stays.', 'It has rolled an inch since last time. They do that.'], { reach: 7, size: 1.3 });
+    say(x, 0.15, z, 'pick up the 10 mm socket', ['The 10 mm! So this is where they go. You put it down again somewhere safe. (Here.)', 'Somebody on this street is still looking for it. If you took it back they would have nothing left to look for. It stays.', 'It has rolled an inch since last time. They do that.'], { reach: 7, size: 1.3 });
   }
 
   // ======================================================================================
@@ -534,7 +543,7 @@ export function eggsLife(ctx, K) {
     if (E.circle) {
       const dx = cx - E.circle.x, dz = cz - E.circle.z, inside = Math.abs(dx) < 16 && Math.abs(dz) < 16 && dx * dx + dz * dz < 196;
       if (inside) {
-        const dusk = day.light < 0.85;
+        const dusk = day.light < 0.96;
         if (!near) { near = true; humAt = t + 0.4; if (!dusk) flash('Eight stones, saying nothing. Come back when the light goes gold.'); }
         if (dusk && t > humAt) { humAt = t + 1.9; const k = humN++ % HUM.length; note(HUM[k], 0, 4.2, 0.085); if (k % 4 === 0) note(HUM[k] + 19, 0.3, 3.2, 0.018); if (humN === 3) flash('The stones are humming. D, mostly. One of them is flat and knows it.'); }
       } else if (near && dx * dx + dz * dz > 900) { near = false; humN = 0; }

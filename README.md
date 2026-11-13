@@ -1,12 +1,14 @@
 # Vesper Street
 
-A little main street you can walk down, in the browser: an island in the sky where it is always
-nearly evening. Six shops are open (coffee, records, a grocer of tinned fish and good oil, books,
-plants, candles), four are shut with their windows lit, there is a dumpling cart in the Yard and a
-picture house whose screen is round the back. Robots keep the shops and like to be talked to.
+A little main street you can walk down, in the browser: an island in the sky with the sun going down
+at the end of the street. It keeps the visitor's clock. Ten shops are open (coffee, records, yoga, a
+small museum of real things, books, bread, a grocer of tinned fish and good oil, plants, candles, a
+noodle bar), there is a chapel beside the Overlook, a bar on the grocer's roof, a dumpling cart in the
+Yard, and a picture house whose screen is round the back. Robots keep the shops and like to be talked to;
+what they make you can eat and drink. Live at https://town.brezgis.com/.
 
-It is built on the engine of Anna's House (`~/projects/my_house`): three.js, plain ES modules,
-no build step, everything batched into a few dozen draw calls.
+It is built on the engine of Anna's House (https://house.brezgis.com/): three.js, plain ES modules,
+no build step.
 
 ## Visiting
 
@@ -24,12 +26,16 @@ keys. `[` and `]` move the hour, though the street prefers dusk.
 - `site/src/street.js`: the island, road, pavements, trees, lamps, string lights, benches.
   `fronts.js`: names over the doors, awnings, hanging signs, ghost signs, the flats' windows.
   `places.js`: the Landing, Pickle Alley and the picture garden, the Yard, the Overlook.
-  `displays.js`: the four shut shops' windows.
-- `site/src/clerks.js`: the robots (bodies, wandering, conversation, coffee).
+  `displays.js`: the picture house's front. `backs.js`: the backs of the buildings and their yards.
+  `flats.js`: the flats' windows upstairs. `chapel.js`, `chapel/`: the chapel. `creatures.js`,
+  `creatures/`: the animals. `eggs.js`: what is hidden in the grass.
+- `site/src/clerks.js`: the robots (who looks like what, roaming, conversation, making things to order).
+  `hold.js`: eating and drinking.
   `story.js`: the stamps, and what happens when you have all six.
 - `site/src/main.js`, `lighting.js`, `sky.js`, `visibility.js`, `life.js`, `walk.js`, `sound.js`,
   `ui.js`: the engine, lightly adapted from the house.
-- `tools/shot.sh` takes a screenshot with headless Chrome; `tools/check.sh` syntax-checks the
-  modules. `archive/marigold-v1/` is the first version of this town (vite), kept for reference.
+- `tools/shot.sh` (and `tryshot.sh`, which retries) take a screenshot with headless Chrome;
+  `tools/drive.py` opens the street in real time, presses keys and measures; `tools/check.sh`
+  syntax-checks the modules. `archive/marigold-v1/` is the first version of this town (vite), kept for reference.
 
 Credits are in `site/assets/CREDITS.md`. Built by Anna with Claude.

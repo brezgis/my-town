@@ -10,6 +10,7 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { ISLAND, islandEdge } from '../street.js';      // (street.js imports the animals in turn; these are only used once the street is laid)
 
 export const FT = 3.28084, TAU = Math.PI * 2;
 export const wrapA = a => ((a + Math.PI) % TAU + TAU) % TAU - Math.PI;
@@ -47,7 +48,8 @@ export function creatureKit(ctx, K) {
   const inLot = (x, z, pad = 1) => lots.some(f => x > f.x0 - pad && x < f.x1 + pad && z > f.z0 - pad && z < f.z1 + pad);
   // inside the footprint of something the visitor bumps into (a planter, a bench, a bin, a post)?
   const blocked = (x, z, pad = 0.3, below = 3) => ctx.colliders.some(c => !c.off && (c.y0 ?? 0) < below && x > c.x0 - pad && x < c.x1 + pad && z > c.z0 - pad && z < c.z1 + pad);
-  const onIsland = (x, z, k = 0.84) => (x / 128) ** 2 + ((z + 62) / 240) ** 2 < k * k;
+  // on the island's lawn, k of the way out to where the long grass rolls over the edge
+  const onIsland = (x, z, k = 0.93) => Math.hypot(x - ISLAND.x, z - ISLAND.z) < islandEdge(Math.atan2(z - ISLAND.z, x - ISLAND.x)) * 0.92 * k;
   const free = (x, z, pad = 0.4) => !inLot(x, z, pad + 0.6) && !blocked(x, z, pad) && onIsland(x, z);
   // is the straight way from a to b free (sampled every two feet)?
   const clear = (ax, az, bx, bz, pad = 0.4) => { const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / 2)); for (let i = 0; i <= n; i++) if (!free(ax + (bx - ax) * i / n, az + (bz - az) * i / n, pad)) return false; return true; };
@@ -100,6 +102,19 @@ export function creatureKit(ctx, K) {
   const kit = { ctx, K, day, cam, scene, glb, mesh, tag, inLot, blocked, onIsland, free, clear, groundAt, dist, dist3, add, crew, feet, plant, all,
     hour: () => day.hour ?? 12 };
   if (typeof window !== 'undefined') { window.__creatures = crew; window.__creatureKit = kit; }      // for tests
+  // ?creaturelog=14000 writes, that many milliseconds in, who is loaded and showing, where they are, and what
+  // the animals in the scene cost just then (draws and triangles of everything of theirs that is visible)
+  const Q = new URLSearchParams(location.search);
+  if (Q.has('creaturelog')) setTimeout(() => {
+    let draws = 0, tri = 0;
+    const seen = o => { for (let p = o; p; p = p.parent) if (p.visible === false) return false; return true; };
+    scene.traverse(o => { if (!o.userData.creature || !(o.isMesh || o.isPoints) || !seen(o)) return; const g = o.geometry, n = g.index ? g.index.count : g.attributes.position.count; draws++; tri += (o.isPoints ? 0 : n / 3) * (o.isInstancedMesh ? o.count : g.instanceCount ?? 1); });
+    const info = ctx.renderer.info.render;
+    console.log(`CREW cost ${draws} draws ${Math.round(tri)} tris | frame ${info.calls} calls ${info.triangles} tris | light ${day.light.toFixed(2)} hour ${(day.hour ?? 0).toFixed(1)} room ${ctx.room?.name ?? '-'} | failed: ${crew.filter(c => c.failed).map(c => c.name).join(',') || 'none'} | not loaded: ${crew.filter(c => !c.loaded).map(c => c.name).join(',') || 'none'}`);
+    const f = v => (typeof v === 'number' ? Math.round(v * 10) / 10 : v);
+    const lines = crew.filter(c => c.on).map(c => { let k = {}; try { k = c.check?.() ?? {}; } catch (e) { k = { err: String(e) }; } return c.name + ' ' + JSON.stringify(k, (key, v) => (key === 'all' ? undefined : f(v))); });
+    for (let i = 0; i < lines.length; i += 5) console.log('CREW on: ' + lines.slice(i, i + 5).join(' ; '));
+  }, Number(Q.get('creaturelog')) || 14000);
   return kit;
 }
 

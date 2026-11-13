@@ -33,7 +33,7 @@ export function birds(kit) {
 
   // ---- sparrows: one instanced body and one instanced pair of wings per flock ----------------------------------
   const sparrows = async N => {
-    const src = await mesh('v_sparrow'), fp = feet(src.geometry);
+    const src = await mesh('v_sparrow', 1, 0x9c8873), fp = feet(src.geometry);      // (toned down: the model's buff is nearly cream in the street's light)
     const inst = tag(new THREE.InstancedMesh(src.geometry, src.material, N)); inst.frustumCulled = false; inst.name = 'sparrows';
     const wg = new THREE.BufferGeometry(); wg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0.09, 0, 0, -0.08, 0.36, 0, -0.1, 0, 0, 0.09, 0.36, 0, -0.1, 0.3, 0, 0.03], 3)); wg.computeVertexNormals(); wg.translate(0, 0.16, 0.02);
     const wingI = tag(new THREE.InstancedMesh(wg, new THREE.MeshStandardMaterial({ color: 0x8a6a48, roughness: 0.9, side: THREE.DoubleSide }), N * 2)); wingI.frustumCulled = false; wingI.name = 'sparrow wings';
@@ -46,8 +46,10 @@ export function birds(kit) {
       const beat = 0.2 + 1.0 * Math.sin(t * 28 + i);
       for (let side = 0; side < 2; side++) { e.set(b.pitch, b.yaw, side ? -beat : beat, 'YXZ'); q.setFromEuler(e); sv.set(side ? -1 : 1, 1, 1).multiplyScalar(b.fly ? b.s : 0); wingI.setMatrixAt(i * 2 + side, m4.compose(pv, q, sv)); }
     };
-    const done = () => { inst.instanceMatrix.needsUpdate = true; wingI.instanceMatrix.needsUpdate = true; };
-    return { inst, wingI, draw, done, show: on => { inst.visible = wingI.visible = on; } };
+    // (the wings are only drawn while somebody is in the air)
+    let shown = false, flew = false;
+    const done = () => { inst.instanceMatrix.needsUpdate = true; wingI.visible = shown && flew; if (flew) wingI.instanceMatrix.needsUpdate = true; flew = false; };
+    return { inst, wingI, draw: (i, b, t) => { if (b.fly) flew = true; draw(i, b, t); }, done, show: on => { shown = on; inst.visible = on; if (!on) wingI.visible = false; } };
   };
   const bird = () => ({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, s: 1, fly: false, mode: 'peck', t0: 0, T: 1, until: 0, ax: 0, ay: 0, az: 0, bx: 0, by: 0, bz: 0, then: 'peck', face: 0 });
   const flyTo = (b, x, y, z, t0, T, then) => { b.ax = b.x; b.ay = b.y; b.az = b.z; b.bx = x; b.by = y; b.bz = z; b.t0 = t0; b.T = T; b.mode = 'fly'; b.then = then; };
@@ -84,7 +86,7 @@ export function birds(kit) {
       },
       show: on => { F.show(on); if (!on) crumbMesh.visible = false; else crumbMesh.visible = feeding(); },
       think: t => {
-        now = t; const roost = day.light < 0.62, fed = feeding(), R = fed ? 3.2 : 8;
+        now = t; const roost = day.light < 0.62, fed = feeding(), R = fed ? 3.0 : 8;
         if (!fed && crumbMesh.visible) crumbMesh.visible = false;
         let near = false; for (const b of B) if (!b.fly && b.mode !== 'wire' && dist(b.x, b.z) < R) near = true;
         if (state === 'down' && (near || roost)) {                                             // all up to the string of lights
@@ -94,7 +96,7 @@ export function birds(kit) {
         }
         if (state === 'up') {
           const off = Math.hypot(Math.max(0, Math.abs(cam.x - (A.x0 + A.x1) / 2) - (A.x1 - A.x0) / 2), Math.max(0, Math.abs(cam.z - (A.z0 + A.z1) / 2) - (A.z1 - A.z0) / 2));
-          const quiet = fed ? dist(crumbs.x, crumbs.z) > 4.5 : off > 7;
+          const quiet = fed ? dist(crumbs.x, crumbs.z) > 3.8 : off > 7;
           calm = quiet ? calm + 0.25 : 0;
           if (!roost && calm > (fed ? 1.5 : 7) && B.every(b => b.mode === 'wire')) { state = 'down'; B.forEach(b => { const [x, z] = spot(fed ? crumbs : null); flyTo(b, x, PAVE, z, t + r() * (fed ? 1.2 : 3), 1.2 + r() * 0.6, 'peck'); }); }
           else for (const b of B) if (b.mode === 'wire' && t > b.until) { b.until = t + 1 + r() * 3; b.yaw = b.face + (r() - 0.5) * 1.3; }
@@ -129,10 +131,12 @@ export function birds(kit) {
     add({
       name: 'crumb bag', x: bagAt.x, z: bagAt.z, load: 120, live: 90,
       init: async () => {
-        const body = new THREE.BoxGeometry(0.42, 0.62, 0.28, 1, 2, 1).translate(0, 0.31, 0), p = body.attributes.position;
-        for (let i = 0; i < p.count; i++) if (p.getY(i) > 0.6) p.setXYZ(i, p.getX(i) * 0.92, p.getY(i) + 0.05 * Math.sign(p.getZ(i)), p.getZ(i) * 0.25);      // the top pinched and folded
-        body.computeVertexNormals();
-        bag = tag(new THREE.Mesh(body, new THREE.MeshStandardMaterial({ color: 0xb9925e, roughness: 0.95 }))); bag.position.set(bagAt.x, bagAt.y, bagAt.z); bag.rotation.y = 0.5; bag.name = 'crumb bag'; scene.add(bag);
+        // a kraft bag: the body, its top pinched in, and the top folded over
+        const sack = new THREE.BoxGeometry(0.4, 0.66, 0.26, 1, 3, 1).translate(0, 0.33, 0), p = sack.attributes.position;
+        for (let i = 0; i < p.count; i++) if (p.getY(i) > 0.6) p.setZ(i, p.getZ(i) * 0.3);
+        const fold = new THREE.BoxGeometry(0.41, 0.12, 0.05).rotateX(0.5).translate(0, 0.63, 0.06);
+        const body = mergeGeometries([sack.toNonIndexed(), fold.toNonIndexed()]); body.computeVertexNormals();
+        bag = tag(new THREE.Mesh(body, new THREE.MeshStandardMaterial({ color: 0x94703f, roughness: 0.95 }))); bag.position.set(bagAt.x, bagAt.y, bagAt.z); bag.rotation.y = 0.5; bag.name = 'crumb bag'; scene.add(bag);
       },
       show: on => { bag.visible = on; },
     });
@@ -151,7 +155,7 @@ export function birds(kit) {
   {
     const N = 9, wires = [strand([FX, TOPW, -126], [-FX, TOPW, -139], 3.6), strand([-FX, TOPW, -139], [FX, TOPW, -152], 3.6)], W = [0, 0, 0];
     let F = null, on = 0, calm = 9; const B = [];
-    const slot = i => 3.5 + i + (i > 4 ? 0.0 : 0);
+    const slot = i => 3.5 + i;                                   // one bird between each pair of bulbs
     add({
       name: 'sparrow roost', x: 0, z: -136, load: 170, live: 130, when: () => day.light < 0.8 && (hour() >= 15 || hour() < 6.5),
       init: async () => {
@@ -328,6 +332,7 @@ export function birds(kit) {
   {
     // four lamps that stand clear of the street trees (street.js: posts at x 13.1, globes 11 ft up; the string lights pass at 13)
     const lamps = [[13.1, -106], [-13.1, -85], [13.1, -148], [-13.1, 42]], N = lamps.length, uT = { value: 0 };
+    const batX = (L, i, s) => L[0] * 0.72 + 6.5 * (Math.sin(s) + 0.3 * Math.sin(s * 2.7 + i)), batZ = (L, i, s) => L[1] + 7.5 * (Math.sin(s * 2 + i) * 0.6 + 0.4 * Math.cos(s * 1.3));      // a lopsided figure of eight, mostly over the road
     let inst;
     add({
       name: 'bats', x: 0, z: -80, load: 400, live: 400, when: () => day.light < 0.66 && (hour() >= 15 || hour() < 7),
@@ -339,9 +344,8 @@ export function birds(kit) {
       tick: t => {
         uT.value = t;
         for (let i = 0; i < N; i++) {
-          const L = lamps[i], a = t * 0.62 + i * 2.1, b = a + 0.05, cx = L[0] * 0.72;                     // a lopsided figure of eight, mostly over the road
-          const X = s => cx + 6.5 * (Math.sin(s) + 0.3 * Math.sin(s * 2.7 + i)), Z = s => L[1] + 7.5 * (Math.sin(s * 2 + i) * 0.6 + 0.4 * Math.cos(s * 1.3));
-          const x = X(a), z = Z(a), y = 17.2 + 1.6 * Math.sin(a * 1.9) + 0.5 * Math.sin(a * 7.3), vx = X(b) - x, vz = Z(b) - z;
+          const L = lamps[i], a = t * 0.62 + i * 2.1, b = a + 0.05;
+          const x = batX(L, i, a), z = batZ(L, i, a), y = 17.2 + 1.6 * Math.sin(a * 1.9) + 0.5 * Math.sin(a * 7.3), vx = batX(L, i, b) - x, vz = batZ(L, i, b) - z;
           e.set(0.1, Math.atan2(vx, vz), 0.3 * Math.sin(a * 2.2), 'YXZ'); q.setFromEuler(e); pv.set(x, y, z); sv.setScalar(1);
           inst.setMatrixAt(i, m4.compose(pv, q, sv));
         }

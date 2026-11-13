@@ -48,8 +48,9 @@ export const ALLEY = { y0: 112, y1: 120 }, YARD = { y0: 78, y1: 118, back: 66 },
 // What to call where you are standing, out of doors
 export function placeName(x, z) {
   const Y = -z;
+  if (x < -35.5 && x > -86 && Y > 197.7 && Y < 224) return 'The Churchyard';
   if (Y > OVERLOOK.y0 - 2) return 'The Overlook';
-  if (Y < CHURCHYARD.y1) return 'The Churchyard';
+  if (Y < CHURCHYARD.y1) return 'The Mooring Field';
   if (Y < LANDING.y1) return 'The Landing';
   if (x > FRONT && Y > ALLEY.y0 && Y < ALLEY.y1) return x > 60 ? 'The Picture Garden' : 'Pickle Alley';
   if (x > FRONT + 10 && Y > 82 && Y < 113) return 'The Picture Garden';
@@ -70,7 +71,8 @@ const STREET_TREES = [];
       const y = Y + (s > 0 ? 0 : 15);
       if (s < 0 && y > YARD.y0 + 4 && y < YARD.y1 - 4) continue;       // the Yard has its own oak
       if (s > 0 && y > ALLEY.y0 - 3 && y < ALLEY.y1 + 3) continue;
-      if (s > 0 && y > 86 && y < 110) continue;                        // nothing in front of the picture house's marquee
+      if (s > 0 && y > 86 && y < 110) continue;
+      if (s < 0 && y > 170) continue;                                  // nor in front of the chapel's door and rose                        // nothing in front of the picture house's marquee
       const kind = kinds[i++ % kinds.length], t = { kind, x: s * 14.6, z: -y, seed: 50 + i, height: kind === 'cherry' ? 19 : kind === 'birch' ? 27 : 26, y: CURB };
       STREET_TREES.push(t); TREES.push(t);
     }

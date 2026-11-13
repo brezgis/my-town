@@ -16,7 +16,7 @@ import { T, F, fill, slate, chalk, paper, board, grain, disc, rect, rrect, line,
 const OAK = 'oak_light#a3825c', PALEW = 'oak_light#c4a477', BLUSH = 'painted_wood#d8b7a6', CREAM = 'painted_wood#efe6d4', DARKW = 'fir#3a2c24';
 const STEEL = 'c#c9ccd0/0.45/1', IRON = 'c#2b2724/0.45/1', PORC = 'c#ebe6dc/0.18', ENAMEL = 'c#2b2724/0.45', LINEN = 'linen#e9dfc8', SACK = 'linen#d9c9a8';
 const CR1 = 'c#a8784a/0.8', CR2 = 'c#8a5a2a/0.8', CR3 = 'c#6a4a2a/0.8', RYE = 'c#3a2214/0.8', PALE = 'c#c9a77a/0.8', BUN = 'c#b08a5a/0.45', GOLD = 'c#c9952a/0.45', FLOUR = 'c#e8e2d4/0.8', WHITE = 'c#f4f1ea/0.8', DOUGH = 'c#efe2bc/0.8';
-const GLOW = 'e#ff8a3c/2.2';                                    // the one new glow: the oven
+const GLOW = 'e#ff7a2a/1.1';                                    // the one new glow: the oven
 const INK = '#2a1c13', RED = '#a8554a', PAPER = '#f6efdc', PINK = '#f3d9cf';
 
 // ---- lettering ------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ const RECIPE = (g, w, h) => {
   line(g, [[w * 0.1, h * 0.162], [w * 0.9, h * 0.162]], RED, 2);
   [['450 g', 'white bread flour'], ['50 g', 'wholewheat flour'], ['375 g', 'water at 30°C / 86°F  (75%)'], ['100 g', 'ripe levain  (20%)'], ['10 g', 'salt  (2%)']].forEach(([a, b], i) => { T(g, a, w * 0.27, h * (0.19 + i * 0.03), h * 0.024, RED, { f: F.elite, a: 'right' }); T(g, b, w * 0.31, h * (0.19 + i * 0.03), h * 0.024, INK, { f: F.elite, a: 'left', max: w * 0.6 }); });
   line(g, [[w * 0.1, h * 0.335], [w * 0.9, h * 0.335]], RED, 2);
-  let y = h * 0.35; const px = h * 0.0195;
+  let y = h * 0.348; const px = h * 0.0182;
   ['Levain: in the morning stir 20 g starter into 50 g flour and 50 g water. It is ready when it has doubled and a spoonful floats: 4 to 6 hours.',
     'Mix the flours with 350 g of the water until no dry flour is left. Cover. Rest 45 minutes.',
     'Add the levain, the salt and the last 25 g of water. Squeeze it through with a wet hand until it is one dough again.',
@@ -60,8 +60,8 @@ const RECIPE = (g, w, h) => {
     'Tip out. Shape a loose round, rest 20 minutes, shape it tight. Seam side up into a well floured basket.',
     'Fridge, covered, overnight: 8 to 14 hours.',
     'Heat a lidded cast-iron pot in the oven at 250°C / 480°F for 45 minutes. Turn the cold loaf in, score it, lid on: 20 minutes. Lid off, down to 230°C / 450°F: 20 to 25 minutes more. Bake it darker than you dare.',
-    'Cool on a rack for an hour before cutting. This is the hard step.'].forEach((s, i) => { T(g, String(i + 1), w * 0.115, y + px * 0.62, px * 1.5, RED, { f: F.abril }); y = para(g, s, w * 0.16, y, px, INK, w * 0.74, { f: F.fraunces, lh: 1.3 }) + px * 0.5; });
-  T(g, 'pale means not done. it is only shy.   C.', w / 2, h * 0.955, h * 0.03, RED, { f: F.caveat, w: 700, max: w * 0.84 });
+    'Cool on a rack for an hour before cutting. This is the hard step.'].forEach((s, i) => { T(g, String(i + 1), w * 0.115, y + px * 0.62, px * 1.5, RED, { f: F.abril }); y = para(g, s, w * 0.16, y, px, INK, w * 0.74, { f: F.fraunces, lh: 1.28 }) + px * 0.42; });
+  T(g, 'pale means not done. it is only shy.   C.', w / 2, h * 0.963, h * 0.026, RED, { f: F.caveat, w: 700, max: w * 0.84 });
 };
 const FEEDLOG = (g, w, h) => {
   paper(g, w, h, '#fbf7ea', 31); for (let i = 0; i < 13; i++) line(g, [[w * 0.05, h * (0.2 + i * 0.058)], [w * 0.95, h * (0.2 + i * 0.058)]], '#b9cfe0', 1);
@@ -225,8 +225,8 @@ export default function bakery(kit, lot) {
 
   // ---- the bread wall: four slanted racks, every bread labelled --------------------------------------------
   const b = at(7.2, D, 0, 'street');
-  const TH = -0.32, CS = Math.cos(TH), SN = Math.sin(TH), SHZ = [7.9, 6.45, 5.0, 3.55], X0 = -6.1, X1 = 6.1;
-  b.box(OAK, X0, X1, 0.01, 0.06, 0, 9.0, G); for (let i = 0; i <= 4; i++) { const x = X0 + (X1 - X0) * i / 4; b.box(OAK, x - 0.05, x + 0.05, 0.01, 1.3, 0, 9.0, G); }
+  const TH = -0.56, CS = Math.cos(TH), SN = Math.sin(TH), SHZ = [7.35, 6.0, 4.65, 3.3], X0 = -6.1, X1 = 6.1;
+  b.box(PALEW, X0, X1, 0.01, 0.06, 0, 9.0, G); for (let i = 0; i <= 4; i++) { const x = X0 + (X1 - X0) * i / 4; b.box(OAK, x - 0.05, x + 0.05, 0.01, 1.3, 0, 9.0, G); }
   b.box(OAK, X0 - 0.08, X1 + 0.08, 0.01, 1.36, 9.0, 9.12, G); b.box(CREAM, X0 + 0.05, X1 - 0.05, 0.06, 1.24, 0, 2.3, G); b.box(OAK, X0, X1, 0.06, 1.34, 2.3, 2.4, G); b.block(X0, X1, 0, 1.3, 0, 7);
   for (let i = 0; i < 4; i++) { const x = X0 + (i + 0.5) * (X1 - X0) / 4; for (const s of [-1, 1]) { b.box(CREAM, x + s * 0.72 - 0.62, x + s * 0.72 + 0.62, 1.24, 1.275, 0.4, 2.1, G); b.cyl(BRASS, x + s * 0.2, 1.3, 1.3, 1.36, 0.04, 0.04, 8); } }
   for (const zb of SHZ) { wood(b, OAK, G3.bev(X0 + 0.06, X1 - 0.06, 0, 1.15, -0.07, 0, 0.01), { rx: TH, at: [0, 0.1, zb] }); wood(b, OAK, G3.bev(X0 + 0.06, X1 - 0.06, 1.15, 1.19, -0.07, 0.13, 0.01), { rx: TH, at: [0, 0.1, zb] }); }
@@ -253,7 +253,7 @@ export default function bakery(kit, lot) {
   BREADS.forEach(([name, note, price, n, sp, make, rz], k) => {
     const zb = SHZ[Math.floor(k / 4)], xc = X1 - (k % 4 + 0.5) * (X1 - X0) / 4, two = n > 5, per = two ? n / 2 : n;
     for (let i = 0; i < n; i++) { const row = two ? Math.floor(i / per) : 0, s = two ? 0.3 + row * 0.5 : 0.58, x = xc + (i % per - (per - 1) / 2) * sp + (row ? sp * 0.3 : 0); set(b, make(), x, 0.1 + s * CS, zb + s * SN, rz + (i % 3 - 1) * 0.18, TH); }
-    kit.sign(b, xc, 0.1 + 1.2 * CS + 0.02, zb + 1.2 * SN - 0.33, 2.7, 0.56, BREADTAG(name, note, price), { cw: 432, ch: 90, rough: 0.9 });
+    kit.sign(b, xc, 0.1 + 1.2 * CS + 0.04, zb + 1.2 * SN + 0.0, 2.7, 0.42, BREADTAG(name, note, price), { cw: 446, ch: 76, rough: 0.9 });
   });
 
   // ---- the oven: three decks, the middle door down ---------------------------------------------------------
@@ -262,11 +262,14 @@ export default function bakery(kit, lot) {
     for (const [x, y] of [[-3.4, 0.25], [3.4, 0.25], [-3.4, 2.75], [3.4, 2.75]]) o.box(STEEL, x - 0.1, x + 0.1, y - 0.1, y + 0.1, 0, 1.5);
     o.box(STEEL, -3.5, 3.5, 0.15, 2.85, 0.5, 0.56); for (let i = 0; i < 5; i++) basket(o, -2.6 + i * 1.3, 1.5, 0.56, 0.42, 0.3);
     o.box(ENAMEL, -3.6, 3.6, 0.02, F0, 1.5, 7.1); o.box(ENAMEL, -3.6, 3.6, F0, F1, 1.5, 3.58); o.box(ENAMEL, -3.6, 3.6, F0, F1, 4.9, 7.1); o.box(ENAMEL, 2.9, 3.6, F0, F1, 3.58, 4.9); o.box(ENAMEL, -3.6, -2.5, F0, F1, 3.58, 4.9);
-    o.box(GLOW, -2.5, 2.9, F0 + 0.02, F0 + 0.05, 3.6, 4.9);                                          // the mouth
+    o.box('c#17140f/0.8', -2.5, 2.9, F0 + 0.02, F0 + 0.04, 3.6, 4.9);
+    kit.sign(o, 0.2, F0 + 0.05, 4.25, 5.4, 1.3, (g, w, h) => { const gr = g.createLinearGradient(0, h, 0, 0); gr.addColorStop(0, '#fff0b0'); gr.addColorStop(0.16, '#ffb040'); gr.addColorStop(0.5, '#e8601c'); gr.addColorStop(1, '#5a1608'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 26; i++) { const x = (i * 97 % 260) / 260 * w, r2 = h * (0.12 + (i * 31 % 10) / 40), rg = g.createRadialGradient(x, h, 0, x, h, r2 * 2.2); rg.addColorStop(0, 'rgba(255,236,170,.55)'); rg.addColorStop(1, 'rgba(255,160,60,0)'); g.fillStyle = rg; g.fillRect(x - r2 * 2.2, h - r2 * 2.2, r2 * 4.4, r2 * 2.2); }
+      for (let i = 0; i < 9; i++) { g.fillStyle = 'rgba(40,10,4,.28)'; g.fillRect(i * w / 8 - 2, 0, 4, h * 0.55); } const ed = g.createLinearGradient(0, 0, w, 0); ed.addColorStop(0, 'rgba(20,6,2,.75)'); ed.addColorStop(0.08, 'rgba(20,6,2,0)'); ed.addColorStop(0.92, 'rgba(20,6,2,0)'); ed.addColorStop(1, 'rgba(20,6,2,.75)'); g.fillStyle = ed; g.fillRect(0, 0, w, h); }, { cw: 432, ch: 104, glow: 1.5 });                                          // the mouth
     o.box('c#9a9590/0.8', -2.5, 2.9, F0 + 0.05, F1 + 0.02, 3.58, 3.68);                               // the hearth stone
     for (let i = 0; i < 5; i++) set(o, [[L(dome(0.33, 0.3), 1, 1, 12), 'c#6a4a2a/0.8']], -1.9 + i * 1.0, 2.7, 3.68);
     o.box(STEEL, -2.5, 2.9, F1, F1 + 1.0, 3.5, 3.57); hcyl(o, STEEL, 'x', 0.2, F1 + 0.95, 3.42, 4.8, 0.035);    // the door, let down
-    for (const [z0, z1] of [[1.8, 3.25], [5.25, 6.75]]) { o.box(STEEL, -2.5, 2.9, F1, F1 + 0.06, z0, z1); o.box(GLOW, -2.0, 2.4, F1 + 0.06, F1 + 0.075, (z0 + z1) / 2 - 0.16, (z0 + z1) / 2 + 0.16); hcyl(o, STEEL, 'x', 0.2, F1 + 0.22, z1 - 0.22, 4.8, 0.035); for (const x of [-2.1, 2.5]) o.box(STEEL, x - 0.03, x + 0.03, F1 + 0.06, F1 + 0.22, z1 - 0.25, z1 - 0.19); }
+    for (const [z0, z1] of [[1.8, 3.25], [5.25, 6.75]]) { o.box(STEEL, -2.5, 2.9, F1, F1 + 0.06, z0, z1); o.box('c#17140f/0.45', -2.1, 2.5, F1 + 0.06, F1 + 0.07, (z0 + z1) / 2 - 0.2, (z0 + z1) / 2 + 0.2); o.box(GLOW, -2.0, 2.4, F1 + 0.07, F1 + 0.082, (z0 + z1) / 2 - 0.1, (z0 + z1) / 2 + 0.1); hcyl(o, STEEL, 'x', 0.2, F1 + 0.22, z1 - 0.22, 4.8, 0.035); for (const x of [-2.1, 2.5]) o.box(STEEL, x - 0.03, x + 0.03, F1 + 0.06, F1 + 0.22, z1 - 0.25, z1 - 0.19); }
     for (const z of [3.42, 5.08, 6.92]) o.box(STEEL, -3.62, 3.62, F1, F1 + 0.02, z - 0.04, z + 0.04);
     kit.sign(o, -3.05, F1 + 0.012, 4.25, 0.86, 1.2, (g, w, h) => { fill(g, w, h, '#d8d9d6'); for (const [y, t, v] of [[0.2, 'TOP', '250°'], [0.5, 'SOLE', '240°'], [0.8, 'STEAM', '8 s']]) { disc(g, w * 0.3, h * y, w * 0.2, '#1d1b18', '#8a8a86', 2); line(g, [[w * 0.3, h * y], [w * 0.3 + w * 0.14, h * y - w * 0.1]], '#f6efdc', 3); T(g, t, w * 0.74, h * (y - 0.045), h * 0.05, '#1d1b18', { f: F.bebas, ls: 1 }); T(g, v, w * 0.74, h * (y + 0.035), h * 0.075, '#b3261e', { f: F.elite }); } }, { cw: 110, ch: 154 });
     kit.sign(o, 0.2, F1 + 0.03, 7.0 - 0.02, 2.6, 0.17, (g, w, h) => { fill(g, w, h, '#b08d4a'); T(g, 'VESTA No. 3 · THREE DECK · STONE SOLE', w / 2, h / 2, h * 0.62, '#2a1c13', { f: F.bebas, ls: 3, max: w * 0.94 }); }, { cw: 380, ch: 26 });
@@ -408,9 +411,9 @@ export default function bakery(kit, lot) {
 
   // ---- out on the pavement: a bench, a crate of bread boards, the board ---------------------------------------
   const out = K.wrap(lot.frOut(kit, 0, 0, 0, 'back'));         // x = a along the frontage, y = -feet out from the shopfront
-  kit.model('painted_wooden_bench', out, 5.2, -1.15, 0, 2, { outdoor: true, collide: true, seat: 1.45 });
-  X.crate(out, 10.4, -1.0, 0.02, 1.7, 1.15, 0.9); for (let i = 0; i < 6; i++) out.box(i % 2 ? OAK : PALEW, 9.75 + i * 0.25, 9.81 + i * 0.25, -1.45, -0.55, 0.1, 1.5 + (i * 7 % 4) * 0.13, G); out.block(9.55, 11.25, -1.6, -0.4, 0, 1.8);
-  kit.sign(out.sub(10.4, -1.6, 0, 2), 0, 0.02, 0.5, 1.4, 0.5, TAG('bread boards · offcuts of the old bench · 18'), { cw: 330, ch: 118 });
+  kit.model('painted_wooden_bench', out, 10.9, -1.15, 0, 2, { outdoor: true, collide: true, seat: 1.45 });
+  X.crate(out, 2.4, -1.0, 0.02, 1.7, 1.15, 0.9); for (let i = 0; i < 6; i++) out.box(i % 2 ? OAK : PALEW, 1.75 + i * 0.25, 1.81 + i * 0.25, -1.45, -0.55, 0.1, 1.5 + (i * 7 % 4) * 0.13, G); out.block(1.55, 3.25, -1.6, -0.4, 0, 1.8);
+  kit.sign(out.sub(2.4, -1.6, 0, 2), 0, 0.02, 0.5, 1.4, 0.5, TAG('bread boards · offcuts of the old bench · 18'), { cw: 330, ch: 118 });
   X.aBoard(K.wrap(lot.frOut(kit, lot.doorA + 4.3, 5.2, 0, 'left')), 0, 0, ABOARD);
 
   // ---- Crumb ------------------------------------------------------------------------------------------------------

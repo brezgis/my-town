@@ -396,6 +396,7 @@ export default function yoga(kit, lot) {
     const S = { on: false, done: false, seat: null, b: null, r: -1, i: 0, t: 0, dur: 0, n: 0, h: 2.6, fwd: 0, roll: 0, tH: 2.6, tP: -0.05, tY: 0, tF: 0, tR: 0, settle: 0, hide: 0, fx: 0, fz: 0, left: 0 };
     const P = { rx: 0, ry: 0, rz: 0, y: 0, hx: 0.8, hy: -0.125, hz: 0.16 }, PT = { rx: 0, ry: 0, rz: 0, y: 0, hx: 0.8, hy: -0.125, hz: 0.16 };
     let sol = null, solHooked = false;
+    if (typeof location !== 'undefined') S.n = Math.max(0, Number(new URLSearchParams(location.search).get('yoga')) || 0);      // ?yoga=1 or 2 starts with the second or third class (for test shots)
     const aimSol = k => { const p = SOL[k] ?? SOL.rest; PT.rx = p[0]; PT.ry = p[1]; PT.rz = p[2]; PT.y = p[3]; PT.hx = p[4]; PT.hy = p[5]; PT.hz = p[6]; };
     const aimEye = e => { const k = eyeHeight() / 4.85; S.tH = e[0] * k; S.tP = e[1]; S.tY = e[2]; S.tF = e[3]; S.tR = e[4]; };
     function step(i) {
