@@ -39,6 +39,7 @@ labels, posters, packaging, robots, trees, the sky.
   (https://poly.pizza/m/Bc97C66HKi). Swallows, butterflies, moths and fireflies are built in code.
 - The chapel's windows are Anna's, from the chapel in the garden of Anna's House, with four more in the same
   hand; the papers and books they honour are named on the boards inside.
+- Dandelion the airship (src/airship) was designed and built for Anna's House and is shared with it.
 - The picture garden shows films from YouTube in YouTube's own player; they remain their makers'.
 - Music (assets/audio): public-domain and CC0 recordings of Satie, Bach, Chopin, Schumann, Mozart
   and Beethoven from Musopen, the Open Goldberg Variations and Open Well-Tempered Clavier

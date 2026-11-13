@@ -8,6 +8,7 @@ import { PAINT, GLOW } from './street/tools.js';
 import { makeFlames } from './flame.js';
 import { T, F, fill, grain, paper, board, slate, chalk, disc, rect, rrect, line, poly, para, glow, ICON, rnd, TAU } from './draw.js';
 import { dressWindows, windowsLife } from './displays.js';
+import { makeAirship } from './airship/ride.js';
 
 const IRON = PAINT.iron, WOOD = 'c#8a6a48/0.85', WOODD = 'c#5a4432/0.85', CREAM = 'c#ece4d0/0.75', GREEN = 'c#2f4a40/0.6';
 
@@ -258,7 +259,7 @@ export function buildPlaces(K, town) {
   }
 
   // a little wildness behind the buildings and along the rim
-  for (const [x, z, rx, rz, n, kind] of [[78, -40, 10, 26, 40, 'grass'], [80, -150, 10, 30, 44, 'grass'], [-84, -40, 10, 24, 40, 'grass'], [-86, -170, 10, 28, 44, 'grass'], [84, -70, 8, 14, 22, 'wildflowers'], [-92, -150, 8, 16, 24, 'wildflowers'], [70, -196, 9, 9, 20, 'wildflowers'], [-66, -206, 9, 9, 20, 'cosmos'], [0, 44, 30, 8, 40, 'grass'], [30, 20, 8, 8, 16, 'wildflowers'], [-34, 20, 8, 8, 16, 'cosmos']]) K.F.drift(kind, x, z, rx, rz, n, 0.9);
+  for (const [x, z, rx, rz, n, kind] of [[78, -40, 10, 26, 40, 'grass'], [80, -150, 10, 30, 44, 'grass'], [-84, -40, 10, 24, 40, 'grass'], [-86, -170, 10, 28, 44, 'grass'], [84, -70, 8, 14, 22, 'wildflowers'], [-92, -150, 8, 16, 24, 'wildflowers'], [70, -196, 9, 9, 20, 'wildflowers'], [-66, -206, 9, 9, 20, 'cosmos'], [60, 90, 14, 20, 30, 'grass'], [-62, 96, 14, 22, 30, 'wildflowers']]) K.F.drift(kind, x, z, rx, rz, n, 0.9);
 
   dressWindows(K, town);
 }
@@ -362,14 +363,52 @@ export function placesLife(ctx, K) {
     const sock = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.9 })); sock.position.set(w.x, w.y, w.z); sock.name = 'windsock'; scene.add(sock);
     animated.push(t => { sock.rotation.y = -0.5 + 0.25 * Math.sin(t * 0.4) + 0.08 * Math.sin(t * 1.7); sock.rotation.z = 0.28 + 0.1 * Math.sin(t * 1.1); });
   }
-  // The airship stop's bell. TRANSIT.house is where the line to Anna's House goes: null until the two are joined.
+  // ---- The airship: Dandelion, Line 6 (airship/bus.js and ride.js, shared with Anna's House, where she was built).
+  // She docks over the Landing's apron with her nose down the street and her door to the north pavement by the
+  // shelter. Ring the bell and she comes; board her for a flight round the island, or, once TRANSIT.house has an
+  // address, on to Anna's House.
   if (K.transit) {
-    const t = K.transit;
-    ctx.interact.push({ x: t.x, y: t.y, z: t.z, reach: 8, size: 1.4, label: () => (TRANSIT.house ? "ring for the airship to Anna's House" : 'ring the bell for the airship'), act: () => {
+    const t = K.transit, DOCK = { x: 5, y: 1.0, z: 49, yaw: Math.PI }, ALIGHT = { x: 12.4, y: CURB, z: 42.6, yaw: 0 };
+    const say = text => ctx.flash('Dandelion: ' + text);
+    let h0 = null, airHint = null;
+    ctx.hint = () => airHint;                                              // what the line at the foot of the screen says while aboard (main.js)
+    const air = makeAirship(ctx, {
+      dock: DOCK, alight: ALIGHT,
+      approach: [[700, 200, 700], [300, 120, 330], [90, 44, 160], [5, 8, 98], [5, 1.0, 62]],
+      leave: [[5, 16, 12], [0, 62, -80], [-200, 160, -300], [-800, 260, -700]],
+      tour: [
+        // once round, just off the rim, the island always on the right-hand side, where the windows are
+        { p: [-6, 14, 26] }, { p: [-70, 62, 30] },
+        { p: [-158, 92, -50], say: 'Below us, the Yard. That thread of steam is Bao. Wave; he will not see, but he will know.' },
+        { p: [-160, 98, -165], say: 'The chapel, and the Humming Stones behind it. They hum whether or not anyone is listening.' },
+        { p: [-95, 112, -300], say: 'The Overlook. See the last bench, out past the rail? People sit there for a long time.' },
+        { p: [10, 122, -338] }, { p: [118, 112, -288] },
+        { p: [160, 100, -150], say: 'On the grocer\'s roof, the Gloaming. And behind the picture house, the picture. I have seen it from here. Twice.' },
+        { p: [158, 96, -40] }, { p: [112, 84, 96], say: 'And the street, end to end. Somebody has put the lights on. Somebody always does.' },
+        { p: [44, 42, 150] }, { p: [5, 9, 100] }, { p: [5, 1.0, 62] },
+      ],
+      transit: { url: TRANSIT.house, cloud: [[5, 16, 12], [60, 120, -120], [260, 330, -420], [520, 560, -800]],
+        query: () => '?from=town' + (ctx.hourMoved || (h0 !== null && Math.abs(ctx.hourNow() - h0) > 0.01) ? '&time=' + (((ctx.hourNow() % 24) + 24) % 24).toFixed(2) : '') + (['low', 'medium', 'high'].includes(window.house?.quality?.get?.()) ? '&quality=' + window.house.quality.get() : '') },
+      arrive: [[600, 420, 900], [330, 220, 520], [120, 70, 230], [5, 9, 100], [5, 1.0, 62]],
+      passes: [[[-1100, 240, -560], [-200, 270, -820], [900, 230, -600]], [[1000, 180, 560], [100, 220, 800], [-1000, 200, 520]], [[820, 160, 300], [760, 190, -320], [600, 210, -900]]],
+      blind: { tour: 'ROUND THE ISLAND', transit: 'ANNA’S HOUSE', home: 'VESPER STREET' },
+      secs: { tour: 120 },
+      lines: { welcome: ['Vesper Street. Mind the kerb, and the sunset.'] },
+      lookOnBoard: -1.4, pitchOnBoard: -0.2, pitchOnTour: -0.6, lookOnArrive: -1.3, pitchOnArrive: -0.35,
+      say, hint: text => { airHint = text || null; }, hintAboard: 'E or Esc · get off (she takes you back to the stop) · the mouse looks about',
+      onStart: () => { h0 = ctx.hourNow?.() ?? null; },
+    });
+    window.__airship = air; ctx.airship = air;
+    ctx.interact.push({ x: t.x, y: t.y, z: t.z, reach: 8, size: 1.4, label: () => 'ring for the airship', act: () => {
       ctx.sound?.note?.(81, 0, 2.4, 0.2); ctx.sound?.note?.(88, 0.02, 2.0, 0.08);
-      if (TRANSIT.house) { ctx.flash("The airship comes about. All aboard for Anna's House."); setTimeout(() => { location.href = TRANSIT.house + (TRANSIT.house.includes('?') ? '&' : '?') + 'from=town' + (ctx.hourMoved ? '&time=' + ctx.hourNow().toFixed(2) : ''); }, 2600); }
-      else ctx.flash("The bell rings out over the clouds. The line to Anna's House is not running yet; soon.");
+      if (air.call() === 'rung') ctx.flash('The bell rings out over the clouds. Somewhere, something yellow turns round.');
     } });
+    const boardSpot = { x: 0, y: -999, z: 0, reach: 7, size: 1.6, label: () => (TRANSIT.house ? "board the airship to Anna's House" : 'board the airship'), act: () => air.board() };
+    ctx.interact.push(boardSpot);
+    addEventListener('keydown', e => { if (e.code === 'Escape' && air.aboard) air.getOff(); });
+    animated.push(() => { const d = air.canBoard ? air.doorAt : null; if (d) { boardSpot.x = d.x; boardSpot.y = d.y + 3.4; boardSpot.z = d.z; } else boardSpot.y = -999; });
+    if (new URLSearchParams(location.search).get('from') === 'house') setTimeout(() => air.arrive(), 0);
+    const stage = new URLSearchParams(location.search).get('airship'); if (stage) setTimeout(() => air.stage(...stage.split(',').map((v, i) => (i ? Number(v) : v))), 500);      // ?airship=docked or tour,0.4 for test views
   }
   // The telescope: look through it, and the sun is very close
   if (K.scope) {
