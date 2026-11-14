@@ -71,6 +71,7 @@ const EAVE = OX + OVER, PITCH = 0.378;                       // the roof: 9'-4" 
 const yO = d => EAVEY + (EAVE - d) * PITCH, RIDGE = yO(0);   // the roof's top, d feet from the middle line
 const UP = { y: R(15.7), h: 14.3 * SC, w: 4.5 * SC }, LOW = { y: R(3.7), h: 7.7 * SC, w: 4.5 * SC };      // the two tiers of windows (sill, height, width of the frame)
 const DOOR = { hw: 2.0, h: 10.7 * SC }, HOOD = { hw: 3.45, y: R(13), peak: R(15.25) };
+const LEAF = { hx: DOOR.hw - 0.04, z: TH + 0.06, w: DOOR.hw - 0.043, th: 0.14 };      // the door's two leaves: each hinge line (x either side, z), a leaf's width and thickness
 const FX = 9.35, BAYS_Z = [15.3, 25.125, 34.925, 44.54];     // the front's side bays; the four window bays down each flank (the first bay is blind)
 const GREAT = { w: 10, h: 14.4, y0: FLR + 6.0 };             // the end window (not the real building's): its glass, round-headed; its sill
 const BC = { z: 3.4, hw: 1.8, foot: RIDGE + 0.5, top: RIDGE + 4.1, peak: RIDGE + 4.75 };      // the bell-cote
@@ -223,12 +224,12 @@ export function chapelShell(B0, t) {
     for (const s of [-1, 1]) box(TRIM, s * (DOOR.hw - 0.04), s * (DOOR.hw + 0.6), 0, top + 0.5, -0.02, TH + 0.05);
     box(TRIM, -DOOR.hw - 0.6, DOOR.hw + 0.6, top - 0.04, top + 0.5, -0.02, TH + 0.05);
     box(TRIM, -DOOR.hw - 0.75, DOOR.hw + 0.75, top + 0.5, HOOD.y, -0.06, 0.3);
+    box(TRIM, -LEAF.hx + 0.1, LEAF.hx - 0.1, top - 0.14, top - 0.04, LEAF.z - LEAF.th - 0.12, LEAF.z - LEAF.th - 0.005);      // and a stop across the head
     box(TRIM, -HOOD.hw, HOOD.hw, HOOD.y, HOOD.y + 0.25, -1.25, 0.3);
     prism(TRIM, [[-HOOD.hw, HOOD.y + 0.25], [HOOD.hw, HOOD.y + 0.25], [0, HOOD.peak]], 1.2, F_.M(0, -1.2));
     for (const s of [-1, 1]) {
       box(TRIM, s * 2.64, s * 3.22, HOOD.y - 0.85, HOOD.y, -1.05, 0.02); box(TRIM, s * 2.7, s * 3.16, HOOD.y - 1.45, HOOD.y - 0.85, -0.55, 0.02);      // the console
-      box(DOORPAINT, s * (DOOR.hw + 0.1), s * (DOOR.hw * 2 + 0.05), FLR + 0.05, top - 0.05, TH + 0.06, TH + 0.2);                                    // the leaf, back against the wall
-      box(DOORPAINT, s * (DOOR.hw + 0.5), s * (DOOR.hw * 2 - 0.35), FLR + 0.9, top - 0.9, TH + 0.2, TH + 0.25);
+      box(TRIM, s * (LEAF.hx - 0.1), s * LEAF.hx, FLR, top - 0.04, LEAF.z - LEAF.th - 0.12, LEAF.z - LEAF.th - 0.005);      // a stop on the jamb for the leaf to shut against (the leaves themselves: chapelDoors)
       // the lantern: iron and amber glass (it glows from dusk; furnishChapel gives it a lamp)
       const lx = s * 4.67, ly = 5.3, lz = -PIL.out - 0.55;
       box(IRON, lx - 0.04, lx + 0.04, ly + 0.9, ly + 0.97, lz, -PIL.out); box(IRON, lx - 0.26, lx + 0.26, ly + 0.62, ly + 0.72, lz - 0.26, lz + 0.26); box(IRON, lx - 0.22, lx + 0.22, ly - 0.08, ly, lz - 0.22, lz + 0.22);
@@ -487,7 +488,7 @@ const WREN = {
     'Evenings belong to the west wall.',
     "I dust the pew you're not sitting in. It seems only polite.",
   ],
-  bye: ['Mind the step.', "Leave the door. It doesn't shut.", 'Go carefully.'],
+  bye: ['Mind the step.', 'Leave the doors as you found them.', 'Go carefully.'],
   topics: [
     { q: 'Which window is this?', get a() { MINE.asked = nearestWindow(); return WIN[MINE.asked][0]; }, next: [{ q: 'Say more.', get a() { return WIN[MINE.asked ?? 'ingression'][1]; } }] },
     { q: 'Is this a church?', a: "It's built after one, in Madison, Indiana, at two thirds the size. Here it's a place to sit." },
@@ -695,7 +696,51 @@ void main() {
   if (Q.has('lifesteps')) { const n = Number(Q.get('lifesteps')); const wait = () => { if (life) { for (let i = 0; i < n; i++) life.step(); lifeTex.needsUpdate = true; } else setTimeout(wait, 200); }; wait(); }
   bell(ctx, root);
   weathervane(ctx, root);
+  chapelDoors(ctx, root);
   try { planting(outdoors); } catch (e) { console.warn('chapel planting', e); }
+}
+
+// ---- the doors ---------------------------------------------------------------------------------------------
+// Two leaves hung on the jambs' inner corners, opening inward. They stand folded back against the wall inside
+// whenever the street is made; E in the doorway shuts the pair together and E opens them again, and nothing
+// is remembered. Each leaf is a group turned about its hinge and eased toward where it should be, as the
+// street's other doors are (life.js), with one stop for the walker (off while they are open). They wait
+// until the visitor is clear of the doorway and of their swing before they move.
+function chapelDoors(ctx, root) {
+  const { animated, interact, materials } = ctx, top = FLR + DOOR.h, y0 = FLR + 0.008, { hx, z: hz, w: W, th } = LEAF;
+  const mat = materials.make(DOORPAINT), leaves = [-1, 1].map(s => {
+    // drawn lying shut: from its hinge toward the middle of the doorway, its face to the street at s * th
+    const slab = new THREE.BoxGeometry(W + 0.01, top - 0.05 - y0, th).translate((W - 0.01) / 2, (top - 0.05 + y0) / 2, s * th / 2);
+    const panel = new THREE.BoxGeometry(W - 0.8, top - 0.9 - (FLR + 0.9), 0.05).translate(W / 2, (top + FLR) / 2, s * (th + 0.025));
+    const parts = [slab, panel];
+    if (s > 0) parts.push(new THREE.BoxGeometry(0.1, top - 0.145 - y0, 0.03).translate(W + 0.02, (top - 0.145 + y0) / 2, s * (th + 0.015)));      // the strip that covers where the two meet
+    const m = new THREE.Mesh(mergeAll(parts.map(g => g.toNonIndexed())), mat); m.castShadow = m.receiveShadow = true; m.name = 'chapel door'; m.userData.cat = 'chapel';
+    const g = new THREE.Group(); g.position.set(s * hx, 0, hz); g.add(m); root.add(g);
+    const shut = s > 0 ? Math.PI : 0, open = shut + s * Math.PI; g.rotation.y = open;
+    return { g, shut, open };
+  });
+  const stop = { ...rectW(-DOOR.hw, DOOR.hw, hz - th - 0.12, hz + 0.04), y0: 0, y1: top, off: true };
+  ctx.colliders?.push(stop);
+  const [ax, az] = toW(0, hz - th / 2);
+  let shut = false, want = null, moving = false, sun;
+  const inWay = () => {      // in the doorway, or inside where the leaves swing
+    const w = ctx.walker; if (!w?.pos || ctx.mode !== 'walk') return false;
+    const lx = w.pos.z - SITE.cz, lz = SITE.cx - w.pos.x;
+    return lz > 0.25 && lz < hz + W + 0.3 && Math.abs(lx) < hx + W + 0.3;
+  };
+  const go = () => { shut = want; want = null; moving = true; stop.off = !shut; };
+  interact?.push({ x: ax, y: FLR + 4.2, z: az, reach: 7, size: 1.7, label: () => (shut ? 'open the chapel doors' : 'close the chapel doors'),
+    act: () => { want = !shut; if (inWay()) ctx.flash?.('The doors need room to swing.'); else go(); } });
+  animated.push((t, dt) => {
+    if (want !== null && !inWay()) go();
+    if (!moving) return;
+    moving = false;
+    for (const l of leaves) { const aim = shut ? l.shut : l.open, cur = l.g.rotation.y; if (Math.abs(aim - cur) > 1e-3) { l.g.rotation.y = cur + (aim - cur) * Math.min(1, dt * 5); moving = true; } else l.g.rotation.y = aim; }
+    if (moving) return;                               // they have come to rest: the sun's shadows are drawn again, once
+    if (!sun) { let r = root; while (r.parent) r = r.parent; r.traverse(o => { if (o.isDirectionalLight && o.castShadow) sun = o; }); }
+    if (sun) sun.shadow.needsUpdate = true;
+  });
+  if (new URLSearchParams(location.search).get('chapeldoor') === 'shut') { want = true; go(); }      // for still pictures
 }
 
 // ---- the bell ---------------------------------------------------------------------------------------------

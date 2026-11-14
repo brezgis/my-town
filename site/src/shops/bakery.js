@@ -220,7 +220,7 @@ export default function bakery(kit, lot) {
     const x0 = CD - 3.6, x1 = CD + 3.6;
     r.box(BLUSH, x0 + 0.1, x1 - 0.1, 0.24, 1.5, 0.3, 1.38, G); r.box('c#2c2520/0.6', x0 + 0.16, x1 - 0.16, 0.3, 1.42, 0.004, 0.3);
     r.box(OAK, x0, x1, 0.22, 1.66, 1.38, 1.5, G); for (const x of [x0, x1]) r.box(OAK, x - 0.07, x + 0.07, 0.22, 1.66, 0.004, 2.35, G);
-    r.soft('linen#e2c9bb', x0 + 0.12, x1 - 0.12, 0.3, 1.62, 1.5, 1.66, 0.06);
+    kit.seatPads(r, 'linen#e2c9bb', x0 + 0.12, x1 - 0.12, 0.3, 1.62, 1.5, 1.63);      // loose crowned cushions (it was one rounded slab)
     for (const x of [CD - 2.3, CD, CD + 2.3]) kit.seat(r, x, 1.0, 1.66, 'sit');
     r.block(x0 - 0.07, x1 + 0.07, 0, 1.66, 0, 1.7);
   }

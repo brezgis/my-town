@@ -329,7 +329,7 @@ export default function rooftop(kit, lot, town) {
     for (let i = 0; i < 7; i++) e.box(TEAK, -EL, EL, 0.0, 0.07, 1.4 + i * 0.25, 1.58 + i * 0.25, G);
     for (const x of POSTS) e.box(TEAK, x - 0.08, x + 0.08, 0.07, 0.17, 1.22, 3.1, G);
     const cols = ['linen#96492f', 'linen#c9c0ac', 'linen#2a3549', 'linen#b48530'];
-    for (let i = 0; i < 4; i++) { const x0 = -6.2 + i * 3.1; e.soft(cols[i], x0, x0 + 3.06, 0.2, 1.84, 1.22, 1.56, 0.1); e.soft(cols[(i + 2) % 4], x0 + 0.05, x0 + 3.01, 0.18, 0.5, 1.56, 2.75, 0.12); }
+    for (let i = 0; i < 4; i++) { const x0 = -6.2 + i * 3.1; kit.seatPads(e, cols[i], x0, x0 + 3.06, 0.2, 1.84, 1.22, 1.53, { n: 1 });      /* a loose crowned cushion (it was a rounded slab) */ e.soft(cols[(i + 2) % 4], x0 + 0.05, x0 + 3.01, 0.18, 0.5, 1.56, 2.75, 0.12); }
     kit.cushion(e, -5.0, 0.72, 1.56, 1.25, 1.25, 'linen#b48530', { tilt: 0.35 }); kit.cushion(e, 0.7, 0.72, 1.56, 1.2, 1.2, 'linen#96492f', { tilt: 0.3 }); kit.cushion(e, 5.3, 0.72, 1.56, 1.25, 1.25, 'linen#c9c0ac', { tilt: 0.4 });
     kit.throwBlanket(e, 2.4, 4.0, 0.3, 1.9, 1.56, 'wool#8a3b2c', { drop: { f: 0.9 }, over: 'front' });
     for (const x of [-4.6, -1.5, 1.6, 4.6]) kit.seat(e, x, 1.05, 1.56, 'sit by the fire'); e.block(-EL, EL, 0, 1.85, 0, 1.6);
