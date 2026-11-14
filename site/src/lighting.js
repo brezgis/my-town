@@ -179,8 +179,8 @@ export function makeWindowGlow({ scene, materials, windows, rooms, groundY = 0.5
 // lamps: { x, y, z, power, kind } (kind 'fill' | 'lamp' | 'candle' | 'fire'). Four point lights
 // are shared out. Their falloff depends on the kind: lamps and candles make pools, fills and
 // the fire spread wide.
-const TINT = { fire: 0xff9a4a, candle: 0xffb060, lamp: 0xffcf96, fill: 0xffe6c8, lantern: 0xffc583 };
-const SHAPE = { fill: [36, 1.0], lamp: [26, 1.9], candle: [12, 2.0], fire: [26, 1.5], lantern: [32, 1.35] };
+const TINT = { fire: 0xff9a4a, candle: 0xffb060, corona: 0xffb468, lamp: 0xffcf96, fill: 0xffe6c8, lantern: 0xffc583 };      // (corona: a hoop of candles hung high, as in the chapel)
+const SHAPE = { fill: [36, 1.0], lamp: [26, 1.9], candle: [12, 2.0], corona: [38, 1.5], fire: [26, 1.5], lantern: [32, 1.35] };
 const LAMP = 13;
 // Where the light sits relative to the lamp's record: fills come down from near the ceiling (they
 // left hot spots on it); lamps hang just below the shade's rim or the lantern's glass, since a light
@@ -194,6 +194,8 @@ export function makeLampPool({ scene, lamps, vis, size, day, camera }) {
     if (l.kind === 'fill') return l.power * 0.4 * smooth(day.light, 0.25, 0.9);
     if (l.kind === 'lamp') return l.power * on * 2.2;
     if (l.kind === 'candle') return l.power * (0.6 + 1.6 * on);
+    if (l.kind === 'corona') return l.power * (0.3 + 2.1 * on);      // candlelight: faint against the day, the room's light after dark
+    if (l.kind === 'glow') return 0;                                 // a flame's halo only (makeHalos): it lights nothing by itself
     return l.power * (1 + day.night);                   // fire
   };
   const zoneOf = l => (l.zone ??= vis.roomAt(l.x, l.y, l.z)?.id ?? 'o:');
@@ -234,7 +236,7 @@ export function makeLampPool({ scene, lamps, vis, size, day, camera }) {
         s.lamp = free ?? null; s.level = free ? s.level : 0;
         if (free) { s.light.position.set(free.x, free.y - (DROP[free.kind] ?? 0), free.z); s.light.color.set(TINT[free.kind]); [s.light.distance, s.light.decay] = SHAPE[free.kind]; }
       }
-      const live = s.lamp && (s.lamp.kind === 'fire' || s.lamp.kind === 'candle');
+      const live = s.lamp && (s.lamp.kind === 'fire' || s.lamp.kind === 'candle' || s.lamp.kind === 'corona');
       const flicker = live ? 1 + 0.1 * Math.sin(t * 9.1 + s.lamp.x) + 0.07 * Math.sin(t * 23.7 + s.lamp.z) + 0.04 * Math.sin(t * 41.3) : 1;
       s.light.intensity = s.lamp ? LAMP * strength(s.lamp) * s.level * flicker : 0;
     }

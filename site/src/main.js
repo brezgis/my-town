@@ -205,7 +205,9 @@ let aimed = null;
 function use() {
   if (mode !== 'walk') return;
   if (ctx.capture?.()) return;                                   // a game in progress takes the click (toys.js)
-  if (walker.seated) { walker.seated = null; return; }
+  // Sat down, you can still use what is in front of you (talk to whoever is behind the counter, take the bowl they
+  // set down) and eat or drink what you are holding; with neither, E stands you up, as any step does.
+  if (walker.seated) { if (aimed) aimed.act(); else if (ctx.holding?.()) ctx.sip?.(); else walker.seated = null; return; }
   if (!aimed) { ctx.sip?.(); return; }                           // nothing in front of you: take a sip of what you are holding (staff.js)
   if (aimed.seat) walker.sit(aimed.seat); else aimed.act();
 }
@@ -302,10 +304,11 @@ renderer.setAnimationLoop(() => {
     if (name !== caption && !fpsBox) { caption = name; $('room').textContent = name; }
     where = r ? 'in' : 'out';
     ctx.room = r ?? null;
-    aimed = walker.seated ? null : life.target(camera);
+    aimed = life.target(camera); if (walker.seated && aimed?.seat) aimed = null;      // (no hopping from seat to seat)
     chalking();
     const toyHint = ctx.hint?.();
-    const text = toyHint ? toyHint : walker.seated ? 'stand up' : aimed ? aimed.label() : '';
+    const having = walker.seated && !aimed ? ctx.holding?.() : null;
+    const text = toyHint ? toyHint : aimed ? aimed.label() : having ? `have some of the ${having.name ?? 'food'} · any step stands you up` : walker.seated ? 'stand up' : '';
     if (text !== shown) { shown = text; $('prompt').innerHTML = text ? (toyHint ? text : `<b>E</b>${text}`) : ''; $('prompt').classList.toggle('on', !!text); }
   } else orbit.update();
   // Eyes adjust: rooms are far dimmer than the garden, and night dimmer still (lighting.js).

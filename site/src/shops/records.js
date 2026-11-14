@@ -155,10 +155,10 @@ export default function records(kit, lot) {
   const TOP = X.counter(c, -4.6, 4.6, -2.2, 0, 3.4, { front: EBONY, top: WALNUT });
   { // the till: orange enamel, round keys, a flag
     const x = 0.6, y = -1.15, z = TOP;
-    c.soft('c#e0782a/0.45', x - 0.6, x + 0.6, y - 0.55, y + 0.5, z, z + 0.45, 0.05); c.soft('c#e0782a/0.45', x - 0.55, x + 0.55, y - 0.55, y + 0.05, z + 0.45, z + 1.0, 0.07);
-    for (let i = 0; i < 12; i++) c.cyl('c#f4f1ea/0.45', x - 0.36 + (i % 4) * 0.24, y + 0.16 + Math.floor(i / 4) * 0.1, z + 0.45, z + 0.5, 0.055, 0.055, 8);
-    c.box('c#17140f/0.45', x - 0.43, x + 0.43, y + 0.05, y + 0.062, z + 0.6, z + 0.92);
-    hcyl(c, CHROME, 'x', x - 0.68, y - 0.2, z + 0.7, 0.14, 0.03); ball(c, 'c#17140f/0.45', x - 0.78, y - 0.2, z + 0.64, 0.06, 8);
+    c.soft('c#e0782a/0.45', x - 0.6, x + 0.6, y - 0.55, y + 0.5, z, z + 0.45, 0.05); c.soft('c#e0782a/0.45', x - 0.55, x + 0.55, y - 0.1, y + 0.5, z + 0.45, z + 1.0, 0.07);      // keys toward Otis (-y); the customer sees the back and the flag window
+    for (let i = 0; i < 12; i++) c.cyl('c#f4f1ea/0.45', x - 0.36 + (i % 4) * 0.24, y - 0.21 - Math.floor(i / 4) * 0.1, z + 0.45, z + 0.5, 0.055, 0.055, 8);
+    c.box('c#17140f/0.45', x - 0.43, x + 0.43, y + 0.5, y + 0.512, z + 0.6, z + 0.92);
+    hcyl(c, CHROME, 'x', x - 0.68, y + 0.15, z + 0.7, 0.14, 0.03); ball(c, 'c#17140f/0.45', x - 0.78, y + 0.15, z + 0.64, 0.06, 8);
     // a box of 45s
     X.crate(c, -3.3, -1.2, z, 1.5, 0.9, 0.42, 'oak_light#b89466');
     for (let x2 = -3.95; x2 < -2.65;) { const t = 0.02 + K.rnd() * 0.02; c.box(K.pick(SPINES), x2, x2 + t - 0.004, -1.5, -0.9, z + 0.055, z + 0.64 + K.rnd() * 0.02); x2 += t; }

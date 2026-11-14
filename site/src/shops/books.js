@@ -179,8 +179,8 @@ export default function books(kit, lot) {
   {
     // the till: brass
     { const x = -1.7, y = 2.9, z = TOP;
-      c.soft(BRASS, x - 0.55, x + 0.55, y - 0.5, y + 0.45, z, z + 0.5, 0.05); c.soft(BRASS, x - 0.5, x + 0.5, y - 0.5, y + 0.1, z + 0.5, z + 1.0, 0.08);
-      for (let i = 0; i < 12; i++) c.cyl('c#efe9da/0.3', x - 0.36 + (i % 4) * 0.24, y + 0.2 + Math.floor(i / 4) * 0.08, z + 0.5 + (2 - Math.floor(i / 4)) * 0.05, z + 0.56 + (2 - Math.floor(i / 4)) * 0.05, 0.05, 0.05, 6); }
+      c.soft(BRASS, x - 0.55, x + 0.55, y - 0.5, y + 0.45, z, z + 0.5, 0.05); c.soft(BRASS, x - 0.5, x + 0.5, y - 0.15, y + 0.45, z + 0.5, z + 1.0, 0.08);      // keys toward the wall side, where the clerk stands
+      for (let i = 0; i < 12; i++) c.cyl('c#efe9da/0.3', x - 0.36 + (i % 4) * 0.24, y - 0.25 - Math.floor(i / 4) * 0.08, z + 0.5 + (2 - Math.floor(i / 4)) * 0.05, z + 0.56 + (2 - Math.floor(i / 4)) * 0.05, 0.05, 0.05, 6); }
     // the bell
     ves(c, BRASS, -0.5, 3.2, TOP, [[0, 0], [0.17, 0], [0.17, 0.02], [0.14, 0.05], [0.12, 0.12], [0.06, 0.17], [0, 0.18]], 12); c.cyl(BLACK, -0.5, 3.2, TOP + 0.17, TOP + 0.22, 0.02, 0.02, 6);
     // the typewriter: its keys face the customer, who is expected to add a sentence

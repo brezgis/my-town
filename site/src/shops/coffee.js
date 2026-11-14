@@ -95,8 +95,8 @@ export default function coffee(kit, lot) {
   }
   // the till: brass; and the tip jar
   { const x = -0.8, y = -1.1, z = TOP;
-    c.soft('c#b08d4a/0.35/1', x - 0.55, x + 0.55, y - 0.5, y + 0.45, z, z + 0.5, 0.05); c.soft('c#b08d4a/0.35/1', x - 0.5, x + 0.5, y - 0.5, y + 0.1, z + 0.5, z + 1.0, 0.08);
-    for (let i = 0; i < 12; i++) c.cyl('c#efe9da/0.3', x - 0.36 + (i % 4) * 0.24, y + 0.2 + Math.floor(i / 4) * 0.08, z + 0.5 + (2 - Math.floor(i / 4)) * 0.05, z + 0.56 + (2 - Math.floor(i / 4)) * 0.05, 0.05, 0.05, 8);
+    c.soft('c#b08d4a/0.35/1', x - 0.55, x + 0.55, y - 0.5, y + 0.45, z, z + 0.5, 0.05); c.soft('c#b08d4a/0.35/1', x - 0.5, x + 0.5, y - 0.15, y + 0.45, z + 0.5, z + 1.0, 0.08);      // keys and deck toward Juniper (-y); its plain back to the customer
+    for (let i = 0; i < 12; i++) c.cyl('c#efe9da/0.3', x - 0.36 + (i % 4) * 0.24, y - 0.25 - Math.floor(i / 4) * 0.08, z + 0.5 + (2 - Math.floor(i / 4)) * 0.05, z + 0.56 + (2 - Math.floor(i / 4)) * 0.05, 0.05, 0.05, 8);
     jar(c, 0.5, -0.5, z, 0.16, 0.42, null, 0, null); for (let i = 0; i < 7; i++) c.cyl('c#b08d4a/0.35/1', 0.5 + (i % 3 - 1) * 0.05, -0.5 + (i % 2) * 0.05, z + 0.02 + i * 0.014, z + 0.032 + i * 0.014, 0.05, 0.05, 8);
     X.card(c, 0.5, -0.22, z, 0.5, 0.26, TAG('for oil & new bearings'));
     lot.pickup = { xz: kit.world(c, 1.5, -0.55), y: lot.fr(kit, 0, 0).h + TOP };       // where finished drinks are set down

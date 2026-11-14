@@ -198,10 +198,10 @@ export default function grocery(kit, lot) {
   kit.model('st_brass_scales', c, -0.5, -1.1, TOP, 0, { scale: 1.25 });
   // the till: cream enamel, a red flag in its window
   { const x = 1.5, y = -1.2, z = TOP;
-    c.soft('c#e8e2d4/0.2', x - 0.6, x + 0.6, y - 0.5, y + 0.5, z, z + 0.45, 0.06); c.soft('c#e8e2d4/0.2', x - 0.55, x + 0.55, y - 0.5, y + 0.05, z + 0.45, z + 1.0, 0.09); c.box(BRASS, x - 0.62, x + 0.62, y - 0.52, y + 0.52, z, z + 0.06);
-    for (let i = 0; i < 12; i++) c.cyl(i % 4 === 3 ? 'c#c8202a/0.45' : 'c#17140f/0.45', x - 0.36 + (i % 4) * 0.24, y + 0.16 + Math.floor(i / 4) * 0.1, z + 0.45, z + 0.5 + (2 - Math.floor(i / 4)) * 0.04, 0.05, 0.05, 8);
-    kit.sign(c, x, y + 0.06, z + 0.78, 0.8, 0.3, (g, w, h) => { fill(g, w, h, '#a8361f'); T(g, 'TA VERY MUCH', w / 2, h / 2, h * 0.46, '#f3ecd6', { f: F.bebas, ls: 2 }); }, { cw: 150, ch: 56 });
-    hcyl(c, BRASS, 'x', x + 0.72, y - 0.1, z + 0.7, 0.2, 0.025); ball(c, 'c#17140f/0.45', x + 0.82, y - 0.1, z + 0.64, 0.06, 8);
+    c.soft('c#e8e2d4/0.2', x - 0.6, x + 0.6, y - 0.5, y + 0.5, z, z + 0.45, 0.06); c.soft('c#e8e2d4/0.2', x - 0.55, x + 0.55, y - 0.05, y + 0.5, z + 0.45, z + 1.0, 0.09); c.box(BRASS, x - 0.62, x + 0.62, y - 0.52, y + 0.52, z, z + 0.06);
+    for (let i = 0; i < 12; i++) c.cyl(i % 4 === 3 ? 'c#c8202a/0.45' : 'c#17140f/0.45', x - 0.36 + (i % 4) * 0.24, y - 0.16 - Math.floor(i / 4) * 0.1, z + 0.45, z + 0.5 + (2 - Math.floor(i / 4)) * 0.04, 0.05, 0.05, 8);      // keys on Olive's side (-y); the flag faces the customer
+    kit.sign(c, x, y + 0.51, z + 0.78, 0.8, 0.3, (g, w, h) => { fill(g, w, h, '#a8361f'); T(g, 'TA VERY MUCH', w / 2, h / 2, h * 0.46, '#f3ecd6', { f: F.bebas, ls: 2 }); }, { cw: 150, ch: 56 });
+    hcyl(c, BRASS, 'x', x + 0.72, y + 0.1, z + 0.7, 0.2, 0.025); ball(c, 'c#17140f/0.45', x + 0.82, y + 0.1, z + 0.64, 0.06, 8);
   }
   // brown paper on a roll; and the find: sardines on toast, on a board, one of them yours
   { const z = TOP, px = 3.9;

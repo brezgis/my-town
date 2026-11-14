@@ -13,6 +13,7 @@
 //   the right, a brass light over each, a long bench on a rug, and the back door where the real one is.
 //   (The building's one back window is taken to be boarded over for hanging wall.)
 //   Windows: a whale and a guardian.
+import { open as openGuestbook } from '../guestbook.js';
 import { tools, fixtures } from '../shopkit.js';
 import { BRASS, G } from '../kit.js';
 import { arch } from './arch.js';
@@ -106,15 +107,17 @@ const PAPERS = [
 ];
 // the right wall: one picture
 // The street's own buildings, as they were measured: sheets of the Historic American Buildings Survey (public domain,
-// Library of Congress). They hang on the back of the partition, three to a pier, facing the oils.
+// Library of Congress). The north side's three sheets and the chapel's hang in one row on the right wall of the
+// picture gallery; the south side's two on the back of the partition, left of the opening; the Cézanne has the
+// pier on the other side to itself.
 const HABS = 'Historic American Buildings Survey', LOC = 'Library of Congress, ';
 const SHEETS = [
-  [ { file: 'museum/habs_madison_plans', w: 2.5, r: 1024 / 803, paper: 1, artist: HABS, title: 'Mulberry Street Block, Madison, Indiana: plans', date: 'measured 1971, ink on film', coll: LOC + 'HABS IN-83, sheet 2', note: 'The north side of this street, from above.' },
-    { file: 'museum/habs_madison_301', w: 2.5, r: 1024 / 803, paper: 1, artist: HABS, title: 'Nos. 301 to 307, east elevation', date: 'measured 1971, ink on film', coll: LOC + 'HABS IN-83, sheet 3' },
-    { file: 'museum/habs_madison_309', w: 2.5, r: 1024 / 803, paper: 1, artist: HABS, title: 'Nos. 309 to 315, east elevation', date: 'measured 1971, ink on film', coll: LOC + 'HABS IN-83, sheet 4' } ],
+  [ { file: 'museum/habs_madison_plans', w: 2.3, r: 1024 / 803, paper: 1, artist: HABS, title: 'Mulberry Street Block, Madison, Indiana: plans', date: 'measured 1971, ink on film', coll: LOC + 'HABS IN-83, sheet 2', note: 'The north side of this street, from above.' },
+    { file: 'museum/habs_madison_301', w: 2.3, r: 1024 / 803, paper: 1, artist: HABS, title: 'Nos. 301 to 307, east elevation', date: 'measured 1971, ink on film', coll: LOC + 'HABS IN-83, sheet 3' },
+    { file: 'museum/habs_madison_309', w: 2.3, r: 1024 / 803, paper: 1, artist: HABS, title: 'Nos. 309 to 315, east elevation', date: 'measured 1971, ink on film', coll: LOC + 'HABS IN-83, sheet 4' } ],
   [ { file: 'museum/habs_norwalk_fronts', w: 2.5, r: 1024 / 681, paper: 1, artist: HABS, title: 'South Main Street, South Norwalk, Connecticut: fronts', date: 'measured 1977, ink on film', coll: LOC + 'HABS CT-349, sheet 5', note: 'No. 22 has the arches. You are in it.' },
     { file: 'museum/habs_norwalk_plan', w: 2.5, r: 1024 / 683, paper: 1, artist: HABS, title: 'Buildings 20 to 24, first floor plan', date: 'measured 1977, ink on film', coll: LOC + 'HABS CT-349, sheet 2' },
-    { file: 'museum/habs_chapel', w: 2.5, r: 1024 / 683, paper: 1, artist: HABS, title: 'First Baptist Church, Madison, Indiana', date: 'measured 1978, ink on film', coll: LOC + 'HABS IN-127, sheet 3', note: 'Ours is two thirds the size.' } ],
+    { file: 'museum/habs_chapel', w: 2.3, r: 1024 / 683, paper: 1, artist: HABS, title: 'First Baptist Church, Madison, Indiana', date: 'measured 1978, ink on film', coll: LOC + 'HABS IN-127, sheet 3', note: 'Ours is two thirds the size.' } ],
 ];
 const ALONE = { file: 'cezanne_basket_of_apples', w: 3.1, r: 1024 / 817, artist: 'Paul Cézanne', title: 'The Basket of Apples', date: 'about 1893', coll: AIC, note: 'The table does not line up. He knew.' };
 
@@ -250,10 +253,12 @@ export default function museum(kit, lot) {
     ROW.forEach((p, i) => hang(b, p, W / 2 - ac[i]));
     const DM = (P.back + D) / 2, l = at(0.024, DM, 0, 'right'), r = at(W - 0.024, DM, 0, 'left');
     PAPERS.forEach((p, i) => hang(l, p, (1 - i) * 4.0));     // x runs toward the street on the left wall
-    hang(r, ALONE, 0);
-    // the measured drawings of the street's buildings, on the back of the partition either side of the opening
-    { const pb = at(0, P.back + 0.024, 0, 'back'), piers = [[0, OA0 - 0.38], [OA1 + 0.38, W]];
-      SHEETS.forEach((set, k) => { const [a0, a1] = piers[k], step = (a1 - a0) / set.length; set.forEach((p, i) => hang(pb, p, a0 + step * (i + 0.5))); }); }
+    // the measured drawings of the street's buildings, and the Cézanne
+    { const [north, south] = SHEETS, row = [...north, south[2]], pitch = 2.76 + 0.95;                       // Mulberry Street's three and the chapel's, in a row on the right wall
+      row.forEach((p, i) => hang(r, p, (i - (row.length - 1) / 2) * pitch));
+      const pb = at(0, P.back + 0.024, 0, 'back'), a0 = 0.3, a1 = OA0 - 0.38;                               // South Main Street's two, on the pier left of the opening
+      south.slice(0, 2).forEach((p, i) => hang(pb, p, a0 + (a1 - a0) * (i + 0.5) / 2));
+      hang(pb, ALONE, (OA1 + 0.38 + W - 0.3) / 2); }                                                        // and the Cézanne alone on the other pier
     for (const x of [-W * 0.24, W * 0.24]) kit.lampAt(b, x, 2.2, 9.2, 0.6);
     // one long bench, on a rug, to sit and look from
     const L = 7, y = D - 7.4, h = lot.fr(kit, 0, 0).h;
@@ -272,7 +277,7 @@ export default function museum(kit, lot) {
     c.box('c#6e2a26/0.8', -0.92, 0.92, 0.72, 1.82, TOP + 0.002, TOP + 0.05); c.box(CREAMP, -0.88, 0.88, 0.76, 1.78, TOP + 0.05, TOP + 0.085);
     kit.sign(c, 0, 1.27, TOP + 0.089, 1.74, 1.0, SIGNS.book, { flat: true, cw: 480, ch: 276, rough: 0.9 });
     tube(c, 'c#17140f/0.45', [[1.1, 1.0, TOP + 0.02], [1.22, 1.7, TOP + 0.02]], 0.014, 5, true); tube(c, BRASS, [[1.22, 1.7, TOP + 0.02], [1.235, 1.78, TOP + 0.02]], 0.011, 5, true);
-    spot(c, 0, 1.27, TOP + 0.2, () => 'sign the visitors\' book', ctx => ctx.flash('You write something small in the book.'));
+    spot(c, 0, 1.27, TOP + 0.2, () => 'open the visitors\' book', () => { openGuestbook(); });      // the same book as the mailbox at Anna's House (guestbook.js)
     ves(c, BRASS, -1.55, 1.2, TOP, [[0, 0], [0.17, 0], [0.17, 0.02], [0.14, 0.05], [0.12, 0.12], [0.06, 0.17], [0, 0.18]], 16); c.cyl('c#17140f/0.45', -1.55, 1.2, TOP + 0.17, TOP + 0.22, 0.02, 0.02, 6);
     kit.tableLamp(c, 1.7, 0.6, TOP, 'c#2f5a6a/0.4', { base: 'gourd' });
     c.box(DARKW, -0.7, 0.7, 0.004, 0.02, 5.2, 6.1); kit.sign(c, 0, 0.032, 5.65, 1.3, 0.8, SIGNS.hours, { cw: 208, ch: 128, rough: 0.9 });   // the one notice

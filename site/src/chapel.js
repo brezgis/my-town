@@ -287,7 +287,10 @@ export function chapelShell(B0, t) {
       put(new THREE.CylinderGeometry(0.14, 0.09, 0.07, 8).translate(x, HY + 0.1, z));
       B.mesh(CAND, new THREE.CylinderGeometry(0.055, 0.06, 0.62, 7).translate(x, HY + 0.44, z));
       B.mesh('e#ffd9a0/2.2', new THREE.SphereGeometry(0.06, 6, 5).scale(1, 2.1, 1).translate(x, HY + 0.9, z)); }
-    const [wx_, wz_] = toW(0, zc); t.lamps.push({ x: wx_, y: HY - 0.6, z: wz_, power: 1.0, kind: 'lamp' });
+    // its light: one candle-coloured source in the middle of the ring at the height of the flames, which flickers a
+    // little and carries to the floor and the walls; and a small halo on each flame after dark
+    const [wx_, wz_] = toW(0, zc); t.lamps.push({ x: wx_, y: HY + 0.9, z: wz_, power: 1.15, kind: 'corona' });
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, [hx, hz] = toW(Math.cos(a) * RAD, zc + Math.sin(a) * RAD); t.lamps.push({ x: hx, y: HY + 0.92, z: hz, power: 0.01, kind: 'glow', halo: 0.3 }); }
   }
 
   // ---- a boarded dado round the room to the short windows' sills, with a cap and a skirting -----------------

@@ -97,7 +97,8 @@ function buildClerk(look) {
   parts.push(paint(T(new THREE.TorusGeometry(R * S[0] + 0.012, 0.03, 8, 44), { p: [0, top * 0.02, 0], r: [Math.PI / 2, 0, 0], s: [1, S[2] / S[0], 1] }), TRIM));
   parts.push(paint(T(new THREE.SphereGeometry(R * 0.5, 18, 8, 0, TAU, Math.PI / 2, Math.PI / 2), { p: [0, -top * 0.86, 0], s: [1, 0.6, 1] }), TRIM));
   if (look.bowtie) { for (const sx of [-1, 1]) parts.push(paint(T(new THREE.ConeGeometry(0.08, 0.16, 10), { p: [sx * 0.08, -top * 0.02, R * S[2] * 0.97], r: [0, 0, -sx * Math.PI / 2], s: [1, 1, 0.55] }), look.bowtie)); }
-  if (look.scarf) { parts.push(paint(T(new THREE.TorusGeometry(R * S[0] * 0.8, 0.075, 8, 30), { p: [0, top * 0.5, 0], r: [Math.PI / 2, 0, 0], s: [1, S[2] / S[0], 0.8] }), look.scarf)); parts.push(paint(T(new THREE.BoxGeometry(0.14, 0.42, 0.05), { p: [R * 0.4, top * 0.28, R * S[2] * 0.72], r: [0.2, 0, -0.15] }), look.scarf)); }
+  // a scarf goes round under the face, not across it (it used to sit half way up the head, over the eyes)
+  if (look.scarf) { parts.push(paint(T(new THREE.TorusGeometry(R * S[0] * 0.99, 0.075, 8, 30), { p: [0, -top * 0.1, 0], r: [Math.PI / 2, 0, 0], s: [1, S[2] / S[0], 0.8] }), look.scarf)); parts.push(paint(T(new THREE.BoxGeometry(0.14, 0.42, 0.05), { p: [R * 0.4, -top * 0.32, R * S[2] * 0.93], r: [-0.25, 0, -0.15] }), look.scarf)); }
   // hats
   const HC = look.hatColour ?? '#b8452e', hat = [];
   if (look.hat === 'beanie') { hat.push(paint(T(new THREE.SphereGeometry(R * 0.78, 20, 10, 0, TAU, 0, Math.PI / 2), { s: [1, 0.72, 1] }), HC), paint(T(new THREE.TorusGeometry(R * 0.76, 0.06, 8, 26), { r: [Math.PI / 2, 0, 0] }), HC), ...(look.pom === false ? [] : [paint(T(sph(0.085, 8, 6), { p: [0, R * 0.58, 0] }), BELLY)])); }

@@ -152,8 +152,8 @@ export default function bakery(kit, lot) {
   }
   // the till (pink enamel), and the baguettes at the bakehouse end
   { const x = -1.5, y = -1.3, z = TOP;
-    c.soft('c#e8907a/0.45', x - 0.58, x + 0.58, y - 0.5, y + 0.5, z, z + 0.45, 0.06); c.soft('c#e8907a/0.45', x - 0.53, x + 0.53, y - 0.5, y + 0.05, z + 0.45, z + 1.0, 0.09); c.box(BRASS, x - 0.6, x + 0.6, y - 0.52, y + 0.52, z, z + 0.05);
-    for (let i = 0; i < 12; i++) c.cyl(i % 4 === 3 ? 'c#8a1c1c/0.45' : 'c#f4f1ea/0.45', x - 0.36 + (i % 4) * 0.24, y + 0.16 + Math.floor(i / 4) * 0.1, z + 0.45, z + 0.5 + (2 - Math.floor(i / 4)) * 0.04, 0.05, 0.05, 8);
+    c.soft('c#e8907a/0.45', x - 0.58, x + 0.58, y - 0.5, y + 0.5, z, z + 0.45, 0.06); c.soft('c#e8907a/0.45', x - 0.53, x + 0.53, y - 0.05, y + 0.5, z + 0.45, z + 1.0, 0.09); c.box(BRASS, x - 0.6, x + 0.6, y - 0.52, y + 0.52, z, z + 0.05);
+    for (let i = 0; i < 12; i++) c.cyl(i % 4 === 3 ? 'c#8a1c1c/0.45' : 'c#f4f1ea/0.45', x - 0.36 + (i % 4) * 0.24, y - 0.16 - Math.floor(i / 4) * 0.1, z + 0.45, z + 0.5 + (2 - Math.floor(i / 4)) * 0.04, 0.05, 0.05, 8);      // keys on the staff side (-y)
     basket(c, -4.5, -1.2, z, 0.5, 1.0); for (let i = 0; i < 9; i++) { const a = i * 0.7; baguette(c, -4.5 + Math.cos(a) * 0.14, -1.2 + Math.sin(a) * 0.14, z + 0.08, Math.cos(a) * 0.34, Math.sin(a) * 0.34, 2.0 + (i % 3) * 0.12, i % 3 ? CR1 : CR2); }
     X.card(c, -4.5, -0.42, z, 1.5, 0.42, BREADTAG('BAGUETTE', 'poolish overnight · 68% water · baked dark, as intended', '3'), { cw: 360, ch: 100 });
     lot.pickup = { xz: kit.world(c, -2.9, -0.6), y: c.h + TOP };

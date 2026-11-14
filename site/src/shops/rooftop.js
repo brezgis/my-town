@@ -143,15 +143,18 @@ export default function rooftop(kit, lot, town) {
     const sx = SX0 - 0.7, sy = YF + 0.9;
     P.box(DARKW, sx - 0.12, sx + 0.12, sy - 0.12, sy + 0.12, 0, 6.3); block(sx - 0.25, sx + 0.25, sy - 0.25, sy + 0.25, 0, 6);
     P.box(DARKW, sx - 0.2, sx - 0.13, sy - 1.3, sy + 1.3, 3.9, 5.3); kit.sign(kit.fr(sx - 0.215, sy, 0, 1), 0, 0, 4.6, 2.4, 1.2, WAYUP, { cw: 360, ch: 180 });
-    lanternAt(P, sx, sy, 6.3, 1.3); kit.lampAt(P, sx - 0.6, sy, 6.4, 0.8);
-    lanternAt(P, SX1 - 0.02, YE - 0.05, HT + 3.46); kit.lampAt(P, SX1 - 1.2, YE + 1.4, HT + 4.2, 0.7);
+    // every lantern on the way up is a real light with a soft halo, set just inboard of its glass so that it falls on
+    // the treads (they were bright glass that lit nothing: the stair stood black after dark)
+    const lit = (x, y, z, power, halo = 0.7) => { kit.lampAt(P, x, y, z, power); kit.lamps[kit.lamps.length - 1].halo = halo; };
+    lanternAt(P, sx, sy, 6.3, 1.3); lit(sx - 0.5, sy, 6.7, 0.9, 0.8);
+    lanternAt(P, SX1 - 0.02, YE - 0.05, HT + 3.46); lit(SX1 - 0.9, YE + 0.9, HT + 3.9, 0.85);
     // lanterns down the stair, standing on the rail of the open side, so the way up shows from the street after dark
-    for (let k = 1; k <= 3; k++) { const y = YT + k * (YF - YT) / 4; lanternAt(P, SX1 - 0.02, y, hs(y) + 3.46, 0.9); if (k !== 2) kit.lampAt(P, SX1 - 1.4, y, hs(y) + 4.4, 0.6); }
+    for (let k = 1; k <= 3; k++) { const y = YT + k * (YF - YT) / 4; lanternAt(P, SX1 - 0.02, y, hs(y) + 3.46, 0.9); lit(SX1 - 0.8, y, hs(y) + 3.85, 0.9); }
     // and one board where the gravel walk leaves the pavement at the end of the street: this way
     { const px = FRONT_X + 1.7, py = 192.2;
       P.box(DARKW, px - 0.12, px + 0.12, py - 0.12, py + 0.12, 0, 6.6); block(px - 0.25, px + 0.25, py - 0.25, py + 0.25, 0, 6);
       P.box(DARKW, px - 1.5, px + 1.5, py - 0.2, py - 0.13, 4.2, 5.9); kit.sign(kit.fr(px, py - 0.215, 0, 2), 0, 0, 5.05, 2.8, 1.5, THISWAY, { cw: 420, ch: 225 });
-      lanternAt(P, px, py, 6.6, 1.2); kit.lampAt(P, px, py - 0.8, 6.6, 0.7); }
+      lanternAt(P, px, py, 6.6, 1.2); lit(px, py - 0.6, 6.9, 0.85, 0.8); }
   }
 
   // ======================================================================================================
