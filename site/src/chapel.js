@@ -11,7 +11,8 @@
 //
 // What is not the real building:
 //   one room the whole height (the real one has a meeting hall below and the auditorium above)
-//   the far end wall (the real one is hidden by a later addition): plain, with one window, the tallest
+//   the far end wall (the real one is hidden by a later addition): plain, with one great window under a round
+//     arch, ten feet by fourteen and a half: three round-headed lights and three roundels in one painted frame
 //   the bell-cote on the ridge, which is the one on the Second Presbyterian Church three streets away
 //     (Edwin J. Peck, 1835; HABS IN-24-15, sheet 2, "Bell ordered in 1837"; research/chapel/in0161)
 //   the glass. Each tall window is one round-headed light, and its picture is drawn for the whole of it. The
@@ -19,7 +20,7 @@
 //       over the door         murmuration, Lorenz and McCulloch & Pitts either side
 //       west wall, from door  Life (it moves), Turing, the strange loop, eigen-behaviour (the evening sun)
 //       east wall, from door  Cajal's neuron, broken symmetry, Darwin's tree, the logistic map
-//       the far end           ingressing minds, behind the stone table
+//       the far end           ingressing minds, the great window, behind the stone table
 //     The short windows under them are leaded too: pale quarries in the border of the window above, and one
 //     small roundel each that answers it (a glider under Life, a seedling under Darwin's tree).
 //
@@ -29,7 +30,7 @@
 // green on the east (stepping stones and a bench).
 //
 // The glass is drawn in chapel/glass.js, a little at a time after start-up: the end window and ten of the
-// tall ones on ONE sheet, the ten short windows on a second, and the Life window on
+// tall ones on ONE sheet (4096 by 2048), the ten short windows on a second, and the Life window on
 // a canvas of its own (it is redrawn every second while someone is looking at it). The sun lays every
 // window's colours on the floor and walls (one mesh lining the room).
 //
@@ -42,7 +43,7 @@ import { outdoorLit } from './lighting.js';
 import { wind, CardSet, crossGeo, rosetteGeo, place, cellUV } from './street/cards.js';
 import { KINDS } from './street/flora.js';
 import { FLORA_CELLS } from './street/paint.js';
-import { WINDOWS, TALL, makeLife, lowLight, poolCopy, w7Outline, W7_SHOULDER, FONT, rng, LOOP_EYE } from './chapel/glass.js';
+import { WINDOWS, TALL, makeLife, lowLight, poolCopy, greatPlan, GREATPX, FONT, rng, LOOP_EYE } from './chapel/glass.js';
 import { T, F, fill, para, paper, line } from './draw.js';
 
 // ---- where it stands -----------------------------------------------------------------------------------
@@ -71,7 +72,7 @@ const yO = d => EAVEY + (EAVE - d) * PITCH, RIDGE = yO(0);   // the roof's top, 
 const UP = { y: R(15.7), h: 14.3 * SC, w: 4.5 * SC }, LOW = { y: R(3.7), h: 7.7 * SC, w: 4.5 * SC };      // the two tiers of windows (sill, height, width of the frame)
 const DOOR = { hw: 2.0, h: 10.7 * SC }, HOOD = { hw: 3.45, y: R(13), peak: R(15.25) };
 const FX = 9.35, BAYS_Z = [15.3, 25.125, 34.925, 44.54];     // the front's side bays; the four window bays down each flank (the first bay is blind)
-const GREAT = { w: 5.34, h: 10.68, y0: FLR + 6.6 };          // the end window (not the real building's)
+const GREAT = { w: 10, h: 14.4, y0: FLR + 6.0 };             // the end window (not the real building's): its glass, round-headed; its sill
 const BC = { z: 3.4, hw: 1.8, foot: RIDGE + 0.5, top: RIDGE + 4.1, peak: RIDGE + 4.75 };      // the bell-cote
 const DAIS = { z0: 39.5, y: FLR + 0.5 };
 const TABLE = { x0: -3.4, x1: 3.4, z0: 42.8, z1: 45.2, y: DAIS.y + 3.3 };
@@ -122,10 +123,10 @@ const GLASS = [
   ...['life', 'turing', 'loop', 'eigen'].map((id, i) => pic(id, 'W', BAYS_Z[i])),
   ...['neuron', 'symmetry', 'tree', 'logistic'].map((id, i) => pic(id, 'E', BAYS_Z[i])),
   pic('lorenz', 'F', -FX), pic('calculus', 'F', FX), pic('murmuration', 'F', 0),
-  { id: 'ingression', ...pane('R', 0, GREAT.y0 + GREAT.h / 2, GREAT.w, GREAT.h, { gable: true }) },
+  { id: 'ingression', ...pane('R', 0, GREAT.y0 + GREAT.h / 2, GREAT.w, GREAT.h, { great: true }) },
 ];
 // The short windows, each under the tall one it answers
-const LOWG = GLASS.filter(w => !w.gable && w.id !== 'murmuration').map(w => ({ ...w, c: [w.c[0], LOW.y + LOW.h / 2, w.c[2]], h: LOWH }));
+const LOWG = GLASS.filter(w => !w.great && w.id !== 'murmuration').map(w => ({ ...w, c: [w.c[0], LOW.y + LOW.h / 2, w.c[2]], h: LOWH }));
 const inWorld = g => ({ ...g, c: [SITE.cx - g.c[2], g.c[1], SITE.cz + g.c[0]], n: vecW(g.n), u: vecW(g.u) });
 const GLASSW = GLASS.map(inWorld), LIGHTS = [...GLASSW, ...LOWG.map(inWorld)];      // the twelve pictures; every window that throws colour
 
@@ -237,13 +238,26 @@ export function chapelShell(B0, t) {
     }
   }
 
-  // ---- the end window: its head (two pieces, so that nothing is cut as a hole), its frame and sill ------
+  // ---- the end window: a round arch (the wall over it is made up in two pieces, so that nothing is cut as a
+  // hole), a painted frame with three lights and three roundels cut through it (greatPlan, in chapel/glass.js: the
+  // picture is drawn to the same plan), a casing inside, a stone sill, hood, imposts and keystone outside ------
   {
-    const yS = GREAT.y0 - 0.15 + (GREAT.h + 0.3) * W7_SHOULDER, yT = GREAT.y0 + GREAT.h + 0.15, W = WALL.R;
-    for (const s of [-1, 1]) for (const [mat, d, th] of [[BRICK, 0, GD], [PL, GD, TH - GD]]) prism(mat, s < 0 ? [[-GHW, yS], [0, yT], [-GHW, yT]] : [[GHW, yS], [GHW, yT], [0, yT]], th, W.M(0, d));
-    const head = (w, h, y0) => w7Outline(w, h).map(([u, v]) => [u - w / 2, y0 + h - v]);
-    frameRing(B, SASH, head(GREAT.w + 0.4, GREAT.h + 0.4, GREAT.y0 - 0.2), head(GREAT.w - 0.24, GREAT.h - 0.24, GREAT.y0 + 0.12), new THREE.Matrix4().setPosition(0, 0, OZ1 - GD - 0.18), 0.36);
-    box(STONE, -GHW - 0.3, GHW + 0.3, GREAT.y0 - 0.5, GREAT.y0 - 0.15, OZ1 - GD, OZ1 + 0.2); box(TRIM, -GHW - 0.2, GHW + 0.2, GREAT.y0 - 0.27, GREAT.y0 - 0.14, IZ1 - 0.2, OZ1 - GD);
+    const W = WALL.R, { w, h, y0 } = GREAT, yT = y0 + h + 0.15, ySp = yT - GHW, v2 = ([a, y]) => new THREE.Vector2(a, y);
+    const arc = (rad, n = 20) => Array.from({ length: n + 1 }, (_, i) => [Math.cos(i / n * Math.PI) * rad, ySp + Math.sin(i / n * Math.PI) * rad]);      // from the right springing over to the left
+    for (const s of [-1, 1]) for (const [mat, d, th] of [[BRICK, 0, GD], [PL, GD, TH - GD]]) prism(mat, [...arc(GHW).slice(0, 11).map(([a, y]) => [s * a, y]), [s * GHW, yT]], th, W.M(0, d));
+    const P = greatPlan(w, h), big = greatPlan(w + 0.4, h + 0.4), sh = new THREE.Shape(big.out.map(([u, v]) => v2([u - w / 2 - 0.2, y0 + h + 0.2 - v])));
+    for (const L of P.lights) sh.holes.push(new THREE.Path(L.out.map(([u, v]) => v2([u - w / 2, y0 + h - v]))));
+    for (const c of P.rounds) sh.holes.push(new THREE.Path(Array.from({ length: 40 }, (_, i) => v2([c.x - w / 2 + Math.cos(i / 40 * Math.PI * 2) * c.r, y0 + h - c.y + Math.sin(i / 40 * Math.PI * 2) * c.r]))));
+    B.mesh(STONE, new THREE.ExtrudeGeometry(sh, { depth: 0.44, bevelEnabled: false, curveSegments: 4 }).applyMatrix4(new THREE.Matrix4().setPosition(0, 0, OZ1 - GD - 0.22)));
+    const band = (r0, r1, yb) => [[r1, yb], ...arc(r1), [-r1, yb], [-r0, yb], ...arc(r0).reverse(), [r0, yb]];      // an arch-headed band, from yb up and over
+    const ring = (mat, pts, z, depth) => B.mesh(mat, new THREE.ExtrudeGeometry(new THREE.Shape(pts.map(v2)), { depth, bevelEnabled: false }).applyMatrix4(new THREE.Matrix4().setPosition(0, 0, z)));
+    ring(TRIM, band(GHW - 0.03, GHW + 0.42, y0 - 0.14), IZ1 - 0.07, 0.09);                                             // the casing, inside
+    ring(TRIM, band(GHW + 0.42, GHW + 0.5, y0 - 0.14), IZ1 - 0.11, 0.13);                                              // its back band
+    box(TRIM, -GHW - 0.62, GHW + 0.62, y0 - 0.28, y0 - 0.12, IZ1 - 0.24, OZ1 - GD);                                   // the sill board
+    box(STONE, -GHW - 0.4, GHW + 0.4, y0 - 0.55, y0 - 0.13, OZ1 - GD, OZ1 + 0.22);                                    // the stone sill
+    ring(STONE, band(GHW - 0.03, GHW + 0.5, ySp), OZ1 - 0.05, 0.19);                                                  // the hood, outside
+    for (const s of [-1, 1]) box(STONE, s * (GHW - 0.03), s * (GHW + 0.64), ySp - 0.42, ySp, OZ1 - 0.05, OZ1 + 0.2);    // its imposts
+    prism(STONE, [[-0.3, yT - 0.06], [0.3, yT - 0.06], [0.42, yT + 0.72], [-0.42, yT + 0.72]], 0.3, new THREE.Matrix4().setPosition(0, 0, OZ1 - 0.05));      // and keystone
   }
 
   // ---- the ceiling and its cornice; the roof's two chimneys; the bell-cote ------------------------------
@@ -264,7 +278,7 @@ export function chapelShell(B0, t) {
   // come up at dusk (their flames are one of the street's lamp glows, which do that by themselves); after dark it is
   // their light that shines out through the glass (chapelLife).
   for (const zc of [11, 23.5, 36]) {
-    const HY = FLR + 12.2, RAD = 2.5, put = g => B.mesh(IRON, g), CAND = 'c#efe6d2/0.7';
+    const HY = FLR + 15.4, RAD = 2.5, put = g => B.mesh(IRON, g), CAND = 'c#efe6d2/0.7';
     put(new THREE.TorusGeometry(RAD, 0.07, 6, 40).rotateX(Math.PI / 2).translate(0, HY, zc)); put(new THREE.TorusGeometry(RAD - 0.16, 0.03, 4, 40).rotateX(Math.PI / 2).translate(0, HY - 0.28, zc));
     for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4, x = Math.cos(a) * RAD, z = zc + Math.sin(a) * RAD, top = new THREE.Vector3(0, HY + 5.2, zc), foot = new THREE.Vector3(x, HY, z), d = top.clone().sub(foot);
       const g = new THREE.CylinderGeometry(0.022, 0.022, d.length(), 4); g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize())); g.translate((top.x + foot.x) / 2, (top.y + foot.y) / 2, (top.z + foot.z) / 2); put(g); }
@@ -443,7 +457,7 @@ const WIN = {
   turing: ["A daisy, and an animal's coat. Turing's two chemicals, spreading at different speeds.", 'Lower down the spots run into stripes. Same rule.'],
   eigen: ["A tangle, smoothed again and again until it's a ball.", 'An object is what stays put when you keep doing the same thing to it.'],
   neuron: ['A nerve cell, the way Cajal drew them. Black on amber.', 'He called them the butterflies of the soul. Given my name, I stay out of it.'],
-  ingression: ['Pure shapes at the top, coming down into a worm, a cell, a frog and a pair of gears.', 'I keep the gears dusted, just in case.'],
+  ingression: ['The five regular solids at the top. Under them three plain shapes coming down into bodies: a cell, a flatworm, a pair of gears, a slime mould, a frog.', 'The second worm grew a head at each end, and nobody touched its genes. The pale ones, bottom right, are frog cells nobody told to be a frog. I keep the gears dusted, just in case.'],
   loop: ["Twelve steps, every one of them up, and you're back where you began.", "Hofstadter thought an 'I' was something like that."],
   lorenz: ["Lorenz's weather. The line never crosses itself and never repeats.", 'He found it by typing a number back in with three decimals instead of six.'],
   logistic: ['One line of arithmetic, done over and over. It settles, then it splits, then it stops settling.', 'May wanted it taught to children.'],
@@ -493,9 +507,9 @@ export function chapelLife(ctx, K) {
   // ---- the glass: one sheet for the end window and ten tall ones, the Life window's own, and a second
   // sheet for the ten short windows ---------------------------------------------------------------------------
   const AW = 4096, AH = 2048, [TLW, TLH] = TALL, LW = 408, LH = 720, LOWW = LW * 5, LOWH2 = LH * 2;
-  const CELL = { ingression: [0, 0, 1024, 2048, 2] }, LCELL = {};
-  // ten tall lights beside the end window: eight upright in a row, two on their sides under them (a cell is [x, y, width, height, scale, on its side])
-  GLASS.filter(w => !w.gable && w.id !== 'life').forEach((w, i) => { CELL[w.id] = i < 8 ? [1028 + i * (TLW + 8), 0, TLW, TLH, 1, 0] : [1028 + (i - 8) * (TLH + 8), TLH + 8, TLW, TLH, 1, 1]; });
+  const [GW, GHT] = GREATPX, CELL = { ingression: [0, 0, GW, GHT, 1] }, LCELL = {};
+  // ten tall lights beside the end window (1400 by 2016, at their scale): seven upright in a row, three on their sides under them (a cell is [x, y, width, height, scale, on its side])
+  GLASS.filter(w => !w.great && w.id !== 'life').forEach((w, i) => { CELL[w.id] = i < 7 ? [GW + 4 + i * (TLW + 8), 0, TLW, TLH, 1, 0] : [GW + 4 + ((i - 7) % 2) * (TLH + 4), TLH + 4 + Math.floor((i - 7) / 2) * (TLW + 4), TLW, TLH, 1, 1]; });
   LOWG.forEach((w, i) => { LCELL[w.id] = [(i % 5) * LW, Math.floor(i / 5) * LH, LW, LH]; });
   const sheet = document.createElement('canvas'); sheet.width = AW; sheet.height = AH;
   const SOFT = { willReadFrequently: true };       // drawn in memory, not on the graphics card: nothing to read back when the sheet is sent up, and nothing to lose when the card is busy
@@ -531,7 +545,7 @@ void main() {
   });
   const paneGeo = (w, [cx, cy, cw, ch, , rot], tw, th) => {                    // drawn facing +z with u to the right, then set into its wall seen from inside
     let geo; const v2 = ([x, y]) => new THREE.Vector2(x, y);
-    if (w.gable) geo = new THREE.ShapeGeometry(new THREE.Shape(w7Outline(w.w, w.h).map(([x, y]) => v2([x - w.w / 2, w.h / 2 - y]))));
+    if (w.great) geo = new THREE.ShapeGeometry(new THREE.Shape(greatPlan(w.w, w.h).out.map(([x, y]) => v2([x - w.w / 2, w.h / 2 - y]))));
     else geo = new THREE.PlaneGeometry(w.w, w.h);
     geo = geo.toNonIndexed();
     const p = geo.attributes.position, uv = geo.attributes.uv;
@@ -830,13 +844,6 @@ function planting(outdoors) {
 }
 
 // ---- small helpers ------------------------------------------------------------------------------------------
-// A frame: the ring between two outlines (in a plane: a along the wall, y up), extruded `depth`, set by m
-function frameRing(B, mat, outer, inner, m, depth = 0.24) {
-  const sh = new THREE.Shape(outer.map(([a, y]) => new THREE.Vector2(a, y)));
-  sh.holes.push(new THREE.Path(inner.map(([a, y]) => new THREE.Vector2(a, y))));
-  const g = new THREE.ExtrudeGeometry(sh, { depth, bevelEnabled: false, curveSegments: 4 });
-  g.applyMatrix4(m); B.mesh(mat, g);
-}
 // The rectangles of a wall [a0..a1] x [y0..y1] left round its holes [[ha0, ha1, hy0, hy1], ...]; holes that
 // stand one over another must share their two sides
 function pieces(a0, a1, y0, y1, holes) {

@@ -13,13 +13,15 @@
 //   W4 Turing           a daisy head over an animal's coat, spots running into stripes
 //   W5 eigen-behaviour  a tangle smoothed by the same operation again and again until a ball
 //   W6 the neuron       a pyramidal cell in black paint on amber, after Ramón y Cajal
-//   W7 ingressing minds pure shapes descending into a flatworm, a cell, a frog and a machine
+//   W7 ingressing minds the great window: the regular solids in the head, and plain forms coming down
+//                       into a cell, flatworms, gears, a slime mould, a frog and xenobots
 //   W8 a strange loop   a ring of steps that climbs all the way round to where it began, Gödel's
 //                       numbering on its treads, the ring again inside it, a clear roundel at the heart
 //
 // On Vesper Street the tall windows are round-headed lights 376 by 1285 (TALL), and every picture is drawn
 // for the whole of that opening (tall(), below): the subject up into the arch, the border round it, a
-// ribbon of words over a sill course at the foot. The end window (W7) keeps its own shape.
+// ribbon of words over a sill course at the foot. The end window (W7) is the great one: three such lights
+// and three roundels under one arch (greatPlan), 1400 by 2016, at the same scale and in the same border.
 //
 // Every window carries words, in one hand and one size (inscription(), below), large enough to read
 // from the middle of the floor. Under each tall window is a short one (lowLight, at the end): pale
@@ -712,148 +714,313 @@ function* neuron(g, W, H, seed = 66) {
   return pieces;
 }
 
-// ---- W7: ingressing minds --------------------------------------------------------------------------
-// The window in the west gable: five feet wide, ten tall, its head following the roof. Above, a
-// field of pure forms in pale and gold on deep blue; from four of them light comes down through
-// the glass into bodies: a flatworm, a cell, a frog, and a pair of gears.
-export const W7_SHOULDER = 0.68;          // the head's slope starts at this fraction of the height, from the top
-export function w7Outline(W, H) { const s = H * (1 - W7_SHOULDER); return [[W / 2, 0], [W, s], [W, H], [0, H], [0, s]]; }
+// ---- W7: ingressing minds, the great window ---------------------------------------------------------
+// After Michael Levin: minds as patterns that come into matter from a space of forms (the word is Whitehead's).
+// The end wall's window, behind the stone table: ten feet wide and nearly fourteen and a half high under a
+// round arch, three round-headed lights (the middle one wider and a little taller) and three roundels in
+// the head, all cut through one frame (greatPlan: chapel.js builds the frame from it and the picture is
+// drawn into its openings). It is read from the top down, in tiers that run across all three lights:
+//   the head     the space of patterns: the five regular solids on deep blue in the great roundel, the
+//                dodecahedron in the middle; a trefoil knot and an equiangular spiral in the two small ones
+//   the arches   three plain forms arriving, a triangle, a ring and a star, each with its halo, and from
+//                each a beam of pale gold that goes on down behind everything below it
+//   first tier   a cell; two flatworms in a dish (the lower one has regrown a head at each end and no
+//                tail); a pair of gears
+//   second tier  a slime mould finding its oat flakes; a frog on its leaf with a tadpole under it;
+//                three xenobots sweeping loose cells into heaps
+//   the foot     water and weed, and the words on a ribbon in the middle light
+// The ground runs from deep blue through sea green to green as it comes down into matter.
+export const GREATPX = [1400, 2016];      // the cell it is drawn in: 140 px to the foot, as the tall windows are
+// The frame's openings for a window W wide and H high (any measure; y runs down from the crown): its own
+// outline, the three lights and the three roundels
+export function greatPlan(W, H) {
+  const R = W / 2, f = W * 0.03, m = W * 0.034, sw = W * 0.266, cw = W - 2 * f - 2 * m - 2 * sw, ls = R + W * 0.14, bot = H - f;
+  const arch = (cx, cy, rad, n) => Array.from({ length: n + 1 }, (_, k) => [cx + Math.cos(Math.PI + k * Math.PI / n) * rad, cy + Math.sin(Math.PI + k * Math.PI / n) * rad]);
+  const light = (x0, x1) => ({ x0, x1, spring: ls, bot, r: (x1 - x0) / 2, out: [[x1, bot], [x0, bot], ...arch((x0 + x1) / 2, ls, (x1 - x0) / 2, 16)] });
+  const xs = f + sw + m;
+  return {
+    R, spring: R, out: [[W, H], [0, H], ...arch(R, R, R, 32)],
+    lights: [light(f, f + sw), light(xs, xs + cw), light(W - f - sw, W - f)],
+    rounds: [{ x: R, y: R - W * 0.25, r: W * 0.19 }, { x: R - W * 0.295, y: R - W * 0.135, r: W * 0.1 }, { x: R + W * 0.295, y: R - W * 0.135, r: W * 0.1 }],
+  };
+}
+// One round-headed light of it, set out as tall() sets out a tall window (but anywhere, and at a given unit):
+// the shared border up the sides and round the arch, a sill course across the foot. Returns the field.
+function archLight(g, xa, xb, ys, yb, unit, r, o = {}) {
+  const R = (xb - xa) / 2, cx = (xa + xb) / 2, N = 12, band = o.band ?? C.blue, jA = o.jewelA ?? C.ruby, jB = o.jewelB ?? C.amber, Rp = R / Math.cos(Math.PI / (2 * N));
+  const out = [[xb, yb], [xa, yb]];
+  for (let k = 0; k <= N; k++) { const a = Math.PI + k * Math.PI / N; out.push([k === 0 ? xa : k === N ? xb : cx + Math.cos(a) * Rp, ys + Math.sin(a) * Rp]); }
+  const b = border(g, out, r, unit, o), D = b.inner, x0 = D[1][0], x1 = D[0][0], yD = D[0][1], y1 = yD - unit * 1.3, Ri = R - (x0 - xa);
+  const sill = [], sw = unit * 1.3, lw = (x1 - x0 - 3 * sw) / 4;
+  for (let i = 0, x = x0; i < 7; i++) { const w = i % 2 ? sw : lw, p = rect(x, y1, x + w, yD); glass(g, p, i % 2 ? (i === 3 ? jA : jB) : shift(band, 0, 0, 3), r, { mattW: 7 }); sill.push(p); x += w; }
+  leads(g, [...b.pieces, ...sill], unit * 0.22, r);
+  const inner = clipHalf(D, 0, 1, y1), y0 = Math.min(...D.map(p => p[1]));
+  const inside = (x, y, m = 0) => x > x0 + m && x < x1 - m && y < y1 - m && (y >= ys || Math.hypot(x - cx, y - ys) < Ri - m);
+  return { unit, x0, x1, y0, y1, cx, sy: ys, R: Ri, inner, inside };
+}
+// The five regular solids, from their corners: the faces are found (every plane through three corners that
+// has the rest on one side), turned, and the ones that face us cut in glass, lighter where they face the light
+const PHI = (1 + Math.sqrt(5)) / 2;
+const turns3 = ([a, b, c]) => [[a, b, c], [c, a, b], [b, c, a]];
+const signs3 = v => { let out = [v]; v.forEach((q, i) => { if (q) out = out.flatMap(p => [p, p.map((c, j) => (j === i ? -c : c))]); }); return out; };
+const SOLIDS = {
+  tetra: [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], cube: signs3([1, 1, 1]), octa: turns3([1, 0, 0]).flatMap(signs3),
+  icosa: turns3([0, 1, PHI]).flatMap(signs3), dodeca: [...signs3([1, 1, 1]), ...turns3([0, 1 / PHI, PHI]).flatMap(signs3)],
+};
+const FACES = {};
+function solidFaces(V) {
+  const n = V.length, faces = [], seen = new Set(), sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) for (let k = j + 1; k < n; k++) {
+    let nm = cross(sub(V[j], V[i]), sub(V[k], V[i])); const len = Math.hypot(...nm); if (len < 1e-6) continue;
+    nm = nm.map(c => c / len); let d = dot3(nm, V[i]); if (d < 0) { nm = nm.map(c => -c); d = -d; }
+    if (d < 1e-6 || V.some(v => dot3(nm, v) - d > 1e-6)) continue;
+    const key = nm.map(c => Math.round(c * 1000) + 0).join(','); if (seen.has(key)) continue; seen.add(key);
+    const on = V.filter(v => Math.abs(dot3(nm, v) - d) < 1e-6), c = [0, 1, 2].map(q => on.reduce((s, v) => s + v[q], 0) / on.length);
+    const e1 = sub(on[0], c), l1 = Math.hypot(...e1), a1 = e1.map(q => q / l1), a2 = cross(nm, a1), ang = p => Math.atan2(dot3(sub(p, c), a2), dot3(sub(p, c), a1));
+    faces.push({ n: nm, v: on.slice().sort((p, q) => ang(p) - ang(q)) });
+  }
+  return faces;
+}
+function platonic(g, name, cx, cy, s, rx, ry, col, r, pieces) {
+  const cxr = Math.cos(rx), sxr = Math.sin(rx), cyr = Math.cos(ry), syr = Math.sin(ry), V = SOLIDS[name], k = s / Math.hypot(...V[0]);
+  const rot = ([x, y, z]) => { const xa = x * cyr + z * syr, za = -x * syr + z * cyr; return [xa, y * cxr - za * sxr, y * sxr + za * cxr]; };
+  for (const f of (FACES[name] ??= solidFaces(V))) {
+    const nn = rot(f.n); if (nn[2] <= 0.02) continue;
+    const p = f.v.map(v => { const q = rot(v); return [cx + q[0] * k, cy - q[1] * k]; });
+    glass(g, p, shift(col, 0, 0, (clamp(nn[0] * -0.45 + nn[1] * 0.6 + nn[2] * 0.66, 0, 1) - 0.6) * 38), r, { mattW: 4, matt: 0.22, lj: 3, hj: 3 }); pieces.push(p);
+  }
+}
 function* ingression(g, W, H, seed = 77) {
-  const r = rng(seed), unit = W / 15, LW = unit * 0.13, out = w7Outline(W, H), b = border(g, out, r, unit, { band: C.deep, jewelA: C.gold, jewelB: C.ruby });
-  const inner = b.inner, x0 = inner[4][0], x1 = inner[2][0], y1 = inner[2][1], X = f => x0 + (x1 - x0) * f;
-  leads(g, b.pieces, LW * 1.3, r);
-  const yBand = H * 0.455, yFoot = y1 - unit * 0.95;
-  // four forms, and the bodies they come down into
-  const forms = [
-    { kind: 'spiral', x: X(0.2), y: H * 0.335, s: unit * 1.0, glow: [44, 88, 66], to: [X(0.25), H * 0.835] },
-    { kind: 'pair', x: X(0.38), y: H * 0.215, s: unit * 0.95, glow: [52, 60, 84], to: [X(0.3), H * 0.6] },
-    { kind: 'circle', x: X(0.62), y: H * 0.215, s: unit * 1.0, glow: [52, 60, 84], to: [X(0.71), H * 0.6] },
-    { kind: 'star', x: X(0.8), y: H * 0.335, s: unit * 1.0, glow: [44, 88, 66], to: [X(0.74), H * 0.835] },
-  ];
-  const along = (f, t) => [f.x + (f.to[0] - f.x) * t + Math.sin(t * Math.PI) * unit * 0.5 * (f.x < W / 2 ? -1 : 1), f.y + (f.to[1] - f.y) * t];
-  // the ground: one sheet of irregular pieces, deep blue above and water-green below, and the
-  // light coming down picked out in pale gold pieces along its way
-  const pts = sitesIn((x, y) => inPolyPt(x, y, inner) && y < yFoot, x0, 0, x1, yFoot, 300, r, (x, y) => unit * (y < yBand ? 0.85 : 1.05));
-  const cells = voronoi(pts, clipPoly(rect(x0, 0, x1, yFoot), inner)), bg = [];
-  for (const p of cells) {
-    const [x, y] = centroid(p), t = smooth(yBand - unit * 2, yBand + unit * 2, y);
-    let col = t < 1 ? lerpC(lerpC(shift(C.azure, 0, 0, 4), C.deep, smooth(H * 0.05, H * 0.42, y)), shift(C.teal, 6, 0, 0), t) : C.teal;
-    if (y > yBand) col = lerpC(shift(C.teal, 6, 0, 0), shift(C.green, -8, -4, -4), smooth(yBand, y1, y));
-    let glow = 0, gc = null;
-    for (const f of forms) {
-      let d = 1e9, tt = 0; for (let k = 0; k <= 24; k++) { const [px, py] = along(f, k / 24), dd = Math.hypot(x - px, y - py); if (dd < d) { d = dd; tt = k / 24; } }
-      const w = unit * (1.15 - 0.55 * tt), k = smooth(w, w * 0.2, d) * (1 - 0.3 * tt);
-      if (k > glow) { glow = k; gc = f.glow; }
-    }
-    if (gc) col = shift(col, 0, -8 * glow, 12 * glow);
-    glass(g, p, col, r, { mattW: 7, matt: 0.3 }); bg.push(p);
-  }
+  const r = rng(seed), P = greatPlan(W, H), u = W / 63.6, LW = u * 0.22, BORD = { band: C.deep, jewelA: C.gold, jewelB: C.ruby }, GOLD = 'rgba(255,224,130,.96)', pieces = [];
+  g.fillStyle = '#0d0b09'; g.fillRect(0, 0, W, H);      // (behind the frame)
+  const flush = (w = LW * 0.8) => { leads(g, pieces, w, r); pieces.length = 0; };
+
+  // ---- the head: three roundels ----------------------------------------------------------------------
+  const [big, kn, sp] = P.rounds;
+  const round = (c, N) => { const b = border(g, circle(c.x, c.y, (c.r + 2) / Math.cos(Math.PI / N), N, -Math.PI / 2), r, u, BORD); leads(g, b.pieces, LW, r); return { inner: b.inner, R: c.r + 2 - u * 1.77 }; };
+  const ground = (rd, c, n, minD, colAt) => {
+    const cells = voronoi(sitesIn((x, y) => Math.hypot(x - c.x, y - c.y) < rd.R, c.x - rd.R, c.y - rd.R, c.x + rd.R, c.y + rd.R, n, r, minD), rd.inner);
+    for (const p of cells) { const [x, y] = centroid(p); glass(g, p, colAt(Math.hypot(x - c.x, y - c.y) / rd.R), r, { mattW: 7, matt: 0.3 }); }
+    leads(g, cells, LW * 0.8, r);
+  };
+  const B = round(big, 18);
   yield;
-  // painted on the field: smaller pure forms in gold stain and white, and points of light
-  const minor = [];
-  for (let k = 0; k < 40; k++) { const x = X(0.08 + r() * 0.84), y = H * 0.06 + r() * (yBand - unit * 2.2 - H * 0.06); if (!inPolyPt(x, y, inset(inner, unit * 0.5)) || forms.some(f => Math.hypot(x - f.x, y - f.y) < unit * 1.9) || minor.some(m => Math.hypot(x - m[0], y - m[1]) < unit * 1.15)) continue; minor.push([x, y, k]); }
-  for (const [x, y, k] of minor) {
-    const s = unit * (0.26 + r() * 0.22), kind = k % 7;
-    g.strokeStyle = k % 3 ? 'rgba(255,232,150,.92)' : 'rgba(240,248,255,.9)'; g.lineWidth = 1.5; g.beginPath();
-    if (kind < 4) { const n = [3, 4, 5, 6][kind], a0 = r() * TAU; for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * TAU; i ? g.lineTo(x + Math.cos(a) * s, y + Math.sin(a) * s) : g.moveTo(x + Math.cos(a) * s, y + Math.sin(a) * s); } }
-    else if (kind === 4) { for (let i = 0; i <= 40; i++) { const t = (i / 40) * TAU, d = 1 + Math.sin(t) ** 2; const px = x + s * 1.3 * Math.cos(t) / d, py = y + s * 1.3 * Math.sin(t) * Math.cos(t) / d; i ? g.lineTo(px, py) : g.moveTo(px, py); } }
-    else if (kind === 5) { const d = s * 0.45; g.rect(x - s * 0.6, y - s * 0.6 + d * 0.3, s, s); g.rect(x - s * 0.6 + d, y - s * 0.6 - d * 0.4, s, s); for (const [ax, ay] of [[0, 0], [s, 0], [0, s], [s, s]]) { g.moveTo(x - s * 0.6 + ax, y - s * 0.6 + d * 0.3 + ay); g.lineTo(x - s * 0.6 + d + ax, y - s * 0.6 - d * 0.4 + ay); } }
-    else { for (let i = 0; i <= 10; i++) { const a = -Math.PI / 2 + (i / 10) * TAU, rr = i % 2 ? s * 0.4 : s; i ? g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr) : g.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } }
-    g.stroke();
-  }
-  for (let k = 0; k < 140; k++) { const x = X(r()), y = H * 0.03 + r() * (yBand - H * 0.05); if (!inPolyPt(x, y, inner)) continue; g.fillStyle = `rgba(255,250,225,${0.35 + r() * 0.5})`; g.beginPath(); g.arc(x, y, 0.6 + r() * 1.1, 0, TAU); g.fill(); }
-  // haloes round the four forms
-  for (const f of forms) for (let k = 1; k <= 3; k++) { g.strokeStyle = `rgba(255,240,190,${0.45 - k * 0.1})`; g.lineWidth = 1.2; g.beginPath(); g.arc(f.x, f.y, f.s * (1.15 + k * 0.22), 0, TAU); g.stroke(); }
-  // water and weed painted in the lower part
-  g.strokeStyle = 'rgba(210,255,240,.22)'; g.lineWidth = 1.2;
-  for (let k = 0; k < 26; k++) { const x = X(r()), y = yBand + unit * 2 + r() * (yFoot - yBand - unit * 4), l = unit * (0.6 + r() * 1.2); g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + l / 2, y - unit * 0.18, x + l, y); g.stroke(); }
-  g.strokeStyle = 'rgba(10,40,20,.45)'; g.lineWidth = 2;
-  for (let k = 0; k < 22; k++) { const x = X(r()), y = yFoot - r() * unit * 0.6, h = unit * (1 + r() * 2.2); g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x + unit * 0.3, y - h * 0.3, x - unit * 0.3, y - h * 0.6, x + (r() - 0.5) * unit * 0.6, y - h); g.stroke(); }
-  leads(g, bg, LW, r);
+  ground(B, big, 170, u * 1.45, t => lerpC(shift(C.azure, 0, 0, 4), C.deep, smooth(0.12, 0.8, t)));
   yield;
-  const pieces = [];
-  // the descents: a long tapering beam of pale gold from each form to its body, fading as it goes
-  for (const f of forms) {
-    const n = 26, L = [], R = [], tEnd = 1 - unit * 1.25 / Math.hypot(f.to[0] - f.x, f.to[1] - f.y);
-    for (let i = 0; i <= n; i++) {
-      const t = i / n * tEnd, [px, py] = along(f, t), [qx, qy] = along(f, Math.min(1, t + 0.01)), d = Math.hypot(qx - px, qy - py) || 1, w = unit * (0.62 - 0.36 * t);
-      L.push([px - (qy - py) / d * w, py + (qx - px) / d * w]); R.push([px + (qy - py) / d * w, py - (qx - px) / d * w]);
-    }
-    const beam = [...L, ...R.reverse()];
-    glass(g, beam, f.glow, r, { mattW: 5, matt: 0.15, hj: 3, lj: 3 });
-    g.save(); path(g, [beam]); g.clip();
-    const gr = g.createLinearGradient(0, f.y, 0, f.to[1]); gr.addColorStop(0, 'rgba(255,250,220,.35)'); gr.addColorStop(0.5, 'rgba(255,240,190,0)'); gr.addColorStop(1, 'rgba(20,90,80,.45)');
-    g.fillStyle = gr; g.fillRect(0, Math.min(f.y, f.to[1]) - unit * 2, W, Math.abs(f.to[1] - f.y) + unit * 4);
-    g.strokeStyle = 'rgba(255,255,240,.3)'; g.lineWidth = 1; for (let k = -2; k <= 2; k++) { g.beginPath(); for (let i = 0; i <= n; i++) { const [px, py] = along(f, i / n * tEnd); i ? g.lineTo(px + k * unit * 0.12 * (1 - i / n * 0.5), py) : g.moveTo(px + k * unit * 0.12, py); } g.stroke(); }
-    g.restore();
-    pieces.push(beam);
-  }
-  leads(g, pieces, LW, r); pieces.length = 0;
-  // the forms, cut in luminous glass
-  for (const f of forms) {
-    if (f.kind === 'circle') { const c = circle(f.x, f.y, f.s, 40), c2 = circle(f.x, f.y, f.s * 0.56, 40); glass(g, [c, c2], C.white, r, { mattW: 6 }); glass(g, c2, C.gold, r, { mattW: 6 }); pieces.push(c, c2); }
-    if (f.kind === 'star') { const p = []; for (let i = 0; i < 14; i++) { const a = -Math.PI / 2 + (i / 14) * TAU, rr = i % 2 ? f.s * 0.5 : f.s; p.push([f.x + Math.cos(a) * rr, f.y + Math.sin(a) * rr]); } glass(g, p, C.gold, r, { mattW: 6 }); pieces.push(p); const c = circle(f.x, f.y, f.s * 0.3, 20); glass(g, c, C.ruby, r, { mattW: 4 }); pieces.push(c); }
-    if (f.kind === 'pair') { const p = [[f.x, f.y - f.s * 1.1], [f.x + f.s * 0.95, f.y + f.s * 0.62], [f.x - f.s * 0.95, f.y + f.s * 0.62]]; glass(g, p, C.white, r, { mattW: 6 }); pieces.push(p); for (const s2 of [-1, 1]) { const e = circle(f.x + s2 * f.s * 0.28, f.y + f.s * 0.12, f.s * 0.16, 16); glass(g, e, C.blue, r, { mattW: 3 }); pieces.push(e); } }
-    if (f.kind === 'spiral') { const c = circle(f.x, f.y, f.s, 40); glass(g, c, C.gold, r, { mattW: 6 }); pieces.push(c); g.strokeStyle = paint(0.8); g.lineWidth = 2; g.beginPath(); for (let i = 0; i <= 160; i++) { const t = i / 160 * 3.4 * TAU, rr = f.s * 0.05 * Math.exp(0.15 * t); if (rr > f.s * 0.9) break; const px = f.x + Math.cos(t) * rr, py = f.y + Math.sin(t) * rr; i ? g.lineTo(px, py) : g.moveTo(px, py); } g.stroke(); }
-  }
+  // rays out of the middle, and points of light
+  g.save(); path(g, [B.inner]); g.clip();
+  for (let k = 0; k < 40; k++) { const a = k / 40 * TAU + 0.04; g.strokeStyle = `rgba(255,236,170,${k % 2 ? 0.2 : 0.38})`; g.lineWidth = k % 2 ? 1 : 1.6; g.beginPath(); g.moveTo(big.x + Math.cos(a) * B.R * 0.2, big.y + Math.sin(a) * B.R * 0.2); g.lineTo(big.x + Math.cos(a) * B.R, big.y + Math.sin(a) * B.R); g.stroke(); }
+  for (let k = 0; k < 90; k++) { const a = r() * TAU, d = Math.sqrt(r()) * B.R; g.fillStyle = `rgba(255,250,225,${0.35 + r() * 0.5})`; g.beginPath(); g.arc(big.x + Math.cos(a) * d, big.y + Math.sin(a) * d, 0.7 + r() * 1.3, 0, TAU); g.fill(); }
+  g.restore();
+  // the solids: the dodecahedron in the middle; round it fire, air, water and earth
+  platonic(g, 'dodeca', big.x, big.y, B.R * 0.37, 0.32, 0.2, C.gold, r, pieces);
+  [['tetra', C.orange, 0.5, 0.4], ['octa', C.straw, 0.45, 0.3], ['icosa', C.ice, 0.3, 0.2], ['cube', C.leaf, 0.5, 0.6]].forEach(([name, col, rx, ry], k) => {
+    const a = -Math.PI * 3 / 4 + k * Math.PI / 2, x = big.x + Math.cos(a) * B.R * 0.645, y = big.y + Math.sin(a) * B.R * 0.645;
+    g.strokeStyle = 'rgba(255,240,190,.3)'; g.lineWidth = 1.2; g.beginPath(); g.arc(x, y, B.R * 0.3, 0, TAU); g.stroke();
+    platonic(g, name, x, y, B.R * 0.25, rx, ry, col, r, pieces);
+  });
+  flush(LW * 0.7);
   yield;
-  // a planarian: an arrow-headed worm, its two eyespots looking inward
+  // a trefoil knot, over and under
+  const K = round(kn, 10); ground(K, kn, 40, u * 1.6, t => lerpC(C.blue, C.deep, t));
   {
-    const [wx, wy] = forms[1].to, L = unit * 4.4, Wd = unit * 1.15, a = -0.22, P = (u, v) => [wx + Math.cos(a) * u - Math.sin(a) * v, wy + Math.sin(a) * u + Math.cos(a) * v];
-    const half = t => Wd * (t < 0.7 ? 0.32 + 0.18 * Math.sin(Math.PI * t / 0.7) : t < 0.8 ? 0.42 - (t - 0.7) * 1.2 : t < 0.88 ? 0.3 + (t - 0.8) * 3.0 : 0.54 - (t - 0.88) * 4.4);
-    const side = s2 => Array.from({ length: 31 }, (_, i) => { const t = i / 30; return P(-L / 2 + L * t, s2 * Math.max(0.02 * Wd, half(t)) + Math.sin(t * 6) * unit * 0.07); });
-    const outline = [...side(-1), ...side(1).reverse()];
-    glass(g, outline, [26, 58, 48], r, { mattW: 12, matt: 0.42 }); pieces.push(outline);
-    g.strokeStyle = 'rgba(60,28,8,.45)'; g.lineWidth = unit * 0.14; g.beginPath(); for (let i = 0; i <= 14; i++) { const [px, py] = P(-L / 2 + L * 0.8 * i / 14, Math.sin(i * 0.43) * unit * 0.05); i ? g.lineTo(px, py) : g.moveTo(px, py); } g.stroke();
-    g.fillStyle = 'rgba(255,230,190,.35)'; for (let i = 0; i < 18; i++) { const [px, py] = P(-L / 2 + L * 0.8 * r(), (r() - 0.5) * Wd * 0.4); g.beginPath(); g.arc(px, py, 1 + r() * 1.4, 0, TAU); g.fill(); }
-    for (const s2 of [-1, 1]) { const [ex, ey] = P(L * 0.36, s2 * Wd * 0.13); g.fillStyle = 'rgba(255,250,235,.95)'; g.beginPath(); g.ellipse(ex, ey, unit * 0.15, unit * 0.11, a, 0, TAU); g.fill(); const [qx, qy] = P(L * 0.36, s2 * Wd * 0.13 - s2 * unit * 0.05); g.fillStyle = paint(0.95); g.beginPath(); g.arc(qx, qy, unit * 0.065, 0, TAU); g.fill(); }
+    const s = K.R * 0.27, wide = u * 0.34;
+    g.lineJoin = 'round';
+    for (const over of [0, 1]) for (let k = 0; k < 3; k++) {
+      const t0 = (2 * k + over) * Math.PI / 3; g.beginPath();
+      for (let i = 0; i <= 24; i++) { const t = t0 + i / 24 * Math.PI / 3, x = kn.x + (Math.sin(t) + 2 * Math.sin(2 * t)) * s, y = kn.y - (Math.cos(t) - 2 * Math.cos(2 * t)) * s; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.lineCap = 'butt'; g.strokeStyle = 'rgba(30,14,4,.8)'; g.lineWidth = wide * 2.1; g.stroke(); g.lineCap = over ? 'round' : 'butt'; g.strokeStyle = GOLD; g.lineWidth = wide; g.stroke();
+    }
   }
-  // a cell: membrane, the cytoplasm, the nucleus and its nucleolus, mitochondria
-  {
-    const [cx, cy] = forms[2].to, R = unit * 1.75, mem = ellipse(cx, cy, R, R * 0.9, 0.3, 44), cyto = ellipse(cx, cy, R * 0.87, R * 0.78, 0.3, 44), nuc = ellipse(cx + R * 0.15, cy - R * 0.08, R * 0.38, R * 0.33, 0.6, 30);
+  yield;
+  // an equiangular spiral
+  const S = round(sp, 10); ground(S, sp, 40, u * 1.6, t => lerpC(C.blue, C.deep, t));
+  { const pts = []; for (let a = 0; a <= 17.6; a += 0.1) { const q = S.R * 0.9 * Math.exp(0.17 * (a - 17.6)); pts.push([sp.x + Math.cos(a) * q, sp.y - Math.sin(a) * q]); } stain(g, pts, u * 0.3, GOLD); }
+  yield;
+
+  // ---- the three lights ----------------------------------------------------------------------------------
+  const ls = P.lights[1].spring, yF = ls - u * 2.5, m1 = ls + u * 12.6, m2 = ls + u * 30, RY = u * 7.6, yA = ls + u * 4, yB = ls + u * 26, F = [];
+  for (const L of P.lights) { F.push(archLight(g, L.x0 - 2, L.x1 + 2, L.spring, L.bot + 2, u, r, BORD)); yield; }
+  const yEnd = F[1].y1, skyAt = y => (y < yA ? lerpC(shift(C.azure, 0, 0, 2), C.deep, smooth(ls - u * 9.5, yA, y)) : y < yB ? lerpC(C.deep, shift(C.teal, 6, 0, 0), smooth(yA, yB, y)) : lerpC(shift(C.teal, 6, 0, 0), shift(C.green, -8, -4, -2), smooth(yB, yEnd, y)));
+  const RX = [u * 6.1, u * 7.6, u * 6.1];
+  // a medallion: a gold ring, and a field of one colour in a few pieces
+  const medal = (cx, cy, rx, col) => {
+    const out = ellipse(cx, cy, rx, RY, 0, 56), inn = ellipse(cx, cy, rx - u * 0.55, RY - u * 0.55, 0, 56);
+    glass(g, [out, inn], C.gold, r, { mattW: 4, matt: 0.2 });
+    const cells = voronoi(sitesIn((x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / RY) ** 2 < 0.8, cx - rx, cy - RY, cx + rx, cy + RY, 12, r, u * 4.2), inn);
+    for (const p of cells) glass(g, p, col, r, { mattW: 9, matt: 0.3, lj: 7 });
+    leads(g, cells, LW * 0.7, r); leads(g, [out, inn], LW, r);
+    g.strokeStyle = '#0d0b09'; g.lineWidth = LW * 0.7; for (let k = 0; k < 12; k++) { const a = (k + 0.5) / 12 * TAU; g.beginPath(); g.moveTo(cx + Math.cos(a) * rx, cy + Math.sin(a) * RY); g.lineTo(cx + Math.cos(a) * (rx - u * 0.55), cy + Math.sin(a) * (RY - u * 0.55)); g.stroke(); }
+  };
+  // ---- what the forms come down into ---------------------------------------------------------------------
+  // a cell: membrane, the cytoplasm, the nucleus and its nucleolus, mitochondria, a few vesicles
+  const cell = (cx, cy) => {
+    const R = u * 4.6, mem = ellipse(cx, cy, R * 0.94, R * 1.2, 0.2, 44), cyto = ellipse(cx, cy, R * 0.81, R * 1.07, 0.2, 44), nx = cx + R * 0.1, ny = cy - R * 0.22, nuc = ellipse(nx, ny, R * 0.42, R * 0.37, 0.6, 30);
     glass(g, [mem, cyto], C.emerald, r, { mattW: 5 }); glass(g, [cyto, nuc], [86, 50, 70], r, { mattW: 16, matt: 0.25 }); glass(g, nuc, C.violet, r, { mattW: 8 }); pieces.push(mem, cyto, nuc);
-    g.fillStyle = 'rgba(255,220,240,.6)'; g.beginPath(); g.arc(cx + R * 0.2, cy - R * 0.12, R * 0.09, 0, TAU); g.fill();
-    for (let k = 0; k < 8; k++) { const a = r() * TAU, d = R * (0.5 + r() * 0.22), mx = cx + Math.cos(a) * d, my = cy + Math.sin(a) * d * 0.85; g.fillStyle = 'rgba(205,110,20,.8)'; g.beginPath(); g.ellipse(mx, my, R * 0.11, R * 0.05, a + 1.2, 0, TAU); g.fill(); g.strokeStyle = paint(0.5); g.lineWidth = 0.8; g.stroke(); }
-    g.strokeStyle = 'rgba(30,60,20,.45)'; g.lineWidth = 1; for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(cx + R * 0.15, cy - R * 0.08, R * (0.48 + k * 0.08), 2.2, 4.0); g.stroke(); }
-  }
-  yield;
-  // a frog, sitting side-on on a lily pad, with its gold eye
-  {
-    const [fx, fy] = forms[0].to, s = unit * 1.25;
-    const pad = ellipse(fx + 0.1 * s, fy + 1.1 * s, 2.0 * s, 0.34 * s, 0, 30);
+    g.fillStyle = 'rgba(255,220,240,.6)'; g.beginPath(); g.arc(nx + R * 0.06, ny - R * 0.04, R * 0.1, 0, TAU); g.fill();
+    g.strokeStyle = 'rgba(30,60,20,.45)'; g.lineWidth = 1.2; for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(nx, ny, R * (0.5 + k * 0.08), 1.2, 3.4); g.stroke(); }
+    for (let k = 0; k < 10; k++) {
+      const a = k / 10 * TAU + r() * 0.4, d = 0.56 + r() * 0.16, mx = cx + Math.cos(a) * R * 0.8 * d, my = cy + Math.sin(a) * R * 1.06 * d;
+      if (Math.hypot(mx - nx, my - ny) < R * 0.56) continue;
+      g.fillStyle = 'rgba(205,110,20,.85)'; g.beginPath(); g.ellipse(mx, my, R * 0.13, R * 0.06, a + 1.2, 0, TAU); g.fill(); g.strokeStyle = paint(0.55); g.lineWidth = 1; g.stroke();
+    }
+    for (let k = 0; k < 7; k++) { const a = r() * TAU, d = 0.3 + r() * 0.5, vx = cx + Math.cos(a) * R * 0.8 * d, vy = cy + Math.sin(a) * R * 1.06 * d; if (Math.hypot(vx - nx, vy - ny) < R * 0.5) continue; g.fillStyle = 'rgba(255,255,240,.5)'; g.beginPath(); g.arc(vx, vy, R * (0.03 + r() * 0.03), 0, TAU); g.fill(); }
+  };
+  // a flatworm: an arrow-headed planarian, its two eyespots looking inward; `two` gives it a head at each end
+  const worm = (wx, wy, L, Wd, a, two) => {
+    const Pt = (p, v) => [wx + Math.cos(a) * p - Math.sin(a) * v, wy + Math.sin(a) * p + Math.cos(a) * v];
+    const h1 = t => (t < 0.72 ? 0.34 + 0.16 * Math.sin(Math.PI * t / 0.72) : t < 0.8 ? 0.34 - (t - 0.72) * 0.5 : t < 0.88 ? 0.3 + (t - 0.8) * 3.0 : 0.54 - (t - 0.88) * 4.4);
+    const half = t => Wd * (two ? h1(Math.max(t, 1 - t)) : h1(t) * Math.min(1, Math.sqrt(t / 0.12)));
+    const side = s2 => Array.from({ length: 41 }, (_, i) => { const t = i / 40; return Pt(-L / 2 + L * t, s2 * Math.max(0.02 * Wd, half(t)) + Math.sin(t * 6) * Wd * 0.06); });
+    const outline = [...side(-1), ...side(1).reverse()], ends = two ? [-1, 1] : [1];
+    glass(g, outline, [26, 58, 46], r, { mattW: 12, matt: 0.42 }); pieces.push(outline);
+    g.strokeStyle = 'rgba(60,28,8,.45)'; g.lineWidth = Wd * 0.12; g.lineCap = 'round'; g.beginPath(); for (let i = 0; i <= 14; i++) { const [px, py] = Pt((two ? -L * 0.3 : -L * 0.42) + L * (two ? 0.6 : 0.72) * i / 14, Math.sin(i * 0.43) * Wd * 0.05); i ? g.lineTo(px, py) : g.moveTo(px, py); } g.stroke();
+    g.fillStyle = 'rgba(255,230,190,.35)'; for (let i = 0; i < 22; i++) { const [px, py] = Pt(-L * 0.36 + L * 0.66 * r(), (r() - 0.5) * Wd * 0.4); g.beginPath(); g.arc(px, py, 1 + r() * 1.6, 0, TAU); g.fill(); }
+    for (const e of ends) for (const s2 of [-1, 1]) { const [ex, ey] = Pt(e * L * 0.36, s2 * Wd * 0.14); g.fillStyle = 'rgba(255,250,235,.95)'; g.beginPath(); g.ellipse(ex, ey, Wd * 0.14, Wd * 0.1, a, 0, TAU); g.fill(); const [qx, qy] = Pt(e * L * 0.36, s2 * Wd * 0.14 - s2 * Wd * 0.045); g.fillStyle = paint(0.95); g.beginPath(); g.arc(qx, qy, Wd * 0.06, 0, TAU); g.fill(); }
+  };
+  // a machine: two gears, one turning the other
+  const gears = (cx, cy) => {
+    const gear = (x, y, R, n, ph) => { const p = []; for (let i = 0; i < n * 4; i++) { const a = ph + (i / (n * 4)) * TAU, rr = (i % 4 < 2) ? R : R * 0.8; p.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]); } return p; };
+    const R1 = u * 3.9, R2 = u * 2.5, ax = cx - u * 1.3, ay = cy + u * 2.4, bx = ax + (R1 + R2) * 0.92 * Math.cos(-1.05), by = ay + (R1 + R2) * 0.92 * Math.sin(-1.05);
+    const ga = gear(ax, ay, R1, 12, 0), gb = gear(bx, by, R2, 8, 0.2), ha = circle(ax, ay, R1 * 0.26, 20), hb = circle(bx, by, R2 * 0.3, 16);
+    glass(g, [ga, ha], C.gold, r, { mattW: 9, matt: 0.4 }); glass(g, ha, C.blue, r, { mattW: 4 });
+    glass(g, [gb, hb], [205, 18, 66], r, { mattW: 7, matt: 0.4 }); glass(g, hb, C.blue, r, { mattW: 4 }); pieces.push(ga, ha, gb, hb);
+    g.strokeStyle = paint(0.55); g.lineWidth = 1.6;
+    for (const [x, y, R, n] of [[ax, ay, R1, 6], [bx, by, R2, 4]]) { for (let k = 0; k < n; k++) { const a = k / n * TAU + 0.2; g.beginPath(); g.moveTo(x + Math.cos(a) * R * 0.3, y + Math.sin(a) * R * 0.3); g.lineTo(x + Math.cos(a) * R * 0.68, y + Math.sin(a) * R * 0.68); g.stroke(); } g.beginPath(); g.arc(x, y, R * 0.7, 0, TAU); g.stroke(); }
+  };
+  // a slime mould: yellow veins from where it started to every oat flake, by the shortest roads it could find
+  const slime = (cx, cy, rx) => {
+    const YEL = 'rgba(255,212,48,.97)', nodes = sitesIn((x, y) => ((x - cx) / (rx - u * 1.7)) ** 2 + ((y - cy) / (RY - u * 1.7)) ** 2 < 1, cx - rx, cy - RY, cx + rx, cy + RY, 24, r, u * 2.05);
+    if (nodes.length < 3) return;
+    let root = 0; nodes.forEach((p, i) => { if (Math.hypot(p[0] - cx + rx * 0.3, p[1] - cy - RY * 0.5) < Math.hypot(nodes[root][0] - cx + rx * 0.3, nodes[root][1] - cy - RY * 0.5)) root = i; });
+    const dist = (i, j) => Math.hypot(nodes[i][0] - nodes[j][0], nodes[i][1] - nodes[j][1]), depth = new Map([[root, 0]]), edges = [], kids = new Map();
+    while (depth.size < nodes.length) {
+      let best = null; for (const i of depth.keys()) for (let j = 0; j < nodes.length; j++) if (!depth.has(j) && (!best || dist(i, j) < best[2])) best = [i, j, dist(i, j)];
+      depth.set(best[1], depth.get(best[0]) + 1); edges.push(best); kids.set(best[0], (kids.get(best[0]) ?? 0) + 1);
+    }
+    const tips = nodes.map((_, i) => i).filter(i => !kids.has(i) && i !== root), food = tips.filter((_, k) => k % 2 === 0).slice(0, 4);
+    for (const i of food) { const e = ellipse(nodes[i][0], nodes[i][1], u * 0.8, u * 0.5, r() * 3, 14); glass(g, e, C.straw, r, { mattW: 4, matt: 0.3 }); pieces.push(e); }
+    flush(LW * 0.6);
+    const vein = (p, q, wide) => { const mx = (p[0] + q[0]) / 2 - (q[1] - p[1]) * (r() - 0.5) * 0.3, my = (p[1] + q[1]) / 2 + (q[0] - p[0]) * (r() - 0.5) * 0.3, pts = []; for (let k = 0; k <= 8; k++) { const t = k / 8; pts.push([(1 - t) ** 2 * p[0] + 2 * t * (1 - t) * mx + t * t * q[0], (1 - t) ** 2 * p[1] + 2 * t * (1 - t) * my + t * t * q[1]]); } stain(g, pts, wide, YEL); };
+    for (const [i, j] of edges.slice().reverse()) vein(nodes[i], nodes[j], Math.max(u * 0.26, u * (0.66 - 0.085 * depth.get(j))));
+    { let loops = 0; for (let i = 0; i < nodes.length && loops < 5; i++) for (let j = i + 1; j < nodes.length && loops < 5; j++) if (dist(i, j) < u * 3.1 && !edges.some(e => (e[0] === i && e[1] === j) || (e[0] === j && e[1] === i))) { vein(nodes[i], nodes[j], u * 0.2); loops++; } }      // and a few ways round
+    for (const i of tips) if (!food.includes(i)) for (let k = 0; k < 4; k++) { const a = r() * TAU, l = u * (0.7 + r() * 0.7); vein(nodes[i], [nodes[i][0] + Math.cos(a) * l, nodes[i][1] + Math.sin(a) * l], u * 0.15); }
+    g.fillStyle = YEL; g.beginPath(); g.arc(nodes[root][0], nodes[root][1], u * 0.7, 0, TAU); g.fill();
+  };
+  // a frog, sitting side-on on a leaf, with its gold eye; and under it what it was
+  const frog = (cx, cy) => {
+    const s = u * 3.1, fx = cx - u * 0.3, fy = cy - u * 1.6, at = pts => pts.map(([a, b]) => [fx + a * s, fy + b * s]);
+    const pad = ellipse(fx + 0.1 * s, fy + 1.1 * s, 1.85 * s, 0.3 * s, 0, 30);
     glass(g, pad, C.leaf, r, { mattW: 8 }); pieces.push(pad);
-    const body = [[-1.35, 0.55], [-1.3, 0.05], [-0.9, -0.42], [-0.2, -0.62], [0.35, -0.78], [0.62, -1.05], [0.95, -1.02], [1.15, -0.72], [1.55, -0.45], [1.62, -0.25], [1.25, 0.0], [0.7, 0.25], [0.3, 0.72], [-0.6, 0.85]].map(([u, v]) => [fx + u * s, fy + v * s]);
-    const thigh = [[-1.45, 0.62], [-1.05, -0.05], [-0.25, 0.1], [-0.05, 0.55], [-0.5, 0.86]].map(([u, v]) => [fx + u * s, fy + v * s]);
-    const foot = [[-0.55, 0.82], [-0.05, 0.55], [0.6, 0.88], [0.75, 1.0], [-0.4, 1.0]].map(([u, v]) => [fx + u * s, fy + v * s]);
-    const arm = [[0.55, 0.25], [0.85, 0.2], [1.0, 0.95], [1.25, 1.02], [0.7, 1.02]].map(([u, v]) => [fx + u * s, fy + v * s]);
-    glass(g, body, [104, 56, 40], r, { mattW: 12, matt: 0.4 }); glass(g, thigh, [100, 52, 34], r, { mattW: 9, matt: 0.42 }); glass(g, foot, [96, 50, 30], r, { mattW: 6 }); glass(g, arm, [102, 50, 36], r, { mattW: 6 });
+    const body = at([[-1.35, 0.55], [-1.3, 0.05], [-0.9, -0.42], [-0.2, -0.62], [0.35, -0.78], [0.62, -1.05], [0.95, -1.02], [1.15, -0.72], [1.55, -0.45], [1.62, -0.25], [1.25, 0.0], [0.7, 0.25], [0.3, 0.72], [-0.6, 0.85]]);
+    const thigh = at([[-1.45, 0.62], [-1.05, -0.05], [-0.25, 0.1], [-0.05, 0.55], [-0.5, 0.86]]), foot = at([[-0.55, 0.82], [-0.05, 0.55], [0.6, 0.88], [0.75, 1.0], [-0.4, 1.0]]), arm = at([[0.55, 0.25], [0.85, 0.2], [1.0, 0.95], [1.25, 1.02], [0.7, 1.02]]);
+    glass(g, body, [104, 56, 42], r, { mattW: 12, matt: 0.4 }); glass(g, thigh, [100, 52, 35], r, { mattW: 9, matt: 0.42 }); glass(g, foot, [96, 50, 31], r, { mattW: 6 }); glass(g, arm, [102, 50, 37], r, { mattW: 6 });
     pieces.push(body, thigh, foot, arm);
     const eye = circle(fx + 0.8 * s, fy - 0.78 * s, 0.22 * s, 18); glass(g, eye, C.gold, r, { mattW: 3 }); pieces.push(eye);
     g.fillStyle = paint(0.95); g.beginPath(); g.ellipse(fx + 0.82 * s, fy - 0.78 * s, 0.12 * s, 0.06 * s, 0, 0, TAU); g.fill();
-    g.strokeStyle = paint(0.55); g.lineWidth = 1.3; g.beginPath(); g.moveTo(fx + 1.58 * s, fy - 0.3 * s); g.quadraticCurveTo(fx + 1.15 * s, fy - 0.2 * s, fx + 0.7 * s, fy - 0.42 * s); g.stroke();
+    g.strokeStyle = paint(0.55); g.lineWidth = 1.6; g.beginPath(); g.moveTo(fx + 1.58 * s, fy - 0.3 * s); g.quadraticCurveTo(fx + 1.15 * s, fy - 0.2 * s, fx + 0.7 * s, fy - 0.42 * s); g.stroke();
     g.beginPath(); g.moveTo(fx - 1.0 * s, fy - 0.3 * s); g.quadraticCurveTo(fx - 0.2 * s, fy - 0.55 * s, fx + 0.6 * s, fy - 0.62 * s); g.stroke();
-    for (let k = 0; k < 10; k++) { g.fillStyle = 'rgba(30,40,10,.4)'; g.beginPath(); g.arc(fx + (r() - 0.7) * 1.6 * s, fy + (r() - 0.65) * 0.9 * s, 0.06 * s + r() * 0.06 * s, 0, TAU); g.fill(); }
+    for (let k = 0; k < 12; k++) { g.fillStyle = 'rgba(30,40,10,.4)'; g.beginPath(); g.arc(fx + (r() - 0.7) * 1.6 * s, fy + (r() - 0.65) * 0.9 * s, 0.06 * s + r() * 0.06 * s, 0, TAU); g.fill(); }
+    // the tadpole
+    const tx = cx + u * 1.0, ty = cy + u * 5.0, tad = [], k2 = 1.35;
+    for (let i = 0; i <= 12; i++) { const a = -Math.PI / 2 + i / 12 * Math.PI; tad.push([tx + Math.cos(a) * u * 1.1 * k2, ty + Math.sin(a) * u * 0.62 * k2]); }
+    for (let i = 1; i <= 10; i++) { const t = i / 10; tad.push([tx - t * u * 3.4 * k2, ty + u * 0.62 * k2 * (1 - t) ** 1.6 + Math.sin(t * 5) * u * 0.3]); }
+    for (let i = 10; i >= 1; i--) { const t = i / 10; tad.push([tx - t * u * 3.4 * k2, ty - u * 0.62 * k2 * (1 - t) ** 1.6 + Math.sin(t * 5) * u * 0.3]); }
+    glass(g, tad, [70, 40, 30], r, { mattW: 6, matt: 0.4 }); pieces.push(tad);
+    g.fillStyle = 'rgba(255,250,235,.95)'; g.beginPath(); g.arc(tx + u * 0.75, ty - u * 0.22, u * 0.22, 0, TAU); g.fill(); g.fillStyle = paint(0.95); g.beginPath(); g.arc(tx + u * 0.81, ty - u * 0.22, u * 0.1, 0, TAU); g.fill();
+  };
+  // xenobots: a few thousand frog cells that were never told to be a frog; they swim, and sweep loose cells into heaps
+  const xeno = (cx, cy) => {
+    for (const [dx, dy, R, a0] of [[-1.3, -3.4, 2.2, 0.5], [1.6, 0.5, 1.9, 2.6], [-1.6, 4.0, 1.6, 0.0]]) {
+      const x = cx + dx * u, y = cy + dy * u, rad = R * u, p = [[x + Math.cos(a0) * rad * 0.2, y + Math.sin(a0) * rad * 0.2]];
+      for (let i = 0; i <= 30; i++) { const a = a0 + 0.55 + i / 30 * (TAU - 1.1); p.push([x + Math.cos(a) * rad, y + Math.sin(a) * rad]); }
+      glass(g, p, [24, 56, 72], r, { mattW: 9, matt: 0.4 }); pieces.push(p);
+      g.save(); path(g, [p]); g.clip(); g.strokeStyle = 'rgba(90,40,20,.4)'; g.lineWidth = 1;
+      for (let k = 0; k < R * 16; k++) { const a = r() * TAU, d = Math.sqrt(r()) * rad; g.beginPath(); g.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, u * 0.2, 0, TAU); g.stroke(); }
+      g.restore();
+      // the heap in front of its mouth, and a few strays
+      for (let k = 0; k < 16; k++) { const a = a0 + (r() - 0.5) * 1.1, d = rad * (0.75 + r() * 0.85) * (k < 11 ? 1 : 1.6); g.fillStyle = `rgba(255,236,206,${0.55 + r() * 0.4})`; g.beginPath(); g.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, u * (0.09 + r() * 0.07), 0, TAU); g.fill(); }
+    }
+  };
+  const FIELD = [[C.ruby, [200, 40, 74], C.ruby], [[282, 40, 20], [206, 62, 38], C.violet]];
+  for (let i = 0; i < 3; i++) {
+    const f = F[i], rx = RX[i], inMed = (x, y, m) => [m1, m2].some(my => ((x - f.cx) / (rx - m)) ** 2 + ((y - my) / (RY - m)) ** 2 < 1);
+    // the ground: deep blue above, coming down through sea green to green; lighter where the beam passes behind it
+    const cells = voronoi(sitesIn((x, y) => f.inside(x, y) && !inMed(x, y, u * 1.2), f.x0, f.y0, f.x1, f.y1, 420, r, u * 1.45), f.inner);
+    yield;
+    let n = 0;
+    for (const p of cells) {
+      const [x, y] = centroid(p), t = clamp((y - yF) / (m2 - yF), 0, 1), glow = y > yF - u * 3 && y < m2 ? smooth(u * 3.4, u * 0.8, Math.abs(x - f.cx)) * (1 - 0.55 * t) : 0;
+      glass(g, p, shift(skyAt(y), 0, -8 * glow, 13 * glow), r, { mattW: 7, matt: 0.3 });
+      if (++n % 80 === 0) yield;
+    }
+    // painted on it: points of light and a few small forms above, ripples lower down, weed at the foot
+    g.save(); path(g, [f.inner]); g.clip();
+    for (let k = 0; k < 46; k++) { const x = f.x0 + r() * (f.x1 - f.x0), y = f.y0 + r() * (m1 - f.y0); g.fillStyle = `rgba(255,250,225,${0.35 + r() * 0.5})`; g.beginPath(); g.arc(x, y, 0.7 + r() * 1.2, 0, TAU); g.fill(); }
+    for (let k = 0; k < 6; k++) {
+      const x = f.cx + (k % 2 ? 1 : -1) * (f.x1 - f.x0) * (0.24 + r() * 0.18), y = yF - u * 2.4 + k * u * 1.5, s = u * (0.36 + r() * 0.2), nn = 3 + (k + i) % 4, a0 = r() * TAU;
+      if (!f.inside(x, y, s * 1.3)) continue;
+      g.strokeStyle = k % 3 ? 'rgba(255,232,150,.9)' : 'rgba(240,248,255,.88)'; g.lineWidth = 1.5; g.beginPath(); for (let q = 0; q <= nn; q++) { const a = a0 + q / nn * TAU; q ? g.lineTo(x + Math.cos(a) * s, y + Math.sin(a) * s) : g.moveTo(x + Math.cos(a) * s, y + Math.sin(a) * s); } g.stroke();
+    }
+    g.strokeStyle = 'rgba(210,255,240,.24)'; g.lineWidth = 1.3;
+    for (let k = 0; k < 26; k++) { const x = f.x0 + r() * (f.x1 - f.x0), y = m1 + RY + r() * (f.y1 - m1 - RY - u), l = u * (0.6 + r() * 1.2); g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + l / 2, y - u * 0.18, x + l, y); g.stroke(); }
+    g.strokeStyle = 'rgba(10,40,20,.5)'; g.lineWidth = 2.2;
+    for (let k = 0; k < 16; k++) { const x = f.x0 + r() * (f.x1 - f.x0), y = f.y1 - r() * u * 0.4, h = u * (1.4 + r() * 3.2); g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x + u * 0.3, y - h * 0.3, x - u * 0.3, y - h * 0.6, x + (r() - 0.5) * u * 0.6, y - h); g.stroke(); }
+    g.restore();
+    leads(g, cells, LW * 0.85, r);
+    yield;
+    // the beam: pale gold from the form down to the first body, and on, fainter, to the second
+    const glowC = i === 1 ? [52, 60, 84] : [44, 88, 66], rf = u * (i === 1 ? 2.5 : 2.2);
+    for (const [ya, yb, wa, wb] of [[yF, m1 - RY + 3, u * 1.25, u * 0.95], [m1 + RY - 3, m2 - RY + 3, u * 0.8, u * 0.6]]) {
+      const p = [[f.cx - wa, ya], [f.cx + wa, ya], [f.cx + wb, yb], [f.cx - wb, yb]];
+      glass(g, p, ya > m1 ? shift(glowC, 0, -6, -6) : glowC, r, { mattW: 5, matt: 0.15, hj: 3, lj: 3 });
+      g.save(); path(g, [p]); g.clip(); g.strokeStyle = 'rgba(255,255,240,.34)'; g.lineWidth = 1; for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(f.cx + k * wa * 0.3, ya); g.lineTo(f.cx + k * wb * 0.3, yb); g.stroke(); } g.restore();
+      pieces.push(p);
+    }
+    flush();
+    // the form in the arch, cut in luminous glass, with its halo
+    for (let k = 1; k <= 3; k++) { g.strokeStyle = `rgba(255,240,190,${0.5 - k * 0.11})`; g.lineWidth = 1.3; g.beginPath(); g.arc(f.cx, yF, rf * (1.18 + k * 0.2), 0, TAU); g.stroke(); }
+    if (i === 0) { const p = [0, 1, 2].map(k => [f.cx + Math.cos(-Math.PI / 2 + k * TAU / 3) * rf * 1.12, yF + rf * 0.14 + Math.sin(-Math.PI / 2 + k * TAU / 3) * rf * 1.12]), q = [0, 1, 2].map(k => [f.cx + Math.cos(-Math.PI / 2 + k * TAU / 3) * rf * 0.42, yF + rf * 0.14 + Math.sin(-Math.PI / 2 + k * TAU / 3) * rf * 0.42]); glass(g, [p, q], C.white, r, { mattW: 6 }); glass(g, q, C.gold, r, { mattW: 4 }); pieces.push(p, q); }
+    if (i === 1) { const c = circle(f.cx, yF, rf, 40), c2 = circle(f.cx, yF, rf * 0.56, 40); glass(g, [c, c2], C.white, r, { mattW: 6 }); glass(g, c2, C.gold, r, { mattW: 6 }); pieces.push(c, c2); }
+    if (i === 2) { const p = []; for (let k = 0; k < 14; k++) { const a = -Math.PI / 2 + (k / 14) * TAU, rr = k % 2 ? rf * 0.52 : rf * 1.08; p.push([f.cx + Math.cos(a) * rr, yF + Math.sin(a) * rr]); } glass(g, p, C.gold, r, { mattW: 6 }); pieces.push(p); const c = circle(f.cx, yF, rf * 0.3, 20); glass(g, c, C.ruby, r, { mattW: 4 }); pieces.push(c); }
+    flush();
+    yield;
+    // the two bodies
+    medal(f.cx, m1, rx, FIELD[0][i]);
+    if (i === 0) cell(f.cx, m1);
+    if (i === 1) { worm(f.cx - u * 0.3, m1 - u * 2.7, u * 10.6, u * 2.9, -0.2, false); worm(f.cx + u * 0.3, m1 + u * 2.9, u * 10.4, u * 2.8, 0.12, true); }
+    if (i === 2) gears(f.cx, m1);
+    flush();
+    yield;
+    medal(f.cx, m2, rx, FIELD[1][i]);
+    if (i === 0) slime(f.cx, m2, rx);
+    if (i === 1) frog(f.cx, m2);
+    if (i === 2) xeno(f.cx, m2);
+    flush();
+    // at the foot of the side lights, beside the words: the pond's edge, three leaves and a flower
+    if (i !== 1) {
+      const sg = i ? -1 : 1, yb = (m2 + RY + f.y1) / 2;
+      for (const [dx, dy, rad, a0] of [[-3.0, 1.3, 2.5, 0.6], [2.4, 0.2, 2.0, 3.6], [0.1, -1.9, 1.5, 5.2]]) {
+        const x = f.cx + sg * dx * u, y = yb + dy * u, p = [[x, y]];
+        for (let k = 0; k <= 22; k++) { const a = a0 + 0.22 + k / 22 * (TAU - 0.44); p.push([x + Math.cos(a) * rad * u, y + Math.sin(a) * rad * u * 0.52]); }
+        glass(g, p, shift(C.leaf, 0, 0, rad * 2 - 4), r, { mattW: 7, matt: 0.36 }); pieces.push(p);
+        g.strokeStyle = 'rgba(20,50,10,.4)'; g.lineWidth = 1.1; for (let k = 0; k < 7; k++) { const a = a0 + 0.6 + k / 7 * (TAU - 1.0); g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * rad * u * 0.86, y + Math.sin(a) * rad * u * 0.45); g.stroke(); }
+      }
+      const fx = f.cx + sg * 2.5 * u, fy = yb - 1.5 * u;
+      for (let k = 0; k < 5; k++) { const a = -Math.PI + (k + 0.5) / 5 * Math.PI, p = ellipse(fx + Math.cos(a) * u * 0.62, fy + Math.sin(a) * u * 0.62, u * 0.66, u * 0.28, a, 12); glass(g, p, k % 2 ? C.white : C.rose, r, { mattW: 3, matt: 0.2 }); pieces.push(p); }
+      flush(LW * 0.6);
+    }
+    // three saddle bars, at the same heights in every light
+    g.fillStyle = '#0d0b09'; for (const y of [m1 - RY - u * 0.95, (m1 + m2) / 2, m2 + RY + u * 1.0]) g.fillRect(f.x0, y - u * 0.07, f.x1 - f.x0, u * 0.14);
+    yield;
   }
-  // a machine: two gears, one turning the other
+  // ---- the words, on a ribbon across the foot of the middle light ------------------------------------------
   {
-    const [mx, my] = forms[3].to, gear = (x, y, R, n, ph) => { const p = []; for (let i = 0; i < n * 4; i++) { const a = ph + (i / (n * 4)) * TAU, rr = (i % 4 < 2) ? R : R * 0.8; p.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]); } return p; };
-    const R1 = unit * 1.35, R2 = unit * 0.85, ax = mx - unit * 0.45, ay = my, bx = ax + (R1 + R2) * 0.92 * Math.cos(-0.9), by = ay + (R1 + R2) * 0.92 * Math.sin(-0.9);
-    const ga = gear(ax, ay, R1, 12, 0), gb = gear(bx, by, R2, 8, 0.25), ha = circle(ax, ay, R1 * 0.26, 20), hb = circle(bx, by, R2 * 0.3, 16);
-    glass(g, [ga, ha], C.amber, r, { mattW: 9, matt: 0.4 }); glass(g, ha, C.blue, r, { mattW: 4 });
-    glass(g, [gb, hb], [205, 18, 62], r, { mattW: 7, matt: 0.4 }); glass(g, hb, C.ruby, r, { mattW: 4 }); pieces.push(ga, ha, gb, hb);
-    g.strokeStyle = paint(0.55); g.lineWidth = 1.4; for (let k = 0; k < 6; k++) { const a = k / 6 * TAU + 0.2; g.beginPath(); g.moveTo(ax + Math.cos(a) * R1 * 0.3, ay + Math.sin(a) * R1 * 0.3); g.lineTo(ax + Math.cos(a) * R1 * 0.68, ay + Math.sin(a) * R1 * 0.68); g.stroke(); }
-    g.beginPath(); g.arc(ax, ay, R1 * 0.7, 0, TAU); g.stroke();
+    const f = F[1], lines = [{ text: 'INGRESSING', size: u * 1.7, track: 0.14, lead: 1 }, { text: 'MINDS', size: u * 1.7, track: 0.14, lead: 1.0 }, { text: 'after M. Levin · the word is Whitehead’s', size: u * 0.88, italic: true, track: 0.05, lead: 1.4 }];
+    const block = lines[0].size * 0.7 + lines.slice(1).reduce((s2, l) => s2 + l.size * l.lead, 0) + lines.at(-1).size * 0.18, h = block / 0.8 + u * 0.3;
+    pieces.push(...banderole(g, f.x0 + u * 0.35, f.x1 - u * 0.35, f.y1 - u * 0.45 - h / 2, h, lines, r, { fold: u * 0.6, wave: u * 0.12 }));
+    flush(LW);
   }
-  leads(g, pieces, LW, r); pieces.length = 0;
-  yield;
-  // the banderole across the middle, and the credit at the foot
-  pieces.push(...banderole(g, X(0.04), X(0.96), yBand, unit * 1.35, [
-    { text: 'INGRESSING  MINDS', size: unit * 0.74, track: 0.24, lead: 1.0 },
-  ], r, { wave: unit * 0.14 }));
-  const foot = clipPoly(rect(x0, yFoot, x1, y1 + 2), inner);
-  glass(g, foot, C.straw, r, { mattW: 6, matt: 0.15 }); pieces.push(foot);
-  g.fillStyle = paint(0.85); setLine(g, 'after M. Levin · the word is Whitehead’s', (x0 + x1) / 2, (yFoot + y1) / 2 + unit * 0.14, unit * 0.36, { italic: true, track: 0.06 });
-  leads(g, pieces, LW, r);
   return pieces;
 }
 
@@ -1253,16 +1420,18 @@ export function* lowLight(g, W, H, id, seed = 500) {
 }
 
 // ---- the set -----------------------------------------------------------------------------------------
-// id: [width px, height px, drawing]. The tall windows are all TALL; the end window is drawn at 512 by 1024.
+// id: [width px, height px, drawing]. The tall windows are all TALL; the end window is GREATPX.
 // The Life window is made by makeLife (it keeps its board).
 const [TW, TH] = TALL;
+// (a fault in the great window's drawing is reported and leaves its glass as far as it got: it must not stop the page)
+function* safely(it, name) { try { yield* it; } catch (e) { console.warn('chapel glass: ' + name, e); } }
 export const WINDOWS = {
   murmuration: [TW, TH, g => murmuration(g, TW, TH)],
   symmetry: [TW, TH, g => brokenSymmetry(g, TW, TH)],
   turing: [TW, TH, g => turing(g, TW, TH)],
   eigen: [TW, TH, g => eigen(g, TW, TH)],
   neuron: [TW, TH, g => neuron(g, TW, TH)],
-  ingression: [512, 1024, g => ingression(g, 512, 1024)],
+  ingression: [GREATPX[0], GREATPX[1], g => safely(ingression(g, GREATPX[0], GREATPX[1]), 'ingression')],
   loop: [TW, TH, g => strangeLoop(g, TW, TH)],
   lorenz: [TW, TH, g => lorenz(g, TW, TH)],
   logistic: [TW, TH, g => logistic(g, TW, TH)],
