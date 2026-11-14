@@ -188,7 +188,7 @@ export function fixtures(kit, K) {
   // Returns the shelf-top heights, for putting things on. o: { d depth, mat, back (material or false), th }
   function shelving(f, x0, x1, zs = [1.2, 2.6, 4.0, 5.4], o = {}) {
     const d = o.d ?? 1.0, mat = o.mat ?? WOOD, th = o.th ?? 0.09, top = Math.max(...zs) + (o.over ?? 1.3), n = Math.max(1, Math.round((x1 - x0) / (o.bay ?? 3.4)));
-    if (o.back !== false) f.box(o.back ?? mat, x0, x1, 0.01, 0.06, 0, top, G);
+    if (o.back !== false) f.box(o.back ?? mat, x0, x1, 0.01, 0.078, 0, top, G);      // (proud of the shell's 0.06 skirting)
     for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; f.box(mat, x - 0.045, x + 0.045, 0.01, d, 0, top, G); }
     for (const z of zs) f.box(mat, x0, x1, 0.02, d + 0.03, z - th, z, G);
     f.box(mat, x0 - 0.05, x1 + 0.05, 0.01, d + 0.05, top, top + 0.1, G);

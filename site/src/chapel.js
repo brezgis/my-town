@@ -14,23 +14,27 @@
 //   the far end wall (the real one is hidden by a later addition): plain, with one window, the tallest
 //   the bell-cote on the ridge, which is the one on the Second Presbyterian Church three streets away
 //     (Edwin J. Peck, 1835; HABS IN-24-15, sheet 2, "Bell ordered in 1837"; research/chapel/in0161)
-//   the glass. Each tall window keeps the real ones' division into lights: a band below, the picture, an
-//     arched light above. The pictures are Anna's eight from the chapel in her garden and four in the same hand:
-//       over the door         murmuration (a roundel), Lorenz and McCulloch & Pitts either side
+//   the glass. Each tall window is one round-headed light, and its picture is drawn for the whole of it. The
+//     subjects are Anna's eight from the chapel in her garden and four in the same hand:
+//       over the door         murmuration, Lorenz and McCulloch & Pitts either side
 //       west wall, from door  Life (it moves), Turing, the strange loop, eigen-behaviour (the evening sun)
 //       east wall, from door  Cajal's neuron, broken symmetry, Darwin's tree, the logistic map
 //       the far end           ingressing minds, behind the stone table
+//     The short windows under them are leaded too: pale quarries in the border of the window above, and one
+//     small roundel each that answers it (a glider under Life, a seedling under Darwin's tree).
 //
-// Inside: pews, the stone table with candles and a bowl of water, one board of numbers, the bell rope, and
-// Moth. Outside: the churchyard on the west (a gate from the Overlook, a path, a bench, one stone) and the
+// Inside: a boarded dado, pews, the stone table with candles and a bowl of water, a lectern on the step with
+// a book open at the last paragraph of the Origin of Species, one board of numbers, the bell rope, and Wren.
+// Outside: the churchyard on the west (a gate from the Overlook, a path, a bench, one stone) and the
 // green on the east (stepping stones and a bench).
 //
-// The glass is drawn in chapel/glass.js onto ONE sheet, a little at a time after start-up; the Life window
-// has a canvas of its own (it is redrawn every second while someone is looking at it), and the plain lights
-// share a small third. The sun lays each picture's colours on the floor and walls (one mesh lining the room).
+// The glass is drawn in chapel/glass.js, a little at a time after start-up: the end window and ten of the
+// tall ones on ONE sheet, the ten short windows on a second, and the Life window on
+// a canvas of its own (it is redrawn every second while someone is looking at it). The sun lays every
+// window's colours on the floor and walls (one mesh lining the room).
 //
 //   chapelShell(B, t)        walls, floor, roof; rooms, portals, colliders (from town.js)
-//   furnishChapel(kit, town) what stands in it and round it; Moth (from shops/index.js)
+//   furnishChapel(kit, town) what stands in it and round it; Wren (from shops/index.js)
 //   chapelLife(ctx, K)       glass, roof, light, bell, vane, planting (from street.js, once the scene exists)
 
 import * as THREE from 'three';
@@ -38,8 +42,8 @@ import { outdoorLit } from './lighting.js';
 import { wind, CardSet, crossGeo, rosetteGeo, place, cellUV } from './street/cards.js';
 import { KINDS } from './street/flora.js';
 import { FLORA_CELLS } from './street/paint.js';
-import { WINDOWS, makeLife, poolCopy, w7Outline, W7_SHOULDER, FONT, rng, LOOP_EYE } from './chapel/glass.js';
-import { T, F, fill } from './draw.js';
+import { WINDOWS, TALL, makeLife, lowLight, poolCopy, w7Outline, W7_SHOULDER, FONT, rng, LOOP_EYE } from './chapel/glass.js';
+import { T, F, fill, para, paper, line } from './draw.js';
 
 // ---- where it stands -----------------------------------------------------------------------------------
 // town.js CHAPEL_SITE.street: Y 160 to 198, building line X = -24. Everything below is laid out in the
@@ -76,7 +80,7 @@ const PEWS = { rows: [12, 16, 20, 24, 28, 32], x0: 2.4, x1: 9.6 };
 // the path's middle on z = -210): its wall, the gate's middle, its west side, its far end, the path's two ends
 const YARD = { zw: 10.9, gx: -28, xW: -41, z1: 59.9, p0: 15.4, p1: 51.9 };
 
-const BRICK = 'brick#a98572', PL = 'plaster#f1eadc', TRIM = 'c#efe6d2/0.7', STONE = 'c#d5cebf/0.85', DOORPAINT = 'c#58786e/0.6', SASH = 'c#2e3833/0.6', IRON = 'c#2a2926/0.45/0.7';
+const BRICK = 'brick#a98572', PL = 'plaster#f1eadc', TRIM = 'c#efe6d2/0.7', STONE = 'c#d5cebf/0.85', DOORPAINT = 'c#58786e/0.6', SASH = 'c#2e3833/0.6', IRON = 'c#2a2926/0.45/0.7', DADO = 'c#b4bca9/0.8';
 
 // ---- the four walls, each in its own terms: a along it, d in from its outer face -------------------------
 const planeM = (dir, at) => { const a = new THREE.Vector3(...dir), up = new THREE.Vector3(0, 1, 0); return new THREE.Matrix4().makeBasis(a, up, a.clone().cross(up)).setPosition(...at); };
@@ -108,26 +112,22 @@ const fills = k => (SPEC[k].door ? [[-DOOR.hw, -UP.w / 2, UP.y, UP.y + UP.h], [U
 const inner = k => [...pieces(SPEC[k].i0, SPEC[k].i1, FLR, CEIL, holes(k)), ...fills(k)];      // the plaster faces of a wall
 
 // ---- the glass --------------------------------------------------------------------------------------------
-// A tall window's glass, from the bottom: a band, the picture (twice as high as wide, as the pictures are
-// drawn), an arched light. n is the way out; u the way a picture runs, seen from inside.
-const PW = UP.w - 0.34, GH = UP.h - 0.44, BOT = 0.9, PICH = PW * 2, TOPL = GH - BOT - PICH, UPG = UP.y + 0.22, PICY = UPG + BOT + PICH / 2, MURM = PW - 0.1;
+// A tall window's glass is one light, the whole opening inside its frame, and its picture is drawn for that
+// shape (round-headed: the arch and its dark spandrels are in the drawing, as are the saddle bars). n is the
+// way out; u the way a picture runs, seen from inside.
+const PW = UP.w - 0.34, GH = UP.h - 0.44, UPG = UP.y + 0.22, LOWH = LOW.h - 0.44;
 const pane = (k, a, y, w, h, more = {}) => ({ c: WALL[k].at(a, y, GD), n: WALL[k].n, u: WALL[k].u, w, h, ...more });
-const pic = (id, k, a) => ({ id, ...pane(k, a, PICY, PW, PICH) });
+const pic = (id, k, a) => ({ id, ...pane(k, a, UPG + GH / 2, PW, GH) });
 const GLASS = [
   ...['life', 'turing', 'loop', 'eigen'].map((id, i) => pic(id, 'W', BAYS_Z[i])),
   ...['neuron', 'symmetry', 'tree', 'logistic'].map((id, i) => pic(id, 'E', BAYS_Z[i])),
-  pic('lorenz', 'F', -FX), pic('calculus', 'F', FX),
-  { id: 'murmuration', ...pane('F', 0, PICY, MURM, MURM, { round: true, u: [-1, 0, 0] }) },
+  pic('lorenz', 'F', -FX), pic('calculus', 'F', FX), pic('murmuration', 'F', 0),
   { id: 'ingression', ...pane('R', 0, GREAT.y0 + GREAT.h / 2, GREAT.w, GREAT.h, { gable: true }) },
 ];
-// The plain lights: [x, y, w, h] on their own small sheet (plainLights, below)
-const PCELL = { top: [0, 0, 256, 276], band: [0, 280, 256, 86], sash: [256, 0, 256, 450], round: [0, 512, 256, 512] };
-const PLAIN = [];
-for (const k of 'FWE') for (const a of SPEC[k].up) PLAIN.push(pane(k, a, UPG + BOT / 2, PW, BOT, { cell: 'band' }), pane(k, a, UPG + GH - TOPL / 2, PW, TOPL, { cell: 'top' }));
-PLAIN.push(pane('F', 0, PICY, PW, PICH, { cell: 'round', hole: MURM / 2 }));
-for (const k of 'FWE') for (const a of SPEC[k].low) PLAIN.push(pane(k, a, LOW.y + LOW.h / 2, PW, LOW.h - 0.44, { cell: 'sash' }));
+// The short windows, each under the tall one it answers
+const LOWG = GLASS.filter(w => !w.gable && w.id !== 'murmuration').map(w => ({ ...w, c: [w.c[0], LOW.y + LOW.h / 2, w.c[2]], h: LOWH }));
 const inWorld = g => ({ ...g, c: [SITE.cx - g.c[2], g.c[1], SITE.cz + g.c[0]], n: vecW(g.n), u: vecW(g.u) });
-const GLASSW = GLASS.map(inWorld);
+const GLASSW = GLASS.map(inWorld), LIGHTS = [...GLASSW, ...LOWG.map(inWorld)];      // the twelve pictures; every window that throws colour
 
 export const CHAPEL = { floor: FLR, door: { x: SITE.cx, z: SITE.cz, yaw: -Math.PI / 2 }, inside: rectW(-IX, IX, IZ0, IZ1), footprint: rectW(-OX - 0.5, OX + 0.5, OZ0 - 1.25, OZ1 + 0.5),
   churchyard: rectW(-OX - 0.45, YARD.xW, YARD.zw, YARD.z1), gatePath: rectW(YARD.gx - 4, YARD.gx + 4, YARD.zw - 0.85, YARD.p0), yardPath: rectW(YARD.gx - 2, YARD.gx + 2, YARD.p0, YARD.p1), glass: GLASSW,
@@ -152,7 +152,7 @@ function local(B) {
     colliders: { push: (...cs) => { for (const c of cs) B.colliders.push({ ...rectW(c.x0, c.x1, c.z0, c.z1), y0: c.y0, y1: c.y1 }); } },
   };
 }
-const MINE = { candles: [], water: null, cam: null, asked: null };      // what furnishChapel leaves for chapelLife, and chapelLife for Moth
+const MINE = { candles: [], water: null, cam: null, asked: null };      // what furnishChapel leaves for chapelLife, and chapelLife for Wren
 
 // ======================================================================================================
 // The shell
@@ -166,8 +166,8 @@ export function chapelShell(B0, t) {
 
   // ---- the way in, the floor -------------------------------------------------------------------------
   box('pavers', -OX - 0.5, OX + 0.5, -0.6, CURB - 0.012, -0.62, 0.3); surf(-OX - 0.5, OX + 0.5, -0.62, 0, CURB);      // the pavement, carried back to the wall
-  box(STONE, -2.9, 2.9, 0, FLR, -1.25, 0.02); surf(-2.9, 2.9, -1.25, 0, FLR);                                          // the one step
-  box(STONE, -DOOR.hw, DOOR.hw, 0, FLR, 0, IZ0 + 0.02); surf(-DOOR.hw, DOOR.hw, -0.1, IZ0 + 0.1, FLR);
+  box(STONE, -2.9, 2.9, 0, FLR, -1.25, 0); surf(-2.9, 2.9, -1.25, 0, FLR);                                          // the one step
+  box(STONE, -DOOR.hw, DOOR.hw, 0, FLR, 0, IZ0); surf(-DOOR.hw, DOOR.hw, -0.1, IZ0 + 0.1, FLR);
   box('floor', -IX, IX, FLR - 0.3, FLR, IZ0, IZ1); surf(-IX, IX, IZ0, IZ1, FLR);
   box('floor', -IX, IX, FLR, DAIS.y, DAIS.z0, IZ1); surf(-IX, IX, DAIS.z0, IZ1, DAIS.y);
 
@@ -193,17 +193,17 @@ export function chapelShell(B0, t) {
     wb(BRICK, e0, e1, CAP, DENT + 0.35, -0.3, GD); wb(TRIM, e0 - 0.15, e1 + 0.15, BAND - 0.14, BAND + 0.12, -0.45, 0);
     for (let a = e0 + 0.25; a < e1; a += 0.5) wb(TRIM, a - 0.12, a + 0.12, DENT, DENT + 0.35, -0.55, -0.3);
     wb(TRIM, e0 - 0.45, e1 + 0.45, DENT + 0.35, DENT + 0.55, -0.75, 0.3); wb(TRIM, e0 - 0.95, e1 + 0.95, DENT + 0.55, EAVEY - 0.18, -1.25, 0.3); wb(TRIM, e0 - 1.05, e1 + 1.05, EAVEY - 0.18, EAVEY, -OVER, 0.3);
-    // the windows: a stone sill and cap, a painted frame, bars where the lights divide
+    // the windows: a stone sill and cap, a painted frame (the tall ones are a single light now: no bars across)
     const win = (c, y0, h, bars) => {
       const hw = UP.w / 2, f = 0.17, r = 0.22;
-      wb(STONE, c - hw - 0.25, c + hw + 0.25, y0 - 0.3, y0, d0 - 0.2, GD); wb(STONE, c - hw - 0.45, c + hw + 0.45, y0 + h, y0 + h + 0.42, d0 - 0.17, d0 + 0.1);
+      wb(STONE, c - hw - 0.25, c + hw + 0.25, y0 - 0.3, y0 + 0.012, d0 - 0.2, GD - 0.02); wb(STONE, c - hw - 0.45, c + hw + 0.45, y0 + h - 0.012, y0 + h + 0.42, d0 - 0.17, d0 + 0.1);      // (a hair proud of the opening's own faces, which they would otherwise share)
       wb(TRIM, c - hw - 0.15, c + hw + 0.15, y0 - 0.1, y0 + 0.01, GD, TH + 0.18);
       for (const sg of [-1, 1]) wb(SASH, c + sg * hw, c + sg * (hw - f), y0, y0 + h, GD - 0.16, GD + 0.16);
       wb(SASH, c - hw, c + hw, y0, y0 + r, GD - 0.16, GD + 0.16); wb(SASH, c - hw, c + hw, y0 + h - r, y0 + h, GD - 0.16, GD + 0.16);
       for (const y of bars) wb(SASH, c - hw + f, c + hw - f, y - 0.07, y + 0.07, GD - 0.1, GD + 0.1);
     };
-    for (const c of s.up) win(c, UP.y, UP.h, [UPG + BOT, UPG + BOT + PICH]);
-    for (const c of s.low) win(c, LOW.y, LOW.h, [LOW.y + LOW.h / 2]);
+    for (const c of s.up) win(c, UP.y, UP.h, []);
+    for (const c of s.low) win(c, LOW.y, LOW.h, []);
     // the gable: brick behind the raking cornice
     if (k === 'F' || k === 'R') prism(BRICK, [[-OX - 0.3, EAVEY - 0.1], [OX + 0.3, EAVEY - 0.1], [OX + 0.3, yO(OX + 0.3) - 0.3], [0, RIDGE - 0.3], [-OX - 0.3, yO(OX + 0.3) - 0.3]], 0.5, W.M(0, 0.1));
   }
@@ -260,6 +260,33 @@ export function chapelShell(B0, t) {
     box('timber', -hw, hw, top - 0.75, top - 0.4, z - 0.16, z + 0.16);                                                                       // the bell's beam
   }
 
+  // ---- three coronas down the nave: plain iron hoops on long chains, eight candles on each. They burn low by day and
+  // come up at dusk (their flames are one of the street's lamp glows, which do that by themselves); after dark it is
+  // their light that shines out through the glass (chapelLife).
+  for (const zc of [11, 23.5, 36]) {
+    const HY = FLR + 12.2, RAD = 2.5, put = g => B.mesh(IRON, g), CAND = 'c#efe6d2/0.7';
+    put(new THREE.TorusGeometry(RAD, 0.07, 6, 40).rotateX(Math.PI / 2).translate(0, HY, zc)); put(new THREE.TorusGeometry(RAD - 0.16, 0.03, 4, 40).rotateX(Math.PI / 2).translate(0, HY - 0.28, zc));
+    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4, x = Math.cos(a) * RAD, z = zc + Math.sin(a) * RAD, top = new THREE.Vector3(0, HY + 5.2, zc), foot = new THREE.Vector3(x, HY, z), d = top.clone().sub(foot);
+      const g = new THREE.CylinderGeometry(0.022, 0.022, d.length(), 4); g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize())); g.translate((top.x + foot.x) / 2, (top.y + foot.y) / 2, (top.z + foot.z) / 2); put(g); }
+    put(new THREE.CylinderGeometry(0.03, 0.03, CEIL - (HY + 5.2), 5).translate(0, (CEIL + HY + 5.2) / 2, zc)); put(new THREE.SphereGeometry(0.16, 8, 6).translate(0, HY + 5.2, zc)); put(new THREE.CylinderGeometry(0.3, 0.3, 0.06, 12).translate(0, CEIL - 0.03, zc));
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, x = Math.cos(a) * RAD, z = zc + Math.sin(a) * RAD;
+      put(new THREE.CylinderGeometry(0.14, 0.09, 0.07, 8).translate(x, HY + 0.1, z));
+      B.mesh(CAND, new THREE.CylinderGeometry(0.055, 0.06, 0.62, 7).translate(x, HY + 0.44, z));
+      B.mesh('e#ffd9a0/2.2', new THREE.SphereGeometry(0.06, 6, 5).scale(1, 2.1, 1).translate(x, HY + 0.9, z)); }
+    const [wx_, wz_] = toW(0, zc); t.lamps.push({ x: wx_, y: HY - 0.6, z: wz_, power: 1.0, kind: 'lamp' });
+  }
+
+  // ---- a boarded dado round the room to the short windows' sills, with a cap and a skirting -----------------
+  {
+    const top = LOW.y - 0.12, th = 0.07, cap = 0.14, sk = 0.11, x0 = DOOR.hw * 2 + 0.1, run = (a0, a1, y, put) => { put(a0, a1, y, top - 0.09, 0, th); put(a0, a1, top - 0.09, top, 0, cap); put(a0, a1, y, y + 0.42, th, sk); };
+    for (const s of [-1, 1]) {
+      const side = (z0, z1, y0, y1, d0, d1) => box(DADO, s * (IX - d0), s * (IX - d1), y0, y1, z0, z1);
+      side(IZ0, IZ1, FLR, top - 0.09, 0, th); side(IZ0, IZ1, top - 0.09, top, 0, cap); side(IZ0, DAIS.z0, FLR, FLR + 0.42, th, sk); side(DAIS.z0, IZ1, DAIS.y, DAIS.y + 0.42, th, sk);
+      run(s * x0, s * IX, FLR, (a0, a1, y0, y1, d0, d1) => box(DADO, a0, a1 - s * (d1 === cap ? cap : d1 === sk ? sk : th), y0, y1, IZ0 + d0, IZ0 + d1));      // the front wall, clear of the door's leaves
+    }
+    run(-IX, IX, DAIS.y, (a0, a1, y0, y1, d0, d1) => { const e = d1 === cap ? cap : d1 === sk ? sk : th; box(DADO, a0 + e, a1 - e, y0, y1, IZ1 - d0, IZ1 - d1); });
+  }
+
   // ---- the room, its light, its openings ---------------------------------------------------------------
   t.rooms.push({ name: 'The Chapel', ...rectW(-IX, IX, IZ0, IZ1), y0: FLR - 1, y1: CEIL + 0.2, lot: 'chapel' });
   { const r = rectW(-(OX - GD), OX - GD, OZ0 + GD, OZ1 - GD); t.boxes.push([r.x0, r.x1, r.z0, r.z1, FLR - 0.6, CEIL + 0.3]); }      // to the glass: reveals inside it are indoors, outside it out
@@ -278,7 +305,7 @@ export function furnishChapel(kit, town) {
   const solid = (x0, x1, z0, z1, y1, y0 = 0) => B.colliders.push({ x0: Math.min(x0, x1), x1: Math.max(x0, x1), z0: Math.min(z0, z1), z1: Math.max(z0, z1), y0, y1 });
   const fw = (x, z, h = 0, q = 0) => { const [X, Z] = toW(x, z); return kit.fr(X, -Z, h, (q + 3) % 4); };      // a kit frame at one of the chapel's own points (q 0 faces the door end, 1 the west flank, 2 the table end, 3 the east flank)
   const sign = (x, z, h, q, w, tall, draw, o = {}) => kit.sign(fw(x, z, 0, q), 0, 0, h, w, tall, draw, o);
-  const G = { grain: 'long' }, OAK = 'oak_light', OAKD = 'timber';
+  const G = { grain: 'long' }, OAK = 'oak_light', OAKD = 'oak_light#9a8068';      // (the darker wood: pew ends, the lectern's post, the board)
   const t0 = (x0, x1, z0, z1, h) => town.surfaces.push({ ...rectW(x0, x1, z0, z1), h });
 
   // ---- pews, facing the table ----------------------------------------------------------------------------
@@ -313,7 +340,7 @@ export function furnishChapel(kit, town) {
   }
 
   // ---- the board on the end wall. The numbers are not hymns: each is the page a paper begins on (Anderson
-  // 1972, Turing 1952, Lorenz 1963, May 1976, Gardner on Conway 1970, McCulloch & Pitts 1943). Moth knows.
+  // 1972, Turing 1952, Lorenz 1963, May 1976, Gardner on Conway 1970, McCulloch & Pitts 1943). Wren knows.
   {
     const NUM = ['393', '37', '130', '459', '120', '115'], x = -8.6;
     box(OAKD, x - 1.3, x + 1.3, DAIS.y + 5.0, DAIS.y + 9.0, IZ1 - 0.14, IZ1 - 0.02);
@@ -322,6 +349,25 @@ export function furnishChapel(kit, town) {
       for (let i = 0; i < 40; i++) { g.strokeStyle = `rgba(${i % 2 ? '20,12,8' : '96,70,50'},.22)`; g.lineWidth = 1 + (i % 3); g.beginPath(); const gx = r() * w; g.moveTo(gx, 0); g.bezierCurveTo(gx + 4, h * 0.3, gx - 4, h * 0.7, gx + 2, h); g.stroke(); }
       NUM.forEach((n, i) => { const y = h * (0.045 + i * 0.156); g.fillStyle = '#1c130d'; g.fillRect(w * 0.12, y + h * 0.132, w * 0.76, h * 0.012); const cw = w * 0.22, x0 = w / 2 - n.length * cw / 2; [...n].forEach((ch, k) => { g.fillStyle = '#efe7d2'; g.fillRect(x0 + k * cw + 2, y, cw - 4, h * 0.13); T(g, ch, x0 + (k + 0.5) * cw, y + h * 0.07, h * 0.11, '#1c1612', { f: F.dm }); }); });
     }, { cw: 300, ch: 476, rough: 0.8 });
+  }
+
+  // ---- the lectern, on the step: the last paragraph of the Origin of Species (first edition, 1859), its
+  // first sentence and its last. The Darwin window's ribbon is cut from the end of it.
+  {
+    const x = 6.6, z = DAIS.z0 + 1.9, y = DAIS.y, t = 0.95, cy = y + 3.8, pk = (cy - y - 0.13) / 4.12, goudy = (g, s, gx, gy, px, col, o = {}) => T(g, s, gx, gy, px, col, { f: FONT, ...o });
+    fw(x, z, y, 0).lathe(OAKD, 0, 0, [[0.01, 0], [0.9, 0], [0.9, 0.14], [0.3, 0.4], [0.16, 0.9], [0.2, 2.2], [0.14, 2.6], [0.22, 3.6], [0.34, 3.8], [0.3, 3.92], [0.13, 4.0], [0.12, 4.12], [0.01, 4.12]].map(([pr, pz]) => [pr, pz * pk]), { seg: 20 });      // (its tip is let into the desk's underside)
+    box(OAK, x - 1.45, x + 1.45, cy - 1.0, cy + 1.0, z + 0.07 * Math.cos(t) - 0.045, z + 0.07 * Math.cos(t) + 0.045, { rot: [t, 0, 0] });      // the desk
+    box(OAK, x - 1.45, x + 1.45, cy - 0.62, cy - 0.5, z - 0.92, z - 0.72);                                                                // the lip the book rests on
+    solid(x - 1.3, x + 1.3, z - 0.9, z + 0.9, cy + 0.4, y);
+    sign(x, z - 0.03, cy + 0.02, 0, 2.64, 1.76, (g, w, h) => {
+      paper(g, w, h, '#efe6cf', 7); const gr = g.createLinearGradient(w * 0.44, 0, w * 0.56, 0); gr.addColorStop(0, 'rgba(60,40,20,0)'); gr.addColorStop(0.5, 'rgba(60,40,20,.32)'); gr.addColorStop(1, 'rgba(60,40,20,0)'); g.fillStyle = gr; g.fillRect(w * 0.44, 0, w * 0.12, h);
+      const ink = '#2a1c13', m = w * 0.045, cw = w / 2 - m * 2.1;
+      goudy(g, 'ON THE ORIGIN OF SPECIES', w * 0.25, h * 0.07, h * 0.034, '#7a4a2a', { ls: 2 }); goudy(g, 'CHAP. XIV.   CONCLUSION.', w * 0.75, h * 0.07, h * 0.034, '#7a4a2a', { ls: 2 });
+      para(g, 'It is interesting to contemplate an entangled bank, clothed with many plants of many kinds, with birds singing on the bushes, with various insects flitting about, and with worms crawling through the damp earth, and to reflect that these elaborately constructed forms, so different from each other, and dependent on each other in so complex a manner, have all been produced by laws acting around us.', m, h * 0.15, h * 0.041, ink, cw, { f: FONT, lh: 1.34 });
+      para(g, 'There is grandeur in this view of life, with its several powers, having been originally breathed into a few forms or into one; and that, whilst this planet has gone cycling on according to the fixed law of gravity, from so simple a beginning endless forms most beautiful and most wonderful have been, and are being, evolved.', w / 2 + m * 1.1, h * 0.15, h * 0.041, ink, cw, { f: FONT, lh: 1.34 });
+      goudy(g, 'Charles Darwin, 1859.', w * 0.75, h * 0.895, h * 0.032, '#7a4a2a', { it: 1 }); goudy(g, 'The last paragraph: its first sentence and its last.', w * 0.75, h * 0.94, h * 0.032, '#7a4a2a', { it: 1, max: cw });
+      goudy(g, '489', w * 0.25, h * 0.93, h * 0.036, '#7a4a2a'); line(g, [[w * 0.56, h * 0.855], [w * 0.94, h * 0.855]], 'rgba(122,74,42,.5)', 1);
+    }, { cw: 792, ch: 528, tilt: t, rough: 0.85 });
   }
 
   // ---- the words over the door, and a lamp for each lantern ------------------------------------------------
@@ -343,7 +389,7 @@ export function furnishChapel(kit, town) {
   };
 
   // ---- the churchyard, west of the nave: a low wall along the Overlook's paving with a gate in it, a path,
-  // one bench facing the sunset, one stone ------------------------------------------------------------------
+  // one bench facing the sunset, three stones ---------------------------------------------------------------
   {
     const { zw, gx, xW, p0, p1 } = YARD, WALLH = 3.1;
     for (const [a, b] of [[-OX - PIL.out, gx + 5.3], [gx - 5.3, xW]]) { box(BRICK, a, b, 0, WALLH, zw, zw + 1); box(TRIM, Math.max(a, b) + 0.1, Math.min(a, b) - 0.1, WALLH, WALLH + 0.22, zw - 0.1, zw + 1.1); solid(a, b, zw, zw + 1, WALLH + 0.3); }
@@ -357,31 +403,39 @@ export function furnishChapel(kit, town) {
       for (let i = 0; i < 8; i++) box(IRON, x - 0.03, x + 0.03, 0.8, 4.3, zw + 1.33 + i * 0.52, zw + 1.39 + i * 0.52);
     }
     bench(-OX - 2.6, BAYS_Z[2], 1, 'sit and watch the sun go down');
-    // the stone: one line that took someone a lifetime
-    const x = gx - 6.4, z = p0 + 4;
-    box('c#9a948a/0.95', x - 1.5, x + 1.5, 0, 3.4, z - 0.32, z + 0.32); box('c#8a847a/0.95', x - 1.75, x + 1.75, 0, 0.35, z - 0.55, z + 0.55); box('c#9a948a/0.95', x - 1.2, x + 1.2, 3.4, 3.62, z - 0.32, z + 0.32);
-    solid(x - 1.75, x + 1.75, z - 0.55, z + 0.55, 3.6);
-    sign(x, z - 0.332, 1.95, 0, 2.8, 2.7, (g, w, h) => {
-      stone(g, w, h, 3, '#a8a297'); carve(g, 'S = k log W', w / 2, h * 0.42, h * 0.2, { italic: true, track: 0.05, ink: '#3c3832', shadow: 'rgba(30,24,18,.6)', light: 'rgba(255,255,250,.45)' });
-      carve(g, 'LUDWIG BOLTZMANN · 1877', w / 2, h * 0.7, h * 0.075, { track: 0.2, ink: '#4a453d', shadow: 'rgba(30,24,18,.5)', light: 'rgba(255,255,250,.4)' });
-    }, { cw: 290, ch: 280, rough: 0.95 });
+    // the stones: three, down the west side of the path, each a line that took someone a lifetime. All three are
+    // carved on their real graves: Boltzmann's in Vienna, Born's in Göttingen, Bernoulli's in the cloister at Basel
+    // (who asked for the logarithmic spiral, and whose mason cut the wrong kind).
+    const grave = (x, z, w, tall, seed, draw) => {
+      box('c#9a948a/0.95', x - w / 2, x + w / 2, 0, tall, z - 0.32, z + 0.32); box('c#8a847a/0.95', x - w / 2 - 0.25, x + w / 2 + 0.25, 0, 0.35, z - 0.55, z + 0.55); box('c#9a948a/0.95', x - w / 2 + 0.3, x + w / 2 - 0.3, tall, tall + 0.22, z - 0.32, z + 0.32);
+      solid(x - w / 2 - 0.25, x + w / 2 + 0.25, z - 0.55, z + 0.55, tall + 0.2);
+      sign(x, z - 0.332, 0.45 + (tall - 0.55) / 2, 0, w - 0.2, tall - 0.7, (g, cw, ch) => { stone(g, cw, ch, seed, '#a8a297'); draw(g, cw, ch); }, { cw: Math.round((w - 0.2) * 104), ch: Math.round((tall - 0.7) * 104), rough: 0.95 });
+    };
+    const CUT = { ink: '#3c3832', shadow: 'rgba(30,24,18,.6)', light: 'rgba(255,255,250,.45)' }, NAME = { track: 0.2, ink: '#4a453d', shadow: 'rgba(30,24,18,.5)', light: 'rgba(255,255,250,.4)' };
+    const gx0 = gx - 6.4;
+    grave(gx0, p0 + 4, 3.0, 3.4, 3, (g, w, h) => { carve(g, 'S = k log W', w / 2, h * 0.42, h * 0.2, { italic: true, track: 0.05, ...CUT }); carve(g, 'LUDWIG BOLTZMANN · 1877', w / 2, h * 0.7, h * 0.075, NAME); });
+    grave(gx0 - 0.3, p0 + 13.5, 3.3, 3.0, 7, (g, w, h) => { carve(g, 'pq − qp = h / 2πi', w / 2, h * 0.42, h * 0.19, { italic: true, track: 0.04, ...CUT }); carve(g, 'MAX BORN · 1925', w / 2, h * 0.72, h * 0.085, NAME); });
+    grave(gx0 + 0.2, p0 + 23, 2.8, 3.8, 11, (g, w, h) => {
+      for (const [dx, dy, col] of [[1.2, 1.2, CUT.light], [0, 0, CUT.ink]]) { g.strokeStyle = col; g.lineWidth = h * 0.012; g.beginPath(); for (let a = 0; a <= 15.2; a += 0.08) { const r = h * 0.012 * Math.exp(0.19 * a), x = w / 2 + dx + r * Math.cos(a), y = h * 0.34 + dy - r * Math.sin(a); if (a === 0) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke(); }
+      carve(g, 'EADEM MUTATA RESURGO', w / 2, h * 0.68, h * 0.062, { track: 0.16, ...CUT }); carve(g, 'JAKOB BERNOULLI · 1705', w / 2, h * 0.82, h * 0.05, NAME);
+    });
   }
 
   // ---- the green, east of the nave: stepping stones from the pavement, a bench in the morning sun ----------
   for (let i = 0; i < 7; i++) { const x = OX + 5.4 + (i % 2) * 0.3, z = 1.0 + i * 3.1; box('flagstone', x - 1.1, x + 1.1, -0.3, 0.08, z - 0.85, z + 0.85); t0(x - 1.1, x + 1.1, z - 0.85, z + 0.85, 0.08); }
   bench(OX + 2.6, BAYS_Z[1], -1, 'sit in the sun');
 
-  // ---- Moth, who keeps the candles --------------------------------------------------------------------------
+  // ---- Wren, who keeps the candles --------------------------------------------------------------------------
   kit.clerks.push({
-    id: 'moth', name: 'Moth', lot: 'chapel', floor: FLR, speed: 1.9, chirp: [62, 69],
-    look: { shape: 'round', colour: '#8d7b68', belly: '#efe4cf', trim: '#b08d4a', eye: '#ffe2b0', ring: 0xffc878, antenna: true, hat: 'none', scarf: '#5b4636', tool: 'candle', hover: 3.3 },
+    id: 'wren', name: 'Wren', lot: 'chapel', floor: FLR, speed: 1.9, chirp: [62, 69],
+    look: { shape: 'round', colour: '#8d7b68', belly: '#efe4cf', trim: '#b08d4a', eye: '#ffe2b0', ring: 0xffc878, antenna: true, hat: 'none', tool: 'candle', hover: 3.3 },
     home: toW(-6.6, 37), faces: toW(0, 24), posts: [toW(-2.2, 37.6), toW(6.4, 37.2), toW(-6.6, 37), toW(2.2, 37)],
-    lines: MOTH,
+    lines: WREN,
   });
   MINE.candles = kit.candles.slice(n0);
 }
 
-// ---- what Moth says: short, and about the window you are looking at ------------------------------------------
+// ---- what Wren says: short, and about the window you are looking at ------------------------------------------
 const WIN = {
   murmuration: ['Starlings at dusk. Each one watches its nearest few, and the flock turns as one.', "Nobody steers. That's the whole window."],
   symmetry: ['Compass needles. Hot at the top, pointing every which way. Cold below, all agreed.', 'Nothing in the physics prefers that direction. Any would have done.'],
@@ -393,7 +447,7 @@ const WIN = {
   loop: ["Twelve steps, every one of them up, and you're back where you began.", "Hofstadter thought an 'I' was something like that."],
   lorenz: ["Lorenz's weather. The line never crosses itself and never repeats.", 'He found it by typing a number back in with three decimals instead of six.'],
   logistic: ['One line of arithmetic, done over and over. It settles, then it splits, then it stops settling.', 'May wanted it taught to children.'],
-  tree: ["Darwin's sketch, from a notebook of 1837. He wrote 'I think' above it, and then drew instead.", 'The jewels are the twigs that came through.'],
+  tree: ["Darwin's sketch, from a notebook of 1837. He wrote 'I think' above it, and then drew instead.", "The jewels are the twigs that came through. The ribbon is from the last sentence of his book, twenty-two years on. It's open on the lectern."],
   calculus: ['Nerve cells drawn as triangles, each one firing or not. McCulloch and Pitts, 1943.', 'Pitts was about twenty.'],
 };
 // The window the visitor is nearest, leaning toward the one being looked at
@@ -407,8 +461,8 @@ function nearestWindow() {
   }
   return best;
 }
-const MOTH = {
-  greet: ["I'm Moth. I keep the candles. Sit anywhere.", 'Ah. Come in.', "It's you. Good.", 'Hello again. Same candles.'],
+const WREN = {
+  greet: ["I'm Wren. I keep the candles. Sit anywhere.", 'Ah. Come in.', "It's you. Good.", 'Hello again. Same candles.'],
   idle: [
     'The candle gets shorter every night and the flame stays the same size.',
     'When the sun is right, the windows lay their colours on the floor. I sweep round them.',
@@ -420,9 +474,9 @@ const MOTH = {
   topics: [
     { q: 'Which window is this?', get a() { MINE.asked = nearestWindow(); return WIN[MINE.asked][0]; }, next: [{ q: 'Say more.', get a() { return WIN[MINE.asked ?? 'ingression'][1]; } }] },
     { q: 'Is this a church?', a: "It's built after one, in Madison, Indiana, at two thirds the size. Here it's a place to sit." },
-    { q: 'Can I ring the bell?', a: 'The rope is by the door. Pull once, then listen.' },
+    { q: 'Can I ring the bells?', a: 'There are four. The rope is by the door. Pull once and they ring every order four bells can be rung in, twenty-four, and stop where they began.' },
     { q: 'What are the numbers on the board?', a: 'Not hymns. Each is the page a paper begins on. 393 is Anderson: More Is Different.' },
-    { q: 'Who are you?', a: 'Moth. I keep the candles. In Greek the word for a moth also meant the soul. I found that out later.' },
+    { q: 'Who are you?', a: 'Wren. I keep the candles. A man of my name built fifty-one churches after a fire. I keep one. It is enough.' },
   ],
 };
 
@@ -436,18 +490,22 @@ export function chapelLife(ctx, K) {
   const sun = new THREE.Vector3(0, 1, 0), U = { uSunDir: { value: sun }, uSunCol: { value: new THREE.Color() }, uSky: { value: new THREE.Color() }, uOut: { value: new THREE.Color() }, uGlow: { value: 0 }, uIn: { value: 0 } };
   MINE.cam = camera;
 
-  // ---- the glass: one sheet for eleven pictures, the Life window's own, and the plain lights' ------------
-  const AW = 4096, AH = 2048;
-  const CELL = { ingression: [0, 0, 1024, 2048, 2], murmuration: [3072, 1024, 1024, 1024, 2] };
-  GLASS.filter(w => !w.round && !w.gable && w.id !== 'life').forEach((w, i) => { CELL[w.id] = [1024 + (i % 6) * 512, i < 6 ? 0 : 1024, 512, 1024, 1]; });
+  // ---- the glass: one sheet for the end window and ten tall ones, the Life window's own, and a second
+  // sheet for the ten short windows ---------------------------------------------------------------------------
+  const AW = 4096, AH = 2048, [TLW, TLH] = TALL, LW = 408, LH = 720, LOWW = LW * 5, LOWH2 = LH * 2;
+  const CELL = { ingression: [0, 0, 1024, 2048, 2] }, LCELL = {};
+  // ten tall lights beside the end window: eight upright in a row, two on their sides under them (a cell is [x, y, width, height, scale, on its side])
+  GLASS.filter(w => !w.gable && w.id !== 'life').forEach((w, i) => { CELL[w.id] = i < 8 ? [1028 + i * (TLW + 8), 0, TLW, TLH, 1, 0] : [1028 + (i - 8) * (TLH + 8), TLH + 8, TLW, TLH, 1, 1]; });
+  LOWG.forEach((w, i) => { LCELL[w.id] = [(i % 5) * LW, Math.floor(i / 5) * LH, LW, LH]; });
   const sheet = document.createElement('canvas'); sheet.width = AW; sheet.height = AH;
   const SOFT = { willReadFrequently: true };       // drawn in memory, not on the graphics card: nothing to read back when the sheet is sent up, and nothing to lose when the card is busy
   const sg = sheet.getContext('2d', SOFT); sg.fillStyle = '#2a2622'; sg.fillRect(0, 0, AW, AH);
-  const lifeCanvas = document.createElement('canvas'); lifeCanvas.width = 512; lifeCanvas.height = 1024;
-  const lg = lifeCanvas.getContext('2d', SOFT); lg.fillStyle = '#2a2622'; lg.fillRect(0, 0, 512, 1024);
-  const plain = document.createElement('canvas'); plain.width = 512; plain.height = 1024; plainLights(plain.getContext('2d', SOFT));
+  const lifeCanvas = document.createElement('canvas'); lifeCanvas.width = TLW; lifeCanvas.height = TLH;
+  const lg = lifeCanvas.getContext('2d', SOFT); lg.fillStyle = '#2a2622'; lg.fillRect(0, 0, TLW, TLH);
+  const lowSheet = document.createElement('canvas'); lowSheet.width = LOWW; lowSheet.height = LOWH2;
+  const wg = lowSheet.getContext('2d', SOFT); wg.fillStyle = '#2a2622'; wg.fillRect(0, 0, LOWW, LOWH2);
   const mkTex = c => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
-  const sheetTex = mkTex(sheet), lifeTex = mkTex(lifeCanvas), plainTex = mkTex(plain);
+  const sheetTex = mkTex(sheet), lifeTex = mkTex(lifeCanvas), lowTex = mkTex(lowSheet);
   const glassMat = tex => new THREE.ShaderMaterial({
     uniforms: { map: { value: tex }, ...U },
     vertexShader: `attribute vec3 aN; varying vec2 vUv; varying vec3 vW; varying vec3 vN;
@@ -471,15 +529,13 @@ void main() {
 }`,
     side: THREE.DoubleSide,
   });
-  const paneGeo = (w, [cx, cy, cw, ch], tw, th) => {                    // drawn facing +z with u to the right, then set into its wall seen from inside
+  const paneGeo = (w, [cx, cy, cw, ch, , rot], tw, th) => {                    // drawn facing +z with u to the right, then set into its wall seen from inside
     let geo; const v2 = ([x, y]) => new THREE.Vector2(x, y);
-    if (w.round) geo = new THREE.CircleGeometry(w.w / 2, 64);
-    else if (w.gable) geo = new THREE.ShapeGeometry(new THREE.Shape(w7Outline(w.w, w.h).map(([x, y]) => v2([x - w.w / 2, w.h / 2 - y]))));
-    else if (w.hole) { const sh = new THREE.Shape([[-w.w / 2, -w.h / 2], [w.w / 2, -w.h / 2], [w.w / 2, w.h / 2], [-w.w / 2, w.h / 2]].map(v2)); sh.holes.push(new THREE.Path().absarc(0, 0, w.hole, 0, Math.PI * 2, true)); geo = new THREE.ShapeGeometry(sh, 24); }
+    if (w.gable) geo = new THREE.ShapeGeometry(new THREE.Shape(w7Outline(w.w, w.h).map(([x, y]) => v2([x - w.w / 2, w.h / 2 - y]))));
     else geo = new THREE.PlaneGeometry(w.w, w.h);
     geo = geo.toNonIndexed();
     const p = geo.attributes.position, uv = geo.attributes.uv;
-    for (let i = 0; i < p.count; i++) { const a = p.getX(i) / w.w + 0.5, b = p.getY(i) / w.h + 0.5; uv.setXY(i, (cx + a * cw) / tw, 1 - (cy + (1 - b) * ch) / th); }
+    for (let i = 0; i < p.count; i++) { const a = p.getX(i) / w.w + 0.5, b = p.getY(i) / w.h + 0.5; if (rot) uv.setXY(i, (cx + (1 - b) * ch) / tw, 1 - (cy + (1 - a) * cw) / th); else uv.setXY(i, (cx + a * cw) / tw, 1 - (cy + (1 - b) * ch) / th); }
     geo.applyMatrix4(new THREE.Matrix4().makeBasis(new THREE.Vector3(...w.u), new THREE.Vector3(0, 1, 0), new THREE.Vector3(...w.n).negate()).setPosition(...w.c));
     const n = new Float32Array(p.count * 3); for (let i = 0; i < p.count; i++) n.set(w.n, i * 3);
     geo.setAttribute('aN', new THREE.BufferAttribute(n, 3)); geo.deleteAttribute('normal');
@@ -489,8 +545,8 @@ void main() {
     const m = new THREE.Mesh(mergeAll(geos, ['position', 'uv', 'aN']), glassMat(tex)); m.name = name; m.castShadow = true; m.frustumCulled = false; m.userData.cat = 'chapel'; scene.add(m); return m;
   };
   addGlass(GLASSW.filter(w => w.id !== 'life').map(w => paneGeo(w, CELL[w.id], AW, AH)), sheetTex, 'chapel glass');
-  const lifePane = addGlass(GLASSW.filter(w => w.id === 'life').map(w => paneGeo(w, [0, 0, 512, 1024], 512, 1024)), lifeTex, 'chapel glass life');
-  addGlass(PLAIN.map(inWorld).map(w => paneGeo(w, PCELL[w.cell], 512, 1024)), plainTex, 'chapel glass plain');
+  const lifePane = addGlass(GLASSW.filter(w => w.id === 'life').map(w => paneGeo(w, [0, 0, TLW, TLH], TLW, TLH)), lifeTex, 'chapel glass life');
+  addGlass(LOWG.map(inWorld).map(w => paneGeo(w, LCELL[w.id], LOWW, LOWH2)), lowTex, 'chapel glass low');
 
   // ---- the roof: shingles lit as outdoors (lighting.js) ----------------------------------------------------
   {
@@ -506,15 +562,14 @@ void main() {
   // One mesh lines the room. For each of its points the shader looks back along the sun's direction:
   // if that line passes through a picture, its colours (a small blurred copy, from a strip) are laid
   // there, as light on whatever colour the surface is.
-  const NW = GLASS.length, SLOT = [32, 64];
+  const NW = LIGHTS.length, SLOT = [32, 64];
   const pool = document.createElement('canvas'); pool.width = SLOT[0] * NW; pool.height = SLOT[1];
   { const a = pool.getContext('2d'); a.fillStyle = '#000'; a.fillRect(0, 0, pool.width, pool.height); }
   const poolTex = new THREE.CanvasTexture(pool); poolTex.colorSpace = THREE.SRGBColorSpace;
   const uW = { c: [], u: [], n: [], s: [], r: [] };
-  GLASSW.forEach((w, i) => {
+  LIGHTS.forEach((w, i) => {
     uW.c.push(new THREE.Vector3(...w.c)); uW.u.push(new THREE.Vector3(...w.u)); uW.n.push(new THREE.Vector3(...w.n)); uW.s.push(new THREE.Vector2(w.w / 2, w.h / 2));
-    const sh = w.round ? SLOT[0] / SLOT[1] : 1;
-    uW.r.push(new THREE.Vector4(i * SLOT[0] / pool.width, 1 - sh, SLOT[0] / pool.width, sh));
+    uW.r.push(new THREE.Vector4(i * SLOT[0] / pool.width, 0, SLOT[0] / pool.width, 1));
   });
   const uPool = { value: 0 };
   const liner = (() => {
@@ -576,31 +631,34 @@ void main() {
   let job = null, life = null, lastStep = 0, seenAt = -1;
   const fonts = Promise.all([`20px ${FONT}`, `italic 20px ${FONT}`].map(f => document.fonts?.load?.(f) ?? Promise.resolve())).catch(() => {});
   function* run() {
-    life = makeLife(lg, 512, 1024); lifeTex.needsUpdate = true; yield;
-    let done = 0;
-    for (const id of ['murmuration', 'ingression', ...GLASS.filter(w => CELL[w.id]?.[4] === 1).map(w => w.id)]) {
-      const [cx, cy, cw, ch, k] = CELL[id], c = document.createElement('canvas'); c.width = cw; c.height = ch;
+    life = makeLife(lg, TLW, TLH); lifeTex.needsUpdate = true; yield;
+    // one window: drawn on a canvas of its own, then set into its cell of a sheet
+    const set = function* (to, [cx, cy, cw, ch, k = 1, rot], draw, after) {
+      const c = document.createElement('canvas'); c.width = cw; c.height = ch;
       const g = c.getContext('2d', SOFT); g.scale(k, k);
-      const it = WINDOWS[id][2](g);
+      const it = draw(g);
       while (!it.next().done) yield;
-      if (id === 'loop') { sg.fillStyle = '#dfe9f2'; sg.beginPath(); sg.arc(cx + LOOP_EYE.u * cw, cy + LOOP_EYE.v * ch, LOOP_EYE.r * cw, 0, Math.PI * 2); sg.fill(); }      // the clear roundel at the loop's heart
-      sg.drawImage(c, cx, cy); c.width = c.height = 1;
-      if (++done % 4 === 0) sheetTex.needsUpdate = true;
-      yield;
+      after?.();
+      if (rot) { to.save(); to.translate(cx, cy + cw); to.rotate(-Math.PI / 2); to.drawImage(c, 0, 0); to.restore(); } else to.drawImage(c, cx, cy);      // (on its side: the picture's top to the cell's left)
+      c.width = c.height = 1;
+    };
+    let done = 0;
+    for (const id of ['murmuration', 'ingression', ...GLASS.map(w => w.id).filter(id => id !== 'murmuration' && id !== 'ingression')]) {      // each picture, then the short window under it
+      if (CELL[id]) {
+        const [cx, cy, cw, ch] = CELL[id];
+        yield* set(sg, CELL[id], WINDOWS[id][2], id !== 'loop' ? null : (() => { sg.fillStyle = '#dfe9f2'; sg.beginPath(); sg.arc(cx + LOOP_EYE.u * cw, cy + LOOP_EYE.v * ch, LOOP_EYE.r * cw, 0, Math.PI * 2); sg.fill(); }));      // (the clear roundel at the loop's heart)
+        if (++done % 4 === 0) sheetTex.needsUpdate = true;
+        yield;
+      }
+      if (LCELL[id]) { yield* set(wg, LCELL[id], g => lowLight(g, LW, LH, id, 500 + done)); lowTex.needsUpdate = true; yield; }
     }
     sheetTex.needsUpdate = true; yield;
     // the strip for the light on the floor
     const a = pool.getContext('2d'), cut = document.createElement('canvas');
-    GLASS.forEach((w, i) => {
+    LIGHTS.forEach((w, i) => {
       let src = lifeCanvas;
-      if (w.id !== 'life') { const [cx, cy, cw, ch] = CELL[w.id]; cut.width = cw; cut.height = ch; cut.getContext('2d').drawImage(sheet, cx, cy, cw, ch, 0, 0, cw, ch); src = cut; }
-      const small = poolCopy(src, SLOT[0], w.round ? SLOT[0] : SLOT[1]);
-      if (w.round) {      // only its disc, fading at the rim, and dimmer (its pale ring of words would print as a bright hoop)
-        const s2 = small.getContext('2d'), R = SLOT[0] / 2, fade = s2.createRadialGradient(R, R, R * 0.35, R, R, R * 0.92);
-        fade.addColorStop(0, 'rgba(0,0,0,1)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
-        s2.globalCompositeOperation = 'destination-in'; s2.fillStyle = fade; s2.fillRect(0, 0, SLOT[0], SLOT[0]);
-        a.globalAlpha = 0.6; a.drawImage(small, i * SLOT[0], 0); a.globalAlpha = 1;
-      } else a.drawImage(small, i * SLOT[0], 0);
+      if (i >= GLASS.length || w.id !== 'life') { const [cx, cy, cw, ch, , rot] = i < GLASS.length ? CELL[w.id] : LCELL[w.id], q = cut.getContext('2d'), from = i < GLASS.length ? sheet : lowSheet; cut.width = cw; cut.height = ch; if (rot) { q.save(); q.translate(cw, 0); q.rotate(Math.PI / 2); q.drawImage(from, cx, cy, ch, cw, 0, 0, ch, cw); q.restore(); } else q.drawImage(from, cx, cy, cw, ch, 0, 0, cw, ch); src = cut; }
+      a.drawImage(poolCopy(src, SLOT[0], SLOT[1]), i * SLOT[0], 0);
     });
     poolTex.needsUpdate = true; ready = true; lastHour = null;
   }
@@ -613,8 +671,8 @@ void main() {
     if (day.hour !== lastHour) { lastHour = day.hour; setHour(); }
     let lit = 0; for (const c of candles) if (c.lit) lit++;
     const night = day.night ?? 0, f = lit / Math.max(1, candles.length);
-    U.uGlow.value = (0.07 + 0.2 * Math.min(1, f * 2.5)) * smooth(night, 0.3, 0.9);       // the windows glow outward after dark, more when the candles are lit
-    U.uIn.value = (0.012 + 0.03 * f) * night;
+    U.uGlow.value = (0.26 + 0.14 * Math.min(1, f * 2.5)) * smooth(night, 0.2, 0.8);      // after dark the coronas shine out through the glass, as the candles do in the chapel in Anna's garden; more when the table's candles are lit too
+    U.uIn.value = (0.03 + 0.03 * f) * night;
     if (life && performance.now() - seenAt < 400 && t - lastStep > 0.9) { lastStep = t; life.step(); lifeTex.needsUpdate = true; }
   });
   if (Q.has('lifesteps')) { const n = Number(Q.get('lifesteps')); const wait = () => { if (life) { for (let i = 0; i < n; i++) life.step(); lifeTex.needsUpdate = true; } else setTimeout(wait, 200); }; wait(); }
@@ -623,65 +681,27 @@ void main() {
   try { planting(outdoors); } catch (e) { console.warn('chapel planting', e); }
 }
 
-// ---- the plain lights, on one small sheet (512 x 1024): the arched light at the head of a tall window, the
-// band at its foot, the quarries round the roundel over the door, and a lower window's six-over-six sashes.
-// As the pictures are, this is what the glass lets through: lead black, pale glass pale.
-function plainLights(g) {
-  const r = rng(61), LEAD = '#14110e';
-  g.fillStyle = LEAD; g.fillRect(0, 0, 512, 1024);
-  const pale = () => `hsl(${50 + r() * 30},${12 + r() * 14}%,${50 + r() * 13}%)`;
-  const quarries = (x0, y0, w, h, n, clip) => {
-    g.save(); g.beginPath(); clip ? clip() : g.rect(x0, y0, w, h); g.clip();
-    const s = w / n, t = s * 1.5;
-    for (let j = -1; j * t / 2 < h + t; j++) for (let i = -1; i <= n; i++) {
-      const cx = x0 + (i + (j & 1 ? 0.5 : 0) + 0.5) * s, cy = y0 + j * t / 2, a = s / 2 - 1.3, b = t / 2 - 1.3;
-      g.fillStyle = pale(); g.beginPath(); g.moveTo(cx, cy - b); g.lineTo(cx + a, cy); g.lineTo(cx, cy + b); g.lineTo(cx - a, cy); g.closePath(); g.fill();
-    }
-    g.restore();
-  };
-  // a border in the pictures' own colours: a pale fillet, then a blue band cut in lengths
-  const border = (x0, y0, w, h) => {
-    const ring = (d, th, col, step) => {
-      for (const [bx, by, bw, bh, along] of [[x0 + d, y0 + d, w - 2 * d, th, 1], [x0 + d, y0 + h - d - th, w - 2 * d, th, 1], [x0 + d, y0 + d + th, th, h - 2 * d - 2 * th, 0], [x0 + w - d - th, y0 + d + th, th, h - 2 * d - 2 * th, 0]]) {
-        const len = along ? bw : bh, n = Math.max(1, Math.round(len / step));
-        for (let i = 0; i < n; i++) { g.fillStyle = col(); along ? g.fillRect(bx + i * len / n + 1, by + 1, len / n - 2, bh - 2) : g.fillRect(bx + 1, by + i * len / n + 1, bw - 2, len / n - 2); }
-      }
-    };
-    ring(2, 7, () => `hsl(64,18%,${70 + r() * 8}%)`, 70); ring(9, 13, () => `hsl(${220 + r() * 6},62%,${27 + r() * 7}%)`, 44);
-    return [x0 + 23, y0 + 23, w - 46, h - 46];
-  };
-  {      // the arched light
-    const [x, y, w, h] = border(...PCELL.top), cx = x + w / 2, rad = w / 2 - 4, cy = y + rad + 6;
-    g.fillStyle = 'hsl(222,58%,24%)'; g.fillRect(x + 1, y + 1, w - 2, h - 2);
-    const arch = () => { g.moveTo(cx - rad, y + h); g.lineTo(cx - rad, cy); g.arc(cx, cy, rad, Math.PI, 0); g.lineTo(cx + rad, y + h); g.closePath(); };
-    g.fillStyle = LEAD; g.beginPath(); arch(); g.fill(); quarries(x, y, w, h, 5, arch);
-    g.strokeStyle = 'hsl(40,80%,48%)'; g.lineWidth = 7; g.beginPath(); g.arc(cx, cy, rad - 5, Math.PI, 0); g.stroke(); g.strokeStyle = LEAD; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, rad - 9.5, Math.PI, 0); g.stroke();
-  }
-  { const [x, y, w, h] = border(...PCELL.band); quarries(x, y, w, h, 5); }
-  { const [x, y, w, h] = border(...PCELL.round); quarries(x, y, w, h, 5); }
-  {      // six over six, in old dim glass (they are not what one is meant to look at)
-    const [x0, y0, w, h] = PCELL.sash, rail = 12, mun = 5;
-    for (let sash = 0; sash < 2; sash++) for (let j = 0; j < 3; j++) for (let i = 0; i < 2; i++) {
-      const pw = (w - mun) / 2, ph = (h / 2 - rail / 2 - mun * 2) / 3, px = x0 + i * (pw + mun), py = y0 + sash * (h / 2 + rail / 2) + j * (ph + mun);
-      const gr = g.createLinearGradient(px, py, px + pw, py + ph), l = 27 + r() * 6; gr.addColorStop(0, `hsl(${50 + r() * 30},10%,${l + 4}%)`); gr.addColorStop(1, `hsl(${50 + r() * 30},10%,${l - 3}%)`);
-      g.fillStyle = gr; g.fillRect(px, py, pw, ph);
-    }
-  }
-}
-
 // ---- the bell ---------------------------------------------------------------------------------------------
 // Bronze, hung in the cote on the ridge; its rope comes down through the ceiling just inside the door, with
-// a striped sally to pull. One pull swings it for a few strokes. The sound is a struck bell's own five
+// a striped sally to pull. One pull rings a whole touch (see bell()). The sound is a struck bell's own five
 // partials (hum, prime, tierce, quint, nominal: an octave below, the note, a minor third, a fifth, an octave).
 function bell(ctx, scene) {
+  // Four bells hang in the cote, two and two on a pair of beams, treble to tenor. One pull of the rope and they ring
+  // Plain Bob Minimus: rounds, then every one of the twenty-four orders four bells can be rung in, each exactly
+  // once, and back into rounds: the oldest of the change-ringing methods, as English towers have rung it since the
+  // 1600s. (Hunting: pairs swap, then the middle pair swaps; and at each lead end the last pair swaps instead.)
   const { animated, interact } = ctx, z = BC.z, yTop = BC.top - 0.75;
-  const bronze = new THREE.MeshStandardMaterial({ color: 0x8a6a3a, metalness: 0.85, roughness: 0.42, side: THREE.DoubleSide });
-  const swing = new THREE.Group(); swing.position.set(0, yTop, z); swing.scale.setScalar(0.72); scene.add(swing);
-  const prof = [[0.04, 0], [0.5, -0.06], [0.66, -0.3], [0.7, -0.9], [0.84, -1.5], [1.12, -1.95], [1.3, -2.15], [1.26, -2.2]].map(([r, y]) => new THREE.Vector2(r, y));
-  const body = new THREE.Mesh(new THREE.LatheGeometry(prof.reverse(), 24), bronze); body.castShadow = true; body.name = 'chapel bell'; swing.add(body);
-  const clapper = new THREE.Mesh(mergeAll([new THREE.CylinderGeometry(0.035, 0.035, 1.7, 6).translate(0, -1.0, 0), new THREE.SphereGeometry(0.17, 10, 8).translate(0, -1.9, 0)].map(g => g.toNonIndexed())), new THREE.MeshStandardMaterial({ color: 0x2a2926, metalness: 0.7, roughness: 0.5 }));
-  swing.add(clapper);
-  const RX = 5.6, RZ = IZ0 + 0.6, y0 = FLR + 3.2;
+  const bronze = new THREE.MeshStandardMaterial({ color: 0x8a6a3a, metalness: 0.85, roughness: 0.42, side: THREE.DoubleSide }), dark = new THREE.MeshStandardMaterial({ color: 0x2a2926, metalness: 0.7, roughness: 0.5 });
+  const prof = [[0.04, 0], [0.5, -0.06], [0.66, -0.3], [0.7, -0.9], [0.84, -1.5], [1.12, -1.95], [1.3, -2.15], [1.26, -2.2]].map(([r, y]) => new THREE.Vector2(r, y)).reverse();
+  const bodyGeo = new THREE.LatheGeometry(prof, 20), clapGeo = mergeAll([new THREE.CylinderGeometry(0.035, 0.035, 1.7, 6).translate(0, -1.0, 0), new THREE.SphereGeometry(0.17, 10, 8).translate(0, -1.9, 0)].map(g => g.toNonIndexed()));
+  // treble (1) to tenor (4): where each hangs, how big, and its note (a major tetrachord coming down: F E D C)
+  const BELLS = [[-0.66, -0.6, 0.3, 77], [0.66, -0.6, 0.34, 76], [-0.66, 0.6, 0.38, 74], [0.66, 0.6, 0.44, 72]].map(([x, dz, sc, midi]) => {
+    const g = new THREE.Group(); g.position.set(x, yTop, z + dz); g.scale.setScalar(sc); scene.add(g);
+    const body = new THREE.Mesh(bodyGeo, bronze); body.castShadow = true; body.name = 'chapel bell'; body.userData.cat = 'chapel'; const clapper = new THREE.Mesh(clapGeo, dark); g.add(body, clapper);
+    return { g, clapper, midi, at: -100 };
+  });
+  for (const dz of [-0.6, 0.6]) { const m = new THREE.Mesh(new THREE.BoxGeometry(BC.hw * 2 - 0.9, 0.3, 0.28), new THREE.MeshStandardMaterial({ color: 0x5a4636, roughness: 0.9 })); m.position.set(0, yTop + 0.17, z + dz); m.userData.cat = 'chapel'; scene.add(m); }
+  const RX = 5.6, RZ = IZ0 + 1.15, y0 = FLR + 3.2;      // (clear of the cornice's lip)
   const tube = (a, b, r, n = 6) => { const A = new THREE.Vector3(...a), Bv = new THREE.Vector3(...b), d = Bv.clone().sub(A), g = new THREE.CylinderGeometry(r, r, d.length(), n); g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize())); g.translate((A.x + Bv.x) / 2, (A.y + Bv.y) / 2, (A.z + Bv.z) / 2); return g.toNonIndexed(); };
   const tint = (g, f) => { const p = g.attributes.position, c = new Float32Array(p.count * 3); for (let i = 0; i < p.count; i++) c.set(f(p.getX(i), p.getY(i), p.getZ(i)), i * 3); g.setAttribute('color', new THREE.BufferAttribute(c, 3)); return g; };
   const HEMP = () => [0.62, 0.52, 0.36], ropeMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 });
@@ -689,17 +709,26 @@ function bell(ctx, scene) {
   tint(sallyGeo, (x, y, zz) => { const k = Math.floor((y - FLR - 4.2) / 0.2 + Math.atan2(zz - RZ, x - RX) / 2.1 + 20) % 3; return k === 0 ? [0.6, 0.1, 0.09] : k === 1 ? [0.85, 0.8, 0.68] : [0.12, 0.2, 0.44]; });
   const rope = new THREE.Mesh(mergeAll([tint(tube([RX, y0, RZ], [RX, CEIL + 1.1, RZ], 0.045), HEMP), sallyGeo], ['position', 'normal', 'color']), ropeMat);
   rope.name = 'chapel bell rope'; rope.userData.cat = 'chapel'; scene.add(rope);
-  let rung = -100, now = 0, struck = 0;
-  const strike = (when, vol) => { try { const s = ctx.sound; if (!s?.note) return; s.note(48, when, 6.5, 0.16 * vol); s.note(60, when, 4.5, 0.2 * vol); s.note(63, when, 3.2, 0.09 * vol); s.note(67, when, 2.4, 0.06 * vol); s.note(72, when, 1.8, 0.11 * vol); } catch { /* no sound yet */ } };
-  interact.push({ x: toW(RX, RZ)[0], y: FLR + 5.4, z: toW(RX, RZ)[1], reach: 6.5, size: 1.2, label: () => (now - rung < 7 ? 'listen' : 'ring the bell'), act: () => { if (now - rung < 7) return; rung = now; struck = 0; } });
+
+  // the touch: two rounds, then the 24 changes of Plain Bob Minimus (the last brings them round), as [bell, time]
+  const BEAT = 0.27, strikes = [];
+  { let row = [0, 1, 2, 3], t = 0, n = 0; const rows = [row, row];
+    const swap = (r, pairs) => { const q = r.slice(); for (const [a, b] of pairs) [q[a], q[b]] = [q[b], q[a]]; return q; };
+    for (let lead = 0; lead < 3; lead++) for (let k = 0; k < 8; k++) { row = swap(row, k % 2 === 0 ? [[0, 1], [2, 3]] : k === 7 ? [[2, 3]] : [[1, 2]]); rows.push(row); }
+    for (const r of rows) { for (const b of r) { strikes.push([b, t]); t += BEAT; } if (++n % 2 === 0) t += BEAT; }      // a beat's pause after every second row, as ringers leave at the handstroke lead
+  }
+  const LEN = strikes.at(-1)[1] + 4;
+  let rung = -1e9, now = 0, next = 0;
+  // a struck bell's own partials: hum, prime, tierce, quint, nominal
+  const strike = (midi, vol) => { try { const s = ctx.sound; if (!s?.note) return; s.note(midi - 24, 0, 3.4, 0.1 * vol); s.note(midi - 12, 0, 2.6, 0.2 * vol); s.note(midi - 9, 0, 1.7, 0.08 * vol); s.note(midi - 5, 0, 1.3, 0.05 * vol); s.note(midi, 0, 1.0, 0.11 * vol); } catch { /* no sound yet */ } };
+  interact.push({ x: toW(RX, RZ)[0], y: FLR + 5.4, z: toW(RX, RZ)[1], reach: 6.5, size: 1.2, label: () => (now - rung < LEN ? 'listen' : 'ring the bells'), act: () => { if (now - rung < LEN) return; rung = now; next = 0; ctx.flash?.('Plain Bob Minimus: four bells, twenty-four orders, each rung once.'); } });
   const near = new THREE.Vector3(toW(0, z)[0], 30, toW(0, z)[1]);
   animated.push((t) => {
     now = t; const dt = t - rung;
-    if (dt > 9) { if (swing.rotation.x) { swing.rotation.x = 0; clapper.rotation.x = 0; rope.position.y = 0; } return; }
-    const a = 0.5 * Math.exp(-dt / 2.6) * Math.sin(dt * 3.9);
-    swing.rotation.x = a; clapper.rotation.x = -a * 1.5; rope.position.y = -0.9 * Math.max(0, Math.exp(-dt / 2.6) * Math.cos(dt * 3.9));
-    const n = Math.floor((dt * 3.9 + Math.PI / 2) / Math.PI);                // one stroke each time it swings through
-    if (n > struck && n <= 5) { struck = n; strike(0, Math.exp(-(n - 1) * 0.45) * (ctx.camera.position.distanceToSquared(near) < 200 * 200 ? 1 : 0.4)); }
+    if (dt > LEN + 1) { if (rope.position.y) rope.position.y = 0; return; }
+    while (next < strikes.length && strikes[next][1] <= dt) { const b = BELLS[strikes[next][0]]; b.at = t; strike(b.midi, ctx.camera.position.distanceToSquared(near) < 200 * 200 ? 1 : 0.4); next++; }
+    for (const b of BELLS) { const u = t - b.at, a = u < 2.5 ? 0.34 * Math.exp(-u / 0.55) * Math.cos(u * 9) : 0; b.g.rotation.x = a; b.clapper.rotation.x = -a * 1.4; }
+    rope.position.y = dt < LEN - 3.5 ? -0.55 * (0.5 - 0.5 * Math.cos(dt * Math.PI / (BEAT * 4.5))) : rope.position.y * 0.9;
   });
 }
 

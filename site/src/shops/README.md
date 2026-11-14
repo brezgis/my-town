@@ -69,6 +69,13 @@ stands within about 6 ft of it is your window display and is seen from the stree
   `site/assets/models/` can be used (copy more from `/home/anna/projects/my_house/site/assets/models/`
   if you need one, they are CC0). Prefer building small goods from K's primitives over many models.
 
+## The room itself
+
+`arch.js` (`const A = arch(kit, lot, K)`) is the joinery every shop shares: `A.wainscot`, `A.rail`,
+`A.partition` (a wall across the room with cased doorways, hatches and internal windows: most shops have
+a back room behind one) and `A.breast` (a chimney breast). Read its header. Each building's real back door
+is drawn on the back wall inside, where `backs.js` puts it outside.
+
 ## The clerk
 
 Push one description onto `kit.clerks` (see the header of `../clerks.js` and Juniper in coffee.js):

@@ -23,6 +23,7 @@ import { buildFlats, flatsLife } from './flats.js';
 import { buildBacks, backsLife } from './backs.js';
 import { placeCreatures, creaturesLife } from './creatures.js';
 import { hideEggs, eggsLife } from './eggs.js';
+import { layGrounds } from './grounds.js';
 import { chapelLife } from './chapel.js';
 
 // ---- the island --------------------------------------------------------------------------------
@@ -85,7 +86,7 @@ const STREET_TREES = [];
     ['oak', -104, -40, 48], ['pine', -112, -84, 54], ['maple', -118, -122, 42], ['oak', -100, -164, 46], ['birch', -86, -196, 30], ['birch', -92, -204, 32], ['pine', -74, -220, 48],
     ['maple', -78, -8, 38], ['cherry', -66, 36, 21], ['pine', -96, 26, 50], ['willow', -98, -128, 34],
     // round the churchyard
-    ['oak', 48, 64, 44], ['maple', -46, 70, 40], ['birch', 40, 96, 28], ['birch', 45, 102, 30], ['pine', -44, 118, 48], ['copper', 42, 136, 42], ['cherry', -36, 92, 20], ['oak', -30, 160, 44], ['pine', 24, 166, 46], ['maple', 76, 70, 36], ['pine', -78, 78, 50],
+    ['oak', 48, 64, 44], ['maple', -46, 70, 40], ['birch', 40, 96, 28], ['birch', 45, 102, 30], ['pine', -44, 118, 48], ['copper', 42, 136, 42], ['cherry', -36, 92, 20], ['oak', -38, 160, 44], ['pine', 38, 168, 46], ['maple', 76, 70, 36], ['pine', -78, 78, 50],
     ['lilac', 66, -116, 12], ['magnolia', 74, -100, 16], ['apple', 80, -128, 15],
     ['jmaple', 34, -214, 13], ['copper', -38, -226, 40], ['lilac', 50, -240, 12], ['pine', -44, -262, 44], ['birch', 66, -252, 28],
   ];
@@ -113,10 +114,10 @@ export function layStreet(B, items, town) {
     P(STONE, s * (ROAD + 0.7), s * FRONT, STREET.y0 - 0.7, STREET.y0, -0.6, CURB);
   }
   // crossings: zebra stripes, a little worn
-  for (const Y of [-12, 98, 186]) for (let X = -ROAD + 1.2; X < ROAD - 1; X += 3) P('c#d9d4c6/0.9', X, X + 1.7, Y - 4, Y + 4, 0.07, 0.082);
+  for (const Y of [-12, 98, 186]) for (let X = -ROAD + 1.2; X < ROAD - 1; X += 3) P('c#d9d4c6/0.9', X, X + 1.7, Y - 4, Y + 4, 0.02, 0.1);
   // a centre line of sorts, and the bicycle lane on the north side
-  for (let Y = -4; Y < 182; Y += 9) if (Math.abs(Y - 98) > 8) P('c#cdb45a/0.9', -0.2, 0.2, Y, Y + 4.5, 0.07, 0.08);
-  for (const [Y0, Y1] of [[-6, 92], [104, 180]]) P('c#d9d4c6/0.9', ROAD - 4.6, ROAD - 4.3, Y0, Y1, 0.07, 0.08);
+  for (let Y = -4; Y < 182; Y += 9) if (Math.abs(Y - 98) > 8) P('c#cdb45a/0.9', -0.2, 0.2, Y, Y + 4.5, 0.02, 0.1);
+  for (const [Y0, Y1] of [[-6, 92], [104, 180]]) P('c#d9d4c6/0.9', ROAD - 4.6, ROAD - 4.3, Y0, Y1, 0.02, 0.1);
   K.surface(-ROAD, ROAD, -R1, -R0, 0.07);
 
   // ======================================================================================
@@ -201,6 +202,7 @@ export function layStreet(B, items, town) {
   dressFronts(K, town);
   buildPlaces(K, town);
   buildFlats(K, town); buildBacks(K, town); placeCreatures(K, town); hideEggs(K, town);
+  try { layGrounds(K, town); } catch (e) { console.warn('street grounds', e); }
 
   // ======================================================================================
   // Built once materials exist, and the things that move
@@ -209,6 +211,7 @@ export function layStreet(B, items, town) {
     const { THREE: T3, scene, renderer, materials, animated, day } = ctx;
     K.G.build(scene, renderer, materials.grass);
     K.P.build(scene, mergeGeometries);
+    weed(K, B);
     K.F.build(scene);
     // String-light bulbs: one instanced mesh; they and the lamps' globes get a soft glow after dark.
     const glow = materials.make(GLOW);
@@ -228,6 +231,32 @@ export function layStreet(B, items, town) {
   };
 
   return { setup, surfaces: K.surfaces, arrive: K.transit?.arrive };
+}
+
+// Weeding. Plants are set out by many hands (the street, the places, the backs, the grounds), and some land where
+// something else already is. Before they are built, any plant growing at ground level is taken out if it stands on
+// gravel or flagstones (the walks, the Yard, stepping stones) or inside something solid that sits on the ground
+// (a bench, a boulder, a wall, a building). Plants in planters and pots (above the ground) are left alone.
+function weed(K, B) {
+  const tris = [];
+  for (const kind of ['gravel', 'flagstone']) for (const part of K.G.parts[kind] ?? []) {
+    const pos = part.attributes?.position?.array, idx = part.index?.array; if (!pos || !idx) continue;
+    for (let i = 0; i < idx.length; i += 3) { const a = idx[i] * 3, b = idx[i + 1] * 3, c = idx[i + 2] * 3; tris.push([pos[a], pos[a + 2], pos[b], pos[b + 2], pos[c], pos[c + 2]]); }
+  }
+  const CELL = 8, grid = new Map(), key = (i, j) => i * 4096 + j;
+  for (const t of tris) { const i0 = Math.floor(Math.min(t[0], t[2], t[4]) / CELL), i1 = Math.floor(Math.max(t[0], t[2], t[4]) / CELL), j0 = Math.floor(Math.min(t[1], t[3], t[5]) / CELL), j1 = Math.floor(Math.max(t[1], t[3], t[5]) / CELL);
+    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) { const k = key(i, j); (grid.get(k) ?? grid.set(k, []).get(k)).push(t); } }
+  const inTri = (x, z, t) => { const d1 = (x - t[2]) * (t[1] - t[3]) - (t[0] - t[2]) * (z - t[3]), d2 = (x - t[4]) * (t[3] - t[5]) - (t[2] - t[4]) * (z - t[5]), d3 = (x - t[0]) * (t[5] - t[1]) - (t[4] - t[0]) * (z - t[1]); return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0)); };
+  const onPath = (x, z) => (grid.get(key(Math.floor(x / CELL), Math.floor(z / CELL))) ?? []).some(t => inTri(x, z, t));
+  const solids = B.colliders.filter(c => (c.y0 ?? 0) < 1.2 && c.y1 > 0.4);
+  const before = K.F.list.length;
+  K.F.list = K.F.list.filter(p => {
+    if (p.y > 0.75) return true;                                                   // in a planter or a pot
+    const m = Math.min(0.9, p.w * 0.25);                                           // a little of its spread counts
+    for (const [dx, dz] of [[0, 0], [m, 0], [-m, 0], [0, m], [0, -m]]) if (onPath(p.x + dx, p.z + dz)) return false;
+    return !solids.some(c => p.x > c.x0 - m && p.x < c.x1 + m && p.z > c.z0 - m && p.z < c.z1 + m);
+  });
+  K.weeded = before - K.F.list.length;
 }
 
 // Soft glows round small lights (bulbs on a string, lamp globes, signs' lamps): camera-facing

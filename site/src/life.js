@@ -335,7 +335,10 @@ export function bringToLife({ scene, outdoors = scene, vis = null, quality = {},
     if (bd > within) return false;
     const [q] = sheetQueue.splice(bi, 1); buildSheet(q.key, q.list); if (!sheetQueue.length) onChange?.(); return true;
   }
-  animated.push(() => { nextSheet(); });
+  // (what is near is made at once, a sheet a frame; what is far off waits for frames with time to spare, so the
+  // street does not stutter through its first seconds making labels nobody can see yet)
+  let sheetTick = 0;
+  animated.push((t, dt) => { sheetTick++; if (!nextSheet(70) && dt < 0.03 && sheetTick % 3 === 0) nextSheet(); });
   function buildSheet(key, list) {
     for (const it of list) if (!it.c) {
       if (it.rug) it.c = rugTexture(it.e.rug, it.e.w, it.e.d).image;

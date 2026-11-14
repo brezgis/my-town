@@ -45,7 +45,7 @@ const IDENT = {
   gus: { shape: 'bean', scale: 1.08, buttons: '#c9a45c', moustache: '#ffe9c0', eyeW: 22, eyeH: 22, eyeR: 11, gap: 38, ears: 'bolts', rest: 'neutral', roam: 16 },
   crumb: { shape: 'barrel', pattern: 'speckle', colour2: '#f4ecdc', eyeW: 40, eyeH: 34, gap: 48, brows: 0.6, ears: 'fins', rest: 'sleepy' },
   hesper: { shape: 'round', scale: 1.04, colour: '#26314a', pattern: 'split', colour2: '#1a2030', bowtie: '#c9a45c', top: 'bulb', eyeW: 40, eyeH: 16, eyeR: 8, gap: 46, brows: -0.5, rest: 'sass', ears: null, roam: 9 },
-  moth: { shape: 'pip', scale: 0.9, colour: '#d9d2c2', pattern: 'speckle', colour2: '#b9ae98', ears: 'fins', top: 'coil', eyeW: 44, eyeH: 44, eyeR: 22, gap: 50, eye: '#cfe3ff', rest: 'neutral' },
+  wren: { shape: 'pip', scale: 0.9, colour: '#d9d2c2', pattern: 'speckle', colour2: '#b9ae98', ears: 'fins', top: 'coil', eyeW: 44, eyeH: 44, eyeR: 22, gap: 50, eye: '#cfe3ff', rest: 'neutral' },
   sol: { shape: 'tall', top: 'halo', pattern: 'stripes', colour2: '#f0c98a', eyeW: 36, eyeH: 40, gap: 44, rest: 'happy', roam: false },
   quill: { shape: 'bean', scale: 1.12, top: 'coil', monocle: true, specs: true, eyeW: 26, eyeH: 34, gap: 42, buttons: '#c9a45c', brows: 0.4, rest: 'focus', antenna: false },
 };
@@ -163,17 +163,19 @@ class Clerk {
     return this.topics(list);
   }
   // ---- getting about: a one-foot grid of the shop (or of the ground round an outdoor stall), made from the
-  // same obstacles the visitor meets. A robot floats, so anything lower than its belly (a counter, a table,
-  // a crate) it simply drifts over; shelves, walls and the visitor it goes round.
+  // same obstacles the visitor meets. A robot goes round everything a person would, low things too (it used to
+  // drift over counters and tables, which looked like a fault), keeping a little further from tall things than
+  // from low ones. The way found on the grid is then pulled straight wherever there is a clear line.
   area() {
     const r = this.H.ctx.house.rooms.find(r => r.lot === this.spec.lot), [hx, hz] = this.spec.home, R = typeof this.roam === 'number' ? this.roam : 10;
     return r ? { x0: r.x0 + 0.9, x1: r.x1 - 0.9, z0: r.z0 + 0.9, z1: r.z1 - 0.9 } : { x0: hx - R, x1: hx + R, z0: hz - R, z1: hz + R };
   }
   remap() {
     const A = this.area(), W = Math.max(1, Math.ceil(A.x1 - A.x0)), D = Math.max(1, Math.ceil(A.z1 - A.z0)), cells = new Uint8Array(W * D);
-    const lo = this.y + this.body.belly, hi = this.y + this.body.top, pad = (this.spec.radius ?? 0.75) * (this.spec.look.scale ?? 1);
+    const belly = this.y + this.body.belly, lo = (this.spec.floor ?? this.y) + 0.45, hi = this.y + this.body.top, PAD = (this.spec.radius ?? 0.75) * (this.spec.look.scale ?? 1);
     for (const c of this.H.ctx.colliders) {
       if (c.off || c.y1 <= lo || c.y0 >= hi || c.x1 < A.x0 - 1 || c.x0 > A.x1 + 1 || c.z1 < A.z0 - 1 || c.z0 > A.z1 + 1) continue;
+      const pad = c.y1 <= belly ? 0.4 : PAD;
       const i0 = Math.max(0, Math.floor(c.x0 - pad - A.x0)), i1 = Math.min(W - 1, Math.floor(c.x1 + pad - A.x0)), j0 = Math.max(0, Math.floor(c.z0 - pad - A.z0)), j1 = Math.min(D - 1, Math.floor(c.z1 + pad - A.z0));
       for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) cells[j * W + i] = 1;
     }
@@ -200,10 +202,15 @@ class Clerk {
     if (prev[e] < 0) return null;
     const pts = []; for (let c = e; c !== s; c = prev[c]) pts.push([c % g.W + 0.5 + g.A.x0, Math.floor(c / g.W) + 0.5 + g.A.z0]);
     pts.reverse(); if (e === this.cell(tx, tz)) pts.push([tx, tz]);
-    return pts;
+    // pull it straight: from where it stands, skip every point it can reach in a clear line
+    const clear = (ax, az, bx, bz) => { const n = Math.ceil(Math.hypot(bx - ax, bz - az) / 0.3); for (let k = 1; k < n; k++) { const c = this.cell(ax + (bx - ax) * k / n, az + (bz - az) * k / n); if (c < 0 || g.cells[c]) return false; } return true; };
+    const out = []; let ax = this.x, az = this.z, i = 0;
+    while (i < pts.length) { let j = pts.length - 1; while (j > i && !clear(ax, az, pts[j][0], pts[j][1])) j--; out.push(pts[j]); [ax, az] = pts[j]; i = j + 1; }
+    return out;
   }
-  go(p, then) {
+  go(p, then, must = true) {
     const path = this.route(p[0], p[1]);
+    if (!path?.length && !must) { this.until = this.H.now + 5; return; }      // no way there: stay put a while longer
     this.path = path?.length ? path : [[p[0], p[1]]]; this.target = { x: this.path[0][0], z: this.path[0][1], then }; this.state = 'go';
   }
   // somewhere to drift to: one of the shop file's posts, or any clear spot in the shop not on top of the visitor
@@ -212,8 +219,27 @@ class Clerk {
     if (sp.posts?.length && Math.random() < 0.45) return pick(sp.posts);
     if (!this.grid || this.H.now - this.gridAt > 25) this.remap();
     const g = this.grid;
-    for (let k = 0; k < 24; k++) { const c = Math.floor(Math.random() * g.cells.length); if (g.cells[c]) continue; const x = c % g.W + 0.5 + g.A.x0, z = Math.floor(c / g.W) + 0.5 + g.A.z0; if (Math.hypot(x - v.x, z - v.z) > 4.5 && Math.hypot(x - this.x, z - this.z) > 4) return [x, z]; }
+    for (let k = 0; k < 24; k++) { const c = Math.floor(Math.random() * g.cells.length); if (g.cells[c]) continue; const x = c % g.W + 0.5 + g.A.x0, z = Math.floor(c / g.W) + 0.5 + g.A.z0; if (Math.hypot(x - v.x, z - v.z) > 4.5 && Math.hypot(x - this.x, z - this.z) > 4 && !this.passage(c)) return [x, z]; }
     return sp.posts?.length ? pick(sp.posts) : null;
+  }
+  // Is this cell in a way through (a doorway, the gap between a counter and a wall, an aisle)? Shut in closely on
+  // both sides one way or the other. Nobody should stand about there (manners, after the staff of Anna's House).
+  passage(c) {
+    const g = this.grid, i = c % g.W, j = (c - i) / g.W, shut = (di, dj) => { for (let k = 1; k <= 2; k++) { const a = i + di * k, b = j + dj * k; if (a < 0 || b < 0 || a >= g.W || b >= g.D || g.cells[b * g.W + a]) return true; } return false; };
+    return (shut(1, 0) && shut(-1, 0)) || (shut(0, 1) && shut(0, -1));
+  }
+  // Out of the visitor's way: a free spot a few feet off, to one side of where they are heading, not in a passage.
+  aside(v, hx, hz) {
+    if (!this.grid || this.H.now - this.gridAt > 25) this.remap();
+    const g = this.grid; let best = null, bs = 1e9;
+    for (let c = 0; c < g.cells.length; c++) {
+      if (g.cells[c]) continue;
+      const x = c % g.W + 0.5 + g.A.x0, z = Math.floor(c / g.W) + 0.5 + g.A.z0, dr = Math.hypot(x - this.x, z - this.z), dvv = Math.hypot(x - v.x, z - v.z);
+      if (dr > 8 || dr < 1.5 || dvv < 4 || this.passage(c)) continue;
+      const side = Math.abs((x - v.x) * hz - (z - v.z) * hx), sc = dr - 1.2 * Math.min(4, side);       // near, and well off their line
+      if (sc < bs) { bs = sc; best = [x, z]; }
+    }
+    return best;
   }
   update(dt) {
     const H = this.H, now = H.now, v = H.visitor, b = this.body, sp = this.spec;
@@ -226,9 +252,16 @@ class Clerk {
     if (inShop && now > this.nextIdle && H.talk.robot !== this && !this.bubble.talking(now)) { this.line('idle'); this.nextIdle = now + 28 + Math.random() * 40; }
     // what to do next
     const talking = H.talk.robot === this;
+    // manners: if the visitor is walking straight at it and is nearly on it, it glides out of the way (not when it
+    // is being spoken to, making something, or already going somewhere)
+    { const sx = (v.x - (this.pvx ?? v.x)) / Math.max(dt, 1e-3), sz = (v.z - (this.pvz ?? v.z)) / Math.max(dt, 1e-3), sp2 = Math.hypot(sx, sz); this.pvx = v.x; this.pvz = v.z;
+      if (this.roam && !talking && dv < 3.4 && sp2 > 1.5 && Math.abs(v.y - this.y) < 3 && (this.state === 'home' || this.state === 'fuss') && !this.queue.length && now > (this.mannersAt ?? 0)) {
+        const hx = sx / sp2, hz = sz / sp2, toward = ((this.x - v.x) * hx + (this.z - v.z) * hz) / Math.max(dv, 0.01);
+        if (toward > 0.8) { this.mannersAt = now + 3; const p = this.aside(v, hx, hz); if (p) this.go(p, () => { this.state = 'fuss'; this.fussYaw = Math.atan2(v.x - this.x, v.z - this.z); this.until = this.H.now + 5 + Math.random() * 4; }, false); }
+      } }
     if (this.state === 'home') {
       if (this.queue.length && !talking) this.startDrink(this.queue.shift());
-      else if (now > this.until && !talking && this.roam) { const p = this.somewhere(); if (p) { this.trips = (this.trips ?? 0) + 1; this.go(p, () => { this.state = 'fuss'; this.fussYaw = this.yaw; this.until = this.H.now + 3 + Math.random() * 5; }); } else this.until = now + 6; }
+      else if (now > this.until && !talking && this.roam) { const p = this.somewhere(); if (p) { this.trips = (this.trips ?? 0) + 1; this.go(p, () => { this.state = 'fuss'; this.fussYaw = this.yaw; this.until = this.H.now + 3 + Math.random() * 5; }, false); } else this.until = now + 6; }
     } else if (this.state === 'fuss' && this.queue.length && !talking) this.startDrink(this.queue.shift());
     else if (this.state === 'fuss' && now > this.until) {                // on to the next thing, or back to their own place every third trip (sooner if someone has come in)
       const home = this.trips % 3 === 0 || (inShop && !this.wasHome), p = home ? sp.home : this.somewhere() ?? sp.home; this.wasHome = home; if (!home) this.trips++;
@@ -248,7 +281,7 @@ class Clerk {
       }
     } else if (this.state === 'fuss' || this.state === 'make') aimYaw = this.fussYaw ?? this.yaw;
     else if ((inShop && dv < 22) || talking) aimYaw = Math.atan2(v.x - this.x, v.z - this.z);
-    this.yaw = turnTo(this.yaw, aimYaw, dt * (moving ? 6 : 3.2));
+    this.yaw = turnTo(this.yaw, aimYaw, dt * (moving ? 4.2 : 3.2));
     // the body
     const t = now + this.phase, bobY = Math.sin(t * 1.7) * 0.07;
     b.root.position.set(this.x, this.y, this.z); b.root.rotation.y = this.yaw;

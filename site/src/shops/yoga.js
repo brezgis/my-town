@@ -1,21 +1,24 @@
 // Low Sun Yoga  (303 Mulberry Street: narrow and deep, about 19 ft wide by 43 deep)
-// The calmest room on the street: mostly floor, light and one wall painting. By the door, shoe cubbies on the
-// left wall, a rack of mats and the evening's slate on the right, and the singing bowl on its stand (E strikes
-// it). Then the practice floor runs back: six mats in two columns either side of a clear aisle, facing Sol's
-// low platform and the painted sun on the end wall.
+// Three rooms, front to back, as the building had them. RECEPTION behind the shop window: shoe cubbies and a
+// bench on the left, the desk and the evening's slate on the right, the singing bowl on its stand in the window
+// (E strikes it). Through a wide cased opening, THE PRACTICE ROOM: seven mats in two rows facing Sol's low
+// platform and the painted sun, one long shelf of props down the right wall, the sun salutation painted along
+// the left, paper lanterns in pairs. Behind the sun, through a door either side of it, THE BACK ROOM: the back
+// door, the window with its blind down, tea on the counter under it.
 // THE ROUTINES: sit on any mat ('take this mat') and a class begins. Sol leads a real sequence
 // (three of them, in rotation), the seated eye is moved through the poses, a caption names each
 // pose in Sanskrit and English with its breath, a bowl sounds at each change. Standing up ends it.
 import { tools, fixtures } from '../shopkit.js';
+import { arch } from './arch.js';
 import { BRASS, G } from '../kit.js';
 import { eyeHeight } from '../walk.js';
 import { T, F, fill, slate, chalk, paper, grain, disc, line, rnd } from '../draw.js';
 
-const OAK = 'oak_light#b4946a', PALE = 'oak_light#d2b88e', TERRA = 'painted_wood#c98a6a', CORK = 'c#c9a77a/0.8';
+const OAK = 'oak_light#b4946a', PALE = 'oak_light#d2b88e', TERRA = 'painted_wood#c98a6a', SAGE = 'painted_wood#aab5a0', CORK = 'c#c9a77a/0.8';
 const INK = '#3a2a22', RUST = '#b8553a', OCHRE = '#d9a441', PAPER = '#f6efe2';
-const MATS = ['c#9fb0a4/0.8', 'c#e8907a/0.8', 'c#2f5a6a/0.8', 'c#d9b35a/0.8', 'c#9fb0d8/0.8', 'c#c9b48a/0.8'];
+const MATS = ['c#9fb0a4/0.8', 'c#e8907a/0.8', 'c#2f5a6a/0.8', 'c#d9b35a/0.8', 'c#9fb0d8/0.8', 'c#c9b48a/0.8', 'c#7d8f72/0.8'];
 
-// The three readable things indoors: the slate, the card on the cubbies, and the words under the sun.
+// The readable things indoors: the slate, the card on the cubbies, how to breathe, the sun salutation, and the words under the sun.
 const TIMETABLE = (g, w, h) => {
   slate(g, w, h, '#262b29', 12);
   chalk(g, 'this evening', w * 0.5, h * 0.13, h * 0.14, '#f1efe6'); line(g, [[w * 0.3, h * 0.23], [w * 0.7, h * 0.23]], '#e9c46a', 3);
@@ -43,14 +46,44 @@ const MURAL = (g, w, h) => {
     const y = hz + k * h * 0.035, half = w * (0.44 - k * 0.07), pts = []; for (let i = 0; i <= 40; i++) pts.push([cx - half + (2 * half * i) / 40, y + Math.sin(i * 0.9 + k * 2) * h * 0.006]);
     line(g, pts, c, h * lw);
   }
-  T(g, 'sthira-sukham āsanam', w * 0.2, h * 0.85, h * 0.064, '#7a2f1c', { f: F.fraunces, it: 1, w: 600 });
-  T(g, '“posture: steady, and comfortable”', w * 0.8, h * 0.83, h * 0.05, '#7a2f1c', { f: F.caveat, w: 600 });
-  T(g, 'Patañjali, Yoga Sūtra 2.46', w * 0.8, h * 0.9, h * 0.036, '#a8553a', { f: F.fraunces, it: 1 });
-  T(g, '(he does not mention hamstrings once)', w * 0.2, h * 0.92, h * 0.038, '#a8553a', { f: F.caveat, w: 600 });
+  T(g, 'sthira-sukham āsanam', w * 0.21, h * 0.85, h * 0.064, '#7a2f1c', { f: F.fraunces, it: 1, w: 600, max: w * 0.36 });
+  T(g, '“posture: steady, and comfortable”', w * 0.79, h * 0.83, h * 0.05, '#7a2f1c', { f: F.caveat, w: 600, max: w * 0.36 });
+  T(g, 'Patañjali, Yoga Sūtra 2.46', w * 0.79, h * 0.9, h * 0.036, '#a8553a', { f: F.fraunces, it: 1 });
+  T(g, '(he does not mention hamstrings once)', w * 0.21, h * 0.92, h * 0.038, '#a8553a', { f: F.caveat, w: 600, max: w * 0.36 });
 };
+
+// The sun salutation, figure by figure, inked along the wall on the same limewash as the sun: u across, v down, the ground at v = 1
+const FIG = {
+  tadasana: [[0.5, 0.1], [[0.5, 0.18], [0.5, 0.58], [0.5, 1]], [[0.5, 0.25], [0.55, 0.56]]],
+  urdhva: [[0.5, 0.21], [[0.5, 0.29], [0.5, 0.62], [0.5, 1]], [[0.5, 0.31], [0.54, 0.02]]],
+  uttana: [[0.61, 0.87], [[0.44, 1], [0.44, 0.5], [0.58, 0.62], [0.6, 0.79]], [[0.59, 0.68], [0.67, 0.98]]],
+  ardha: [[0.84, 0.47], [[0.4, 1], [0.4, 0.5], [0.75, 0.49]], [[0.7, 0.5], [0.7, 0.95]]],
+  chatur: [[0.89, 0.74], [[0.08, 0.97], [0.1, 0.88], [0.79, 0.78]], [[0.79, 0.78], [0.62, 0.75], [0.66, 0.98]]],
+  updog: [[0.77, 0.4], [[0.04, 0.96], [0.5, 0.92], [0.72, 0.52]], [[0.71, 0.56], [0.7, 0.98]]],
+  adho: [[0.75, 0.75], [[0.93, 0.98], [0.5, 0.38], [0.14, 0.98]]],
+};
+function fig(g, key, cx, ground, s, col, lw = s * 0.05) {
+  const [head, ...lines] = FIG[key], P = ([u, v]) => [cx + (u - 0.5) * s, ground - (1 - v) * s];
+  for (const l of lines) line(g, l.map(P), col, lw);
+  const [hx, hy] = P(head); disc(g, hx, hy, s * 0.07, col);
+}
+const FRIEZE = (g, w, h) => {
+  fill(g, w, h, '#edd5bf'); grain(g, w, h, 0.05, 9);
+  const seq = [['tadasana', 'Tāḍāsana'], ['urdhva', 'Ūrdhva Hastāsana'], ['uttana', 'Uttānāsana'], ['ardha', 'Ardha Uttānāsana'], ['chatur', 'Chaturaṅga'], ['updog', 'Ūrdhva Mukha'], ['adho', 'Adho Mukha'], ['ardha', 'Ardha Uttānāsana'], ['uttana', 'Uttānāsana'], ['urdhva', 'Ūrdhva Hastāsana'], ['tadasana', 'Samasthiti']];
+  const cw = w / (seq.length + 0.6), x0 = cw * 0.3;
+  line(g, [[w * 0.025, h * 0.715], [w * 0.975, h * 0.715]], '#c4603f', h * 0.009);
+  seq.forEach(([k, sk], i) => { const x = x0 + cw * (i + 0.5); fig(g, k, x, h * 0.7, h * 0.46, '#7a2f1c', h * 0.022); T(g, sk, x, h * 0.86, h * 0.075, '#a8553a', { f: F.fraunces, it: 1, max: cw * 0.92 }); });
+};
+const BREATHE = (g, w, h) => { paper(g, w, h, '#f1e6d2', 15); g.strokeStyle = INK; g.lineWidth = 2; g.strokeRect(12, 12, w - 24, h - 24);
+  T(g, 'HOW TO', w / 2, h * 0.09, h * 0.06, RUST, { f: F.bebas, ls: 6 }); T(g, 'BREATHE', w / 2, h * 0.18, h * 0.115, INK, { f: F.abril, max: w * 0.84 });
+  const cy = h * 0.42; for (const [k, c] of [[0.2, '#c4603f'], [0.155, '#d9763f'], [0.11, OCHRE], [0.06, '#f1e6d2']]) disc(g, w / 2, cy, w * k, c);
+  T(g, 'in', w / 2, cy, h * 0.045, INK, { f: F.fraunces, it: 1, w: 600 });
+  ['1.  in, through the nose', '2.  out, slower than in', '3.  repeat until further notice'].forEach((s, i) => T(g, s, w * 0.14, h * (0.66 + i * 0.075), h * 0.05, INK, { f: F.fraunces, w: 600, a: 'left', max: w * 0.74 }));
+  T(g, 'you have been doing it all day. well done.', w / 2, h * 0.925, h * 0.042, RUST, { f: F.caveat, w: 600, max: w * 0.84 }); };
 
 const TAG2 = (a, b, c = PAPER) => (g, w, h) => { paper(g, w, h, c); T(g, a, w / 2, h * 0.34, h * 0.36, INK, { f: F.caveat, w: 600, max: w * 0.92 }); T(g, b, w / 2, h * 0.72, h * 0.27, RUST, { f: F.caveat, w: 600, max: w * 0.92 }); };
 const sunMark = (g, x, y, s, c) => { g.save(); g.translate(x, y); g.fillStyle = c; g.strokeStyle = c; g.lineWidth = s * 0.05; g.lineCap = 'round'; g.beginPath(); g.arc(0, 0, s * 0.24, Math.PI, 0); g.closePath(); g.fill(); for (let i = 0; i <= 6; i++) { const a = Math.PI + (i / 6) * Math.PI; g.beginPath(); g.moveTo(Math.cos(a) * s * 0.32, Math.sin(a) * s * 0.32); g.lineTo(Math.cos(a) * s * 0.46, Math.sin(a) * s * 0.46); g.stroke(); } g.beginPath(); g.moveTo(-s * 0.5, s * 0.06); g.lineTo(s * 0.5, s * 0.06); g.stroke(); g.restore(); };
+const LOGO = (g, w, h) => { fill(g, w, h, '#c98a6a'); grain(g, w, h, 0.05); sunMark(g, w * 0.14, h * 0.58, h * 0.7, '#fbf1df'); T(g, 'low sun yoga', w * 0.58, h * 0.5, h * 0.42, '#fbf1df', { f: F.fraunces, w: 600, it: 1, max: w * 0.66 }); };
 const BOARD = (g, w, h) => { slate(g, w, h, '#2a2623'); sunMark(g, w / 2, h * 0.22, h * 0.24, '#e9c46a'); chalk(g, 'LOW SUN YOGA', w / 2, h * 0.34, h * 0.085, '#f1efe6', { max: w * 0.9 });
   chalk(g, 'now on:', w / 2, h * 0.52, h * 0.06, '#9aa39d'); chalk(g, 'Sunset Salutations', w / 2, h * 0.62, h * 0.085, '#e9c46a', { max: w * 0.9 }); chalk(g, '(it is always now)', w / 2, h * 0.72, h * 0.055, '#9aa39d'); };
 
@@ -117,38 +150,88 @@ const SOL = { rest: [0, 0, 0, 0, 0.8, -0.125, 0.16], seat: [0, 0, 0, -1.7, 0.52,
   supL: [-1.5708, 0, 0.6, -2.75, 1.12, -0.2, 0], supR: [-1.5708, 0, -0.6, -2.75, 1.12, -0.2, 0], legs: [-1.5708, 0, 0, -2.75, 0.3, 0.1, 1.15], heart: [0.16, 0, 0, 0.1, 0.13, 0, 0.64] };
 
 export default function yoga(kit, lot) {
-  const K = tools(kit, 53), X = fixtures(kit, K), { ves, hcyl, tube } = K;
+  const K = tools(kit, 53), X = fixtures(kit, K), A = arch(kit, lot, K), { ves, hcyl, tube, ball } = K;
   const at = (a, d, h = 0, face = 'back') => K.wrap(lot.fr(kit, a, d, h, face));
   const R = at(0, 0);                                              // room coordinates: x = a, y = d, z = height
   const W = lot.W, D = lot.D, FL = R.h, DA = lot.doorA, MID = W / 2;
+  const DADO = 3.4, RAIL = 9.6;
   const roll = (f, ax, x, y, z, col, len = 2, r = 0.21) => { hcyl(f, col, ax, x, y, z, len, r, r, 12); hcyl(f, 'c#d9cdb2/0.8', ax, x, y, z, len * 0.09, r + 0.012, r + 0.012, 12); };      // a rolled mat with its strap
+  const bolster = (f, x, y, z, col, len = 1.7) => { hcyl(f, col, 'x', x, y, z + 0.33, len, 0.33, 0.33, 14); hcyl(f, 'c#efe2bc/0.8', 'x', x, y, z + 0.33, len + 0.03, 0.09, 0.09, 8); };
+  const zafu = (f, x, y, z, col, r = 0.62) => { ball(f, col, x, y, z, r, 16, 0.4); hcyl(f, 'c#efe2bc/0.8', 'z', x, y, z + r * 0.4, 0.03, r * 1.005, r * 1.005, 16, true); };
+  const dado = (wall, s0, s1) => A.wainscot(wall, s0, s1, { h: DADO, mat: SAGE });
 
-  // ---- the platform at the far end, and the sun behind it --------------------------------------------------------
-  const PX0 = MID - 4.5, PX1 = MID + 4.5, PY0 = D - 5.6, PH = 0.5;
-  R.box(PALE, PX0, PX1, PY0, D - 0.02, 0, PH, G); R.box(OAK, PX0 - 0.03, PX1 + 0.03, PY0 - 0.03, D - 0.02, PH - 0.07, PH + 0.01, G);
-  { const [x0, z0] = lot.world(PX0, PY0), [x1, z1] = lot.world(PX1, D); kit.town?.surfaces?.push({ x0: Math.min(x0, x1), x1: Math.max(x0, x1), z0: Math.min(z0, z1), z1: Math.max(z0, z1), h: FL + PH }); }
+  // ---- the room itself: reception, a screen with a wide opening, the practice room, and a back room for tea ------------
+  const P1 = A.partition(10.2, { openings: [{ a0: MID - 4.6, a1: MID + 4.6, z1: 8.6 }] });
+  const P2 = A.partition(D - 7.1, { openings: [{ a0: 0.75, a1: 4.25, z1: 7.6 }, { a0: W - 4.25, a1: W - 0.75, z1: 7.6 }] });
+  const F1 = { d: P1.front, side: 'front' }, B1 = { d: P1.back, side: 'back' }, F2 = { d: P2.front, side: 'front' }, B2 = { d: P2.back, side: 'back' };
+  const SH0 = 14, SH1 = 30;                                        // the long shelf on the right wall of the practice room
+  const DOORA = W - (0.72 * (W + 1) - 0.5), WINA = W - (0.3 * (W + 1) - 0.5);      // the real back door and back window
+  const TC0 = WINA - 3.4, TC1 = WINA + 3.4;                        // the tea counter under the window
+  for (const [s0, s1] of [[0.05, P1.front - 0.005], [P1.back + 0.005, P2.front - 0.005], [P2.back + 0.005, D - 0.05]]) { A.rail('left', s0, s1, { z: RAIL }); A.rail('right', s0, s1, { z: RAIL }); dado('left', s0, s1); }
+  dado('right', 0.05, P1.front - 0.005); dado('right', P1.back + 0.005, SH0 - 0.07); dado('right', SH1 + 0.07, P2.front - 0.005); dado('right', P2.back + 0.005, D - 0.05);
+  for (const f of [F1, B1, F2, B2, 'back']) A.rail(f, 0.07, W - 0.07, { z: RAIL });
+  dado(F1, 0.076, MID - 4.98); dado(B1, 0.076, MID - 4.98); dado(B1, MID + 4.98, W - 0.076);
+  dado(F2, 4.63, W - 4.63); dado(B2, 4.63, W - 4.63);
+  dado('back', 0.076, DOORA - 1.88); dado('back', DOORA + 1.88, TC0 - 0.1); dado('back', TC1 + 0.1, W - 0.076);
+
+  // ---- the platform at the far end of the practice room, and the sun behind it ----------------------------------------
+  const PX0 = MID - 4.5, PX1 = MID + 4.5, PY1 = P2.front - 0.21, PY0 = PY1 - 5.2, PH = 0.5;
+  R.box(PALE, PX0, PX1, PY0, PY1, 0, PH, G); R.box(OAK, PX0 - 0.03, PX1 + 0.03, PY0 - 0.03, PY1 + 0.005, PH - 0.07, PH + 0.01, G);
+  { const [x0, z0] = lot.world(PX0, PY0), [x1, z1] = lot.world(PX1, PY1); kit.town?.surfaces?.push({ x0: Math.min(x0, x1), x1: Math.max(x0, x1), z0: Math.min(z0, z1), z1: Math.max(z0, z1), h: FL + PH }); }
   R.soft('c#b8361f/0.8', MID - 2.9, MID + 2.9, PY0 + 0.65, PY0 + 2.65, PH + 0.02, PH + 0.075, 0.025);            // Sol's own mat (pristine: Sol hovers)
   kit.pillarCandle(R, PX0 + 0.7, PY0 + 0.7, PH + 0.01, 0.7, 0.16); kit.pillarCandle(R, PX0 + 1.25, PY0 + 1.05, PH + 0.01, 0.45, 0.14);
-  kit.pottedPlant(R, PX1 - 0.9, D - 1.1, PH, 'snake', { size: 1.25, pot: 'c#f4f1ea/0.45' });
-  { const b = at(MID, D, 0, 'street'), hw = Math.min(6.85, MID - 1.2); b.box(TERRA, -hw - 0.1, hw + 0.1, 0.01, 0.05, 3.25, 10.55); kit.sign(b, 0, 0.06, 6.9, hw * 2, 7.1, MURAL, { cw: 1200, ch: 622, rough: 0.95 }); }
+  kit.pottedPlant(R, PX1 - 0.9, PY1 - 0.9, PH, 'snake', { size: 1.25, pot: 'c#f4f1ea/0.45' });
+  { const b = at(MID, P2.front, 0, 'street'), hw = 4.7; b.box(TERRA, -hw - 0.1, hw + 0.1, 0.01, 0.05, 3.62, 9.28); kit.sign(b, 0, 0.06, 6.45, hw * 2, 5.46, MURAL, { cw: 1200, ch: 697, rough: 0.95 }); }
 
-  // ---- the practice floor: six mats in two columns, a clear aisle from the door to the platform ------------------
+  // ---- the practice floor: two rows of mats facing the platform --------------------------------------------------------
   const seats = [];
-  const COLS = [MID - 4, MID + 4], ROW0 = 13.5, STEP = (PY0 - 3.5 - 5.8 - ROW0) / 2;
+  const ROWS = [[PY0 - 8.4, [MID - 4.2, MID, MID + 4.2]], [PY0 - 16.4, [MID - 6.3, MID - 2.1, MID + 2.1, MID + 6.3]]];
   let n = 0;
-  for (let r = 2; r >= 0; r--) for (const a of COLS) {
-    const i = n++, d0 = ROW0 + r * STEP;
+  for (const [d0, as] of ROWS) for (const a of as) {
+    const i = n++;
     R.soft(MATS[i % MATS.length], a - 1, a + 1, d0, d0 + 5.8, 0.02, 0.075, 0.025);
     kit.seat(R, a, d0 + 2.3, 0.15, 'take this mat'); seats.push(kit.seats[kit.seats.length - 1]);
     // what two people left at the top of their mats
     if (i === 0) { kit.foldedStack(R, a - 0.3, d0 + 5.2, 0.08, 1, ['wool#c9b48a'], { w: 1.1, d: 0.8, t: 0.14 }); R.box(CORK, a + 0.25, a + 1.0, d0 + 5.05, d0 + 5.55, 0.08, 0.41); }
-    if (i === 3) K.bottle(R, a + 0.75, d0 + 5.45, 0.08, { r: 0.11, h: 0.75, col: 'c#c9ccd0/0.2/1', cap: 'c#2f5a6a/0.45' });
+    if (i === 5) K.bottle(R, a + 0.75, d0 + 5.45, 0.08, { r: 0.11, h: 0.75, col: 'c#c9ccd0/0.2/1', cap: 'c#2f5a6a/0.45' });
   }
-  // one big plant in the back corner
-  kit.pottedPlant(R, 2.1, D - 2.1, 0, 'leafy', { size: 1.9, pot: 'c#f4f1ea/0.45' }); R.block(1.2, 3.0, D - 3.0, D - 1.2, 0, 4);
 
-  // ---- left wall by the door: shoes -------------------------------------------------------------------------------
-  const L = at(0, 6.8, 0, 'right');                               // +x runs toward the street, +y out into the room
+  // ---- right wall of the practice room: one long low shelf of props, its top level with the dado ----------------------
+  { const Rs = at(W, (SH0 + SH1) / 2, 0, 'left'), h = (SH1 - SH0) / 2, z1 = 1.15, z2 = 2.2, TOP = 3.4;      // +x runs toward the back, +y out into the room
+    X.shelving(Rs, -h, h, [z1, z2], { d: 1.25, mat: PALE, bay: 4, over: 1.1 });
+    const stack = (x, z, k) => { for (const [y, dz, j] of [[0.36, 0, 0], [0.84, 0, 1], [0.6, 0.365, 2]]) roll(Rs, 'x', x + (j - 1) * 0.05, y, z + 0.215 + dz, MATS[(k + j * 2) % MATS.length], 1.7); };
+    const cork = (x0, z, cols, hi) => { for (let i = 0; i < cols; i++) for (let j = 0; j < (i % 3 === 2 ? hi - 1 : hi); j++) Rs.box(CORK, x0 + i * 0.84, x0 + i * 0.84 + 0.75, 0.35, 0.85, z + 0.004 + j * 0.335, z + 0.334 + j * 0.335); };
+    // on the floor
+    bolster(Rs, -7, 0.62, 0.02, 'c#c98a6a/0.85'); bolster(Rs, -5, 0.62, 0.02, 'c#9fb0a4/0.85');
+    kit.foldedStack(Rs, -3, 0.62, 0.02, 4, ['wool#c98a6a', 'wool#e8e2d4', 'wool#7d8f72', 'wool#e8e2d4'], { w: 1.4, d: 0.9, t: 0.17 }); kit.foldedStack(Rs, -1, 0.62, 0.02, 3, ['wool#d9b35a', 'wool#e8e2d4', 'wool#2f5a6a'], { w: 1.4, d: 0.9, t: 0.17 });
+    cork(0.45, 0.02, 4, 3);
+    bolster(Rs, 5, 0.62, 0.02, 'c#d9b35a/0.85'); bolster(Rs, 7, 0.62, 0.02, 'c#c9b48a/0.85');
+    // the first shelf
+    stack(-7, z1, 0); stack(-5, z1, 1); stack(-3, z1, 2); stack(-1, z1, 3);
+    bolster(Rs, 1, 0.62, z1, 'c#9fb0a4/0.85'); bolster(Rs, 3, 0.62, z1, 'c#c98a6a/0.85');
+    kit.foldedStack(Rs, 5, 0.62, z1, 4, ['wool#e8e2d4', 'wool#9fb0a4', 'wool#e8e2d4', 'wool#c98a6a'], { w: 1.4, d: 0.9, t: 0.17 }); kit.foldedStack(Rs, 7, 0.62, z1, 3, ['wool#7d8f72', 'wool#e8e2d4', 'wool#d9b35a'], { w: 1.4, d: 0.9, t: 0.17 });
+    // the second: some of it left empty
+    kit.foldedStack(Rs, -7, 0.62, z2, 3, ['wool#e8e2d4', 'wool#c9b48a', 'wool#e8e2d4'], { w: 1.4, d: 0.9, t: 0.17 });
+    cork(-3.55, z2, 4, 2);
+    stack(5, z2, 4); stack(7, z2, 1);
+    // along the top
+    kit.pottedPlant(Rs, -6.9, 0.65, TOP, 'fern', { size: 0.9, pot: 'c#f4f1ea/0.45' });
+    kit.tableLamp(Rs, 0, 0.65, TOP, 'c#c98a6a/0.4');
+    K.potted(Rs, 6.9, 0.7, TOP, { r: 0.3, n: 18, len: 1.5, up: 0.15, out: 0.55, droop: 1.5, pot: 'c#f4f1ea/0.45' }); }
+
+  // ---- left wall of the practice room: the sun salutation, painted along it -------------------------------------------
+  { const Lf = at(0, (P1.back + PY0) / 2 + 1, 0, 'right');
+    Lf.box(TERRA, -6.58, 6.58, 0.01, 0.04, 5.07, 7.53); kit.sign(Lf, 0, 0.05, 6.3, 13, 2.3, FRIEZE, { cw: 1300, ch: 230, rough: 0.95 }); }
+  // a ladder of blankets against the screen, and a big plant in the other front corner
+  { const Lp = at(2.55, P1.back, 0, 'back'), lean = z => 1.3 - 1.05 * z / 4.7;
+    for (const s of [-0.75, 0.75]) tube(Lp, PALE, [[s, lean(0), 0], [s, lean(4.7), 4.7]], 0.05, 6);
+    for (const z of [1.2, 2.3, 3.4, 4.4]) hcyl(Lp, PALE, 'x', 0, lean(z), z, 1.5, 0.035, 0.035, 6);
+    kit.hangingTowel(Lp, -0.05, lean(4.4), 4.4, 1.15, 0.9, 'wool#c98a6a'); kit.hangingTowel(Lp, 0.05, lean(3.4), 3.4, 1.2, 0.9, 'wool#e8e2d4'); kit.hangingTowel(Lp, 0, lean(2.3), 2.3, 1.15, 0.85, 'wool#7d8f72');
+    Lp.block(-0.85, 0.85, 0, 1.4, 0, 4.7); }
+  kit.pottedPlant(R, W - 2.0, P1.back + 1.75, 0, 'leafy', { size: 1.9, pot: 'c#f4f1ea/0.45' }); R.block(W - 2.9, W - 1.1, P1.back + 0.85, P1.back + 2.65, 0, 4);
+
+  // ---- reception, left: shoes, and a bench to take them off on ---------------------------------------------------------
+  const L = at(0.21, 5.6, 0, 'right');                            // +x runs toward the street, +y out into the room
   { const x0 = -2.2, x1 = 2.2, dp = 1.25, zs = [0.1, 1.05, 2.0, 2.95], nc = 4, cw = (x1 - x0) / nc;
     L.box(PALE, x0, x1, 0.02, 0.06, 0, 2.95, G); for (let i = 0; i <= nc; i++) L.box(PALE, x0 + i * cw - 0.04, x0 + i * cw + 0.04, 0.02, dp, 0, 2.95, G);
     for (const z of zs) L.box(PALE, x0 - 0.04, x1 + 0.04, 0.02, dp + (z > 2.9 ? 0.05 : 0), z - 0.08, z, G);
@@ -157,19 +240,32 @@ export default function yoga(kit, lot) {
     [[0, 0], [1, 0], [3, 0], [2, 1], [0, 1], [3, 2]].forEach(([c, r], i) => kit.shoes(L, x0 + (c + 0.5) * cw, 0.62, zs[r] + 0.005, kinds[i], cols[i], { turn: (K.rnd() - 0.5) * 0.2 }));
     X.card(L, 0.5, 0.9, 2.95, 2.1, 0.5, TAG2('SHOES OFF', 'egos: top left cubby, please'), { cw: 400, ch: 96 });
     kit.pottedPlant(L, -1.6, 0.62, 2.95, 'fern', { size: 0.75, pot: 'c#f4f1ea/0.45' }); }
-  // a ladder of blankets, further along the same wall
-  { const Lp = at(0, 11.3, 0, 'right'), lean = z => 1.25 - 1.1 * z / 4.7;
-    for (const s of [-0.75, 0.75]) tube(Lp, PALE, [[s, lean(0), 0], [s, lean(4.7), 4.7]], 0.05, 6);
-    for (const z of [1.2, 2.3, 3.4, 4.4]) hcyl(Lp, PALE, 'x', 0, lean(z), z, 1.5, 0.035, 0.035, 6);
-    kit.hangingTowel(Lp, -0.05, lean(3.4), 3.4, 1.15, 1.0, 'wool#c98a6a'); kit.hangingTowel(Lp, 0.05, lean(2.3), 2.3, 1.2, 0.95, 'wool#e8e2d4'); kit.hangingTowel(Lp, 0, lean(1.2), 1.2, 1.15, 0.8, 'wool#7d8f72');
-    Lp.block(-0.85, 0.85, 0, 1.35, 0, 4.7); }
+  { const bf = at(2.6, P1.front - 0.22, 0, 'street');             // the bench, its back to the screen; +y is toward the street
+    bf.box(PALE, -1.9, 1.9, 0.02, 1.25, 1.38, 1.5, G); for (const s of [-1, 1]) bf.box(PALE, s * 1.65 - 0.06, s * 1.65 + 0.06, 0.1, 1.17, 0, 1.38, G); bf.box(PALE, -1.59, 1.59, 0.56, 0.68, 0.5, 0.66, G);
+    bf.block(-1.9, 1.9, 0, 1.25, 0, 1.5); kit.seat(bf, 0, 0.7, 1.5, 'sit on the bench');
+    kit.shoes(bf, 0.95, 0.75, 0.005, 'sneaker', 'linen#e8e2d4', { turn: 0.15 });
+    // a peg rail over it: somebody's bag, somebody's mat
+    A.rail(F1, 0.7, 4.5, { z: 5.75, deep: 0.09, tall: 0.3, mat: PALE });
+    for (const x of [-1.5, -0.75, 0, 0.75, 1.5]) hcyl(bf, PALE, 'y', x, -0.01, 5.6, 0.24, 0.045, 0.045, 8);
+    bf.soft('linen#d8ccb4', 0.3, 1.2, -0.11, 0.08, 3.75, 4.85, 0.05); tube(bf, 'linen#d8ccb4', [[0.5, -0.02, 4.8], [0.72, 0.03, 5.6], [0.78, 0.03, 5.6], [1.0, -0.02, 4.8]], 0.025, 5);
+    roll(bf, 'z', -0.75, 0.1, 4.3, MATS[2], 2.0, 0.2); tube(bf, 'c#d9cdb2/0.8', [[-0.75, 0.1, 5.25], [-0.75, 0.03, 5.6]], 0.02, 5); }
+  // one tall plant in the left half of the window
+  kit.pottedPlant(R, 2.3, 2.0, 0, 'snake', { size: 2.4, pot: 'c#b8755a/0.85' }); R.block(1.5, 3.1, 1.2, 2.8, 0, 3);
+  // a round jute mat in the middle
+  R.cyl('c#a8906a/0.95', MID, 6.5, 0.006, 0.03, 3.2, 3.2, 48); R.cyl('c#c9b48a/0.95', MID, 6.5, 0.03, 0.045, 3.0, 3.0, 48);
 
-  // ---- right wall by the door: a rack of mats, and the evening's slate over it -------------------------------------
-  { const Rm = at(W, 6.2, 0, 'left');                             // +x runs toward the back, +y out into the room
+  // ---- reception, right: the desk against the screen with the evening's slate over it; mats to borrow; how to breathe ---
+  { const c = at(W - 2.6, P1.front, 0, 'street');                 // +x toward smaller a; +y toward the street (the visitor's side)
+    const z = X.counter(c, -1.9, 1.9, 0.03, 1.7, 3.2, { front: TERRA, top: PALE, kick: 'c#3a2214/0.8', panels: false });
+    kit.sign(c, 0, 1.705, 1.75, 3.0, 0.9, LOGO, { cw: 500, ch: 150, rough: 0.95 });
+    X.slateBoard(c, 0, 6.3, 3.0, 2.4, TIMETABLE, { cw: 420, ch: 336, frame: OAK });
+    kit.jarCandle(c, 1.35, 1.0, z, { r: 0.18, tall: 0.4, wax: 'c#efe2bc/0.6', label: 'c#c9b48a/0.8' }); K.potted(c, -1.35, 0.8, z, { r: 0.2, n: 14, len: 0.75, pot: 'c#f4f1ea/0.45' });
+    kit.foldedStack(c, 0.1, 0.85, z, 3, ['linen#e8e2d4', 'linen#c98a6a', 'linen#e8e2d4'], { w: 0.9, d: 0.7, t: 0.1 }); }
+  { const Rm = at(W - 0.21, 5.8, 0, 'left');                      // +x runs toward the back, +y out into the room
     for (const y of [0.05, 0.78]) Rm.box(PALE, -1.65, 1.65, y, y + 0.07, 0, 1.3, G); for (const x of [-1.65, 1.58]) Rm.box(PALE, x, x + 0.07, 0.05, 0.85, 0, 1.3, G); Rm.box(PALE, -1.65, 1.65, 0.05, 0.85, 0.02, 0.09, G);
     for (let i = 0; i < 5; i++) roll(Rm, 'z', -1.24 + i * 0.62, 0.44, 1.12 + (i % 3) * 0.05, MATS[(i * 3 + 1) % MATS.length], 2.05 + (i % 2) * 0.12);
     Rm.block(-1.65, 1.65, 0, 0.85, 0, 2.3);
-    X.slateBoard(Rm, 0, 6.2, 3.0, 2.4, TIMETABLE, { cw: 420, ch: 336, frame: OAK }); }
+    const Rw = at(W, 5.8, 0, 'left'); Rw.box('c#17140f/0.45', -1.38, 1.38, 0.01, 0.07, 4.72, 8.48); kit.sign(Rw, 0, 0.08, 6.6, 2.6, 3.6, BREATHE, { cw: 400, ch: 554, rough: 0.95 }); }
 
   // ---- the singing bowl, on its stand in the window ---------------------------------------------------------------
   const BA = W - 3.4, BD = 2.6, BZ = 2.75;
@@ -177,11 +273,34 @@ export default function yoga(kit, lot) {
     R.cyl('c#b8361f/0.8', BA, BD, BZ, BZ + 0.1, 0.4, 0.36, 20);
     ves(R, BRASS, BA, BD, BZ + 0.1, [[0, 0], [0.26, 0], [0.43, 0.1], [0.5, 0.28], [0.5, 0.44], [0.47, 0.44], [0.46, 0.28], [0.4, 0.13], [0.25, 0.05], [0, 0.05]], 28);
     hcyl(R, 'c#6a4a2a/0.8', 'x', BA + 0.02, BD - 0.5, BZ + 0.045, 0.8, 0.035, 0.03, 8); hcyl(R, 'c#8a1c1c/0.8', 'x', BA - 0.3, BD - 0.5, BZ + 0.06, 0.3, 0.06, 0.06, 10); }
-  // and one tall plant in the other half of the window
-  kit.pottedPlant(R, 2.3, 2.0, 0, 'snake', { size: 2.4, pot: 'c#b8755a/0.85' }); R.block(1.5, 3.1, 1.2, 2.8, 0, 3);
 
-  // ---- the light: paper lanterns, one by the door and a pair over each end of the floor ----------------------------
-  for (const [a, d, drop, p] of [[MID, 6.5, 3.4, 0.9], [COLS[0], 17.5, 3.3, 0.95], [COLS[1], 17.5, 3.3, 0.95], [COLS[0], 31, 3.3, 0.95], [COLS[1], 31, 3.3, 0.95]]) X.pendant(R, a, d, { kind: 'paper', drop, power: p });
+  // ---- the back room: the back door, the window with its blind down, tea under it, the cushions ---------------------------
+  { const bd = at(DOORA, D, 0, 'street');                          // the real back door is hung by town.js: here, only its casing (the opening is 3.1 wide, 6.95 high)
+    for (const s of [-1, 1]) bd.box(A.TRIM, s * 1.7 - 0.15, s * 1.7 + 0.15, 0.004, 0.06, 0.004, 6.95, G);
+    bd.box(A.TRIM, -1.85, 1.85, 0.004, 0.06, 6.95, 7.45, G);
+    const wn = at(WINA, D, 0, 'street');
+    wn.box(A.TRIM, -1.8, 1.8, 0.004, 0.06, 4.1, 8.7, G); wn.box(A.TRIM, -1.92, 1.92, 0.004, 0.3, 4.0, 4.1, G);
+    wn.box('linen#ece2cc', -1.5, 1.5, 0.06, 0.08, 4.4, 8.4); wn.box(PALE, -1.53, 1.53, 0.06, 0.11, 4.36, 4.44, G);
+    const tc = at(WINA, D, 0, 'street'), z = X.counter(tc, -3.4, 3.4, 0.03, 1.8, 3.0, { front: SAGE, top: PALE, kick: 'c#3a2214/0.8' });
+    kit.model('vintage_electric_kettle', tc, 2.3, 0.9, z, 0, { scale: 0.8 }); { const [sx, sz] = kit.world(tc, 2.3, 0.9); kit.steam.push({ x: sx, y: FL + z + 0.9, z: sz }); }
+    ves(tc, 'c#2f5a6a/0.45', 1.2, 0.85, z, [[0, 0], [0.16, 0], [0.26, 0.12], [0.27, 0.26], [0.18, 0.38], [0.1, 0.4], [0.1, 0.43], [0.03, 0.47], [0, 0.47]], 18); tube(tc, 'c#2f5a6a/0.45', [[0.96, 0.85, z + 0.2], [0.82, 0.85, z + 0.3], [0.76, 0.85, z + 0.4]], 0.035, 6); tube(tc, 'c#6a4a2a/0.8', [[1.2, 0.67, z + 0.38], [1.2, 0.85, z + 0.62], [1.2, 1.03, z + 0.38]], 0.018, 6);      // the pot
+    for (let i = 0; i < 5; i++) ves(tc, i % 2 ? 'c#e8e2d4/0.45' : 'c#9fb0a4/0.45', -0.1 + (i % 3) * 0.32, 0.75 + (i > 2 ? 0.36 : 0) + (i % 2) * 0.05, z, [[0, 0], [0.07, 0], [0.11, 0.08], [0.12, 0.17], [0.105, 0.17], [0.09, 0.06], [0, 0.04]], 12);
+    ['c#b8553a/0.5', 'c#d9a441/0.5', 'c#2f4858/0.5'].forEach((m, i) => K.tin(tc, -1.2 - i * 0.5, 0.5, z, 0.2, 0.55, m, null));
+    kit.tableLamp(tc, -2.75, 0.8, z, 'c#9fb0a4/0.4');
+    { const [ex, ez] = kit.world(tc, 0.22, 1.16); kit.eats.push({ x: ex, y: FL + z + 0.1, z: ez, name: 'cup of tulsi tea', drink: { vessel: 'teacup', liquid: 0xb9772e }, note: 'Tulsi and ginger. It comes free with the class, or the other way round.', reach: 7 }); }
+    // a bench against the back of the sun's wall, to sit on with the tea
+    { const bb = at(MID - 1.5, P2.back + 0.22, 0, 'back');
+      bb.box(PALE, -3, 3, 0.02, 1.1, 1.38, 1.5, G); for (const x of [-2.7, 0, 2.7]) bb.box(PALE, x - 0.06, x + 0.06, 0.1, 1.02, 0, 1.38, G); bb.box(PALE, -2.64, 2.64, 0.5, 0.62, 0.5, 0.66, G);
+      bb.block(-3, 3, 0, 1.1, 0, 1.5); kit.seat(bb, 0.9, 0.6, 1.5, 'sit on the bench');
+      kit.foldedStack(bb, -2.1, 0.56, 1.5, 2, ['wool#c98a6a', 'wool#e8e2d4'], { w: 1.2, d: 0.85, t: 0.16 }); }
+    // cushions in the corner, and a tall plant between the door and the counter
+    zafu(R, 1.25, D - 1.3, 0.02, 'c#2f5a6a/0.8'); zafu(R, 1.25, D - 1.3, 0.5, 'c#d9b35a/0.8', 0.56); zafu(R, 1.25, D - 1.3, 0.94, 'c#c98a6a/0.8', 0.5); zafu(R, 1.4, D - 2.75, 0.02, 'c#9fb0a4/0.8');
+    R.block(0.5, 2.1, D - 3.4, D - 0.6, 0, 1.5);
+    kit.pottedPlant(R, (DOORA + 1.9 + TC0) / 2, D - 1.2, 0, 'snake', { size: 1.7, pot: 'c#b8755a/0.85' }); R.block((DOORA + 1.9 + TC0) / 2 - 0.7, (DOORA + 1.9 + TC0) / 2 + 0.7, D - 1.9, D - 0.5, 0, 3); }
+
+  // ---- the light: paper lanterns, one in reception and three pairs down the practice room --------------------------------
+  X.pendant(R, MID, 5.8, { kind: 'paper', drop: 3.3, power: 0.9 });
+  for (const d of [16.2, 21.4, 26.6]) for (const s of [-1, 1]) X.pendant(R, MID + s * 4.2, d, { kind: 'paper', drop: 3.4, power: 0.95 });
 
   // ---- out on the pavement: a bench and the board ------------------------------------------------------------------
   const o = K.wrap(lot.frOut(kit, 0, 0, 0, 'back'));              // x = a along the frontage, y = -feet out from the shopfront
@@ -189,7 +308,7 @@ export default function yoga(kit, lot) {
   X.aBoard(K.wrap(lot.frOut(kit, DA + 4.5, 5.4, 0, 'left')), 0, 0, BOARD);
 
   // ---- Sol ------------------------------------------------------------------------------------------------------------------
-  const SOLHOME = lot.world(MID, D - 3.9);
+  const SOLHOME = lot.world(MID, PY0 + 1.7);
   kit.clerks.push({
     id: 'sol', name: 'Sol', lot: 'yoga', floor: FL + PH, look: { shape: 'egg', colour: '#e0a458', belly: '#fbf1df', trim: '#b8553a', hat: 'bun', hatColour: '#5a3a2a', scarf: '#2f5a6a', eye: '#fff1cf', ring: 0xffd08a, blush: true, hover: 3.4 },
     home: SOLHOME, faces: lot.world(MID, 8),

@@ -94,10 +94,16 @@ export function buildBacks(K, town) {
   function door(t, v, hex, o = {}) {
     const b = t.b, w = 3.1, h0 = o.h0 ?? 0.5, h1 = h0 + 7, M = P(hex, 0.6), M2 = P(shade(hex, 0.8), 0.6), hs = o.hinge ?? 1, fan = o.fan !== false;
     if (o.step !== false) { t.box(STONE, b, b + 2.6, v - w / 2 - 0.7, v + w / 2 + 0.7, 0, h0); t.surf(b, b + 2.6, v - w / 2 - 0.7, v + w / 2 + 0.7, h0); }
-    t.box(CREAM, b, b + 0.16, v - w / 2 - 0.26, v + w / 2 + 0.26, h0, h1 + (fan ? 1.7 : 0.26));
-    t.box(M, b + 0.16, b + 0.2, v - w / 2, v + w / 2, h0, h1);
-    for (const [a0, a1] of [[-w / 2 + 0.3, -0.12], [0.12, w / 2 - 0.3]]) for (const [p0, p1] of [[h0 + 0.5, h0 + 2.9], [h0 + 3.3, h1 - 0.5]]) t.box(M2, b + 0.2, b + 0.23, v + a0, v + a1, p0, p1);
-    t.box(BRASS, b + 0.2, b + 0.36, v + hs * (w / 2 - 0.42), v + hs * (w / 2 - 0.26), h0 + 3.15, h0 + 3.33);
+    if (o.h0 === undefined && t.lot.backDoorV !== undefined && Math.abs(t.lot.backDoorV - v) < 0.05) {
+      // the shop's yard door is a real one (town.js cuts the opening and hangs the leaf): here only its frame
+      for (const sg of [-1, 1]) t.box(CREAM, b, b + 0.16, v + sg * (w / 2), v + sg * (w / 2 + 0.26), h0, h1);
+      t.box(CREAM, b, b + 0.16, v - w / 2 - 0.26, v + w / 2 + 0.26, h1, h1 + (fan ? 1.7 : 0.26));
+    } else {
+      t.box(CREAM, b, b + 0.16, v - w / 2 - 0.26, v + w / 2 + 0.26, h0, h1 + (fan ? 1.7 : 0.26));
+      t.box(M, b + 0.16, b + 0.2, v - w / 2, v + w / 2, h0, h1);
+      for (const [a0, a1] of [[-w / 2 + 0.3, -0.12], [0.12, w / 2 - 0.3]]) for (const [p0, p1] of [[h0 + 0.5, h0 + 2.9], [h0 + 3.3, h1 - 0.5]]) t.box(M2, b + 0.2, b + 0.23, v + a0, v + a1, p0, p1);
+      t.box(BRASS, b + 0.2, b + 0.36, v + hs * (w / 2 - 0.42), v + hs * (w / 2 - 0.26), h0 + 3.15, h0 + 3.33);
+    }
     if (fan) panes.push({ x: t.s * (b + 0.18), y: h1 + 0.8, z: -v, w, h: 1.2, side: t.s, kind: KIND.f });
     if (o.lamp) {                                                // a little enamel shade on a bracket
       const hl = h1 + (fan ? 2.6 : 1.3);
@@ -224,7 +230,7 @@ export function buildBacks(K, town) {
       T(g, 'nine till three.', w / 2, h * 0.52, h * 0.19, '#2a1c13', { f: F.caveat, w: 600, max: w * 0.86 });
       T(g, 'knock only if you are flour.', w / 2, h * 0.78, h * 0.17, '#a8361f', { f: F.caveat, w: 600, max: w * 0.88 });
     }, { cw: 204, ch: 144 });
-    knocks.push({ x: t.s * (b + 0.4), y: 4.5, z: -vd, label: 'knock at the bakery', lines: ['Nobody comes. Something warm is going on behind this door.'] });
+    // (it used to be a door to knock at; now it opens)
   });
   back('noodles', (t, b, hex) => {                              // no. 23 (20 ft). The kitchen's flue. Touch: its thread of steam.
     door(t, t.at(0.74), '#7a2f26', { hinge: -1, lamp: true }); win(t, t.at(0.26), 4.6, 3, 4, 'b'); upper(t, [0.2, 0.8], ['dc', 'bd']); pipe(t, t.at(0.04));

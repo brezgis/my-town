@@ -2,9 +2,12 @@
 // a narrow, deep brick shop-house, about 19.75 ft wide inside by 42.7 deep)
 // A long plain bookshop. Wall cases to the picture rail down both long walls; one low double-sided case
 // down the middle; the table of new books in front of it; the counter on the door side near the front.
-// The door looks straight down the main aisle to an armchair and a lamp at the very back. One quiet find:
-// the blind-date shelf, past the counter. Everything is laid out from lot.W, lot.D and lot.doorA.
+// The door looks straight down the main aisle to the back door. Beside it, at the back, the reading room:
+// a stove on the chimney breast in the party wall, two chairs, a rug and a lamp. One quiet find: the
+// blind-date shelf, past the counter. One thing to do: the typewriter on the counter, where every visitor
+// adds a sentence. Everything is laid out from lot.W, lot.D and lot.doorA.
 import { tools, fixtures, snapMat } from '../shopkit.js';
+import { arch } from './arch.js';
 import { BRASS, G } from '../kit.js';
 import { T, F, fill, slate, chalk, paper, board, grain, disc, rect, rrect, line, poly, para, ICON } from '../draw.js';
 
@@ -104,7 +107,7 @@ const POSTER = {
 };
 
 export default function books(kit, lot) {
-  const K = tools(kit, 57), X = fixtures(kit, K), { ves, hcyl, ball, tube } = K;
+  const K = tools(kit, 57), X = fixtures(kit, K), A = arch(kit, lot, K), { ves, hcyl, ball, tube } = K;
   const at = (a, d, h = 0, face = 'back') => K.wrap(lot.fr(kit, a, d, h, face));
   const R = at(0, 0);                                        // room coordinates: x = a, y = d, z = height
   const W = lot.W, D = lot.D, FLOOR = lot.fr(kit, 0, 0).h;
@@ -127,7 +130,7 @@ export default function books(kit, lot) {
   crest(rightF[0], 0.96, 8.73, 5.6, 'LINGUISTICS & OTHER ARGUMENTS', 'descriptivists to the left. prescriptivists: also to the left.');
   { const L = rightF[0], x = rw / 4 - 0.02;
     ticket(L, -x, 4, 'syntax', 1.0); ticket(L, x, 4, 'semantics & pragmatics', 1.6); ticket(L, -x, 3, 'phonology /fəˈnɒlədʒi/', 1.6); ticket(L, x, 3, 'morphology: un-put-down-able', 1.8); }
-  const BW = SP + 0.96 - 1.1, backF = at(1.1 + BW / 2, D - 0.02, 0, 'street');   // one case on the back wall; the rest of that wall is left plain
+  const BW = SP - 0.96 - 1.1, backF = at(1.1 + BW / 2, D - 0.02, 0, 'street');   // one case on the back wall, in line with the middle case; the rest of that wall has the chair and the back door (a real one, out to the yard)
   kit.bookcase(backF, BW - 0.03, 8.6, { wood: WOOD, fill: 0.94 }); crest(backF, 0.96, 8.73, 5.6, 'HISTORY');
 
   // ---- the rolling ladder on the left wall ----------------------------------------------------------------
@@ -139,7 +142,7 @@ export default function books(kit, lot) {
     for (const s of [-0.7, 0.7]) {
       tube(l, HONEY, [[s, foot, z0], [s, top, z1]], 0.08, 6, true);
       tube(l, BRASS, [[s, top, z1], [s, 1.1, 8.08], [s, 1.06, 7.9]], 0.03, 5);
-      hcyl(l, IRON, 'x', s * 1.14, foot, z0, 0.09, 0.22, 0.22, 12);
+      hcyl(l, IRON, 'x', s * 1.14, foot, z0 - 0.05, 0.09, 0.16, 0.16, 12);
     }
     for (let z = 1.0; z < 7.8; z += 0.92) { const t = (z - z0) / (z1 - z0); hcyl(l, HONEY, 'x', 0, foot + (top - foot) * t, z, 1.4, 0.05, 0.05, 6); }
     l.block(-0.9, 0.9, 0.95, foot + 0.25, 0, 7);
@@ -187,6 +190,12 @@ export default function books(kit, lot) {
       t.box(BLACK, -0.72, 0.72, -0.46, -0.16, 0.34, 0.42); hcyl(t, BLACK, 'x', 0, -0.3, 0.52, 1.36, 0.09, 0.09, 10);
       t.box(CREAMP, -0.38, 0.38, -0.262, -0.25, 0.5, 1.72); kit.sign(t, 0, -0.243, 1.12, 0.74, 1.18, POSTER.typed, { cw: 236, ch: 376 }); }
     kit.model('st_bankers_lamp', c, 2.5, 2.7, TOP, 0); kit.lampAt(c, 2.5, 2.8, TOP + 0.8, 0.5);
+    // and they can: E at the keys adds the next sentence
+    const ADDED = ['"It rained on the lighthouse, and on the fox."', '"Nobody had asked the keeper what he thought of endings."', '"The tide came in with a book under its arm."', '"asdf," said the fox, and meant it.'];
+    const [tx, tz] = kit.world(c, 1.1, 3.1); let n = 0;
+    kit.later.push(ctx => ctx.interact.push({ x: tx, y: c.h + TOP + 0.3, z: tz, reach: 5.5, size: 0.8, label: () => 'add a sentence', act: () => { try {
+      for (let i = 0; i < 9; i++) ctx.sound.note(84 + (i * 5) % 7, i * 0.085, 0.04, 0.012); ctx.sound.note(98, 0.82, 0.7, 0.03);
+      ctx.flash('You type: ' + ADDED[n++ % ADDED.length]); } catch { /* a sentence is not worth a crash */ } } }));
   }
   // behind the counter: the holds shelf
   X.shelving(c, -3.0, 3.0, [1.3, 2.55, 3.8], { d: 0.8, mat: WOOD, over: 0.05 });
@@ -203,16 +212,39 @@ export default function books(kit, lot) {
       T(g, 'BLIND DATE WITH A BOOK', w / 2, h * 0.36, h * 0.32, '#3a2214', { f: F.abril, ls: 1, max: w * 0.88 }); T(g, 'three clues. no title.', w / 2, h * 0.76, h * 0.24, '#8a1c1c', { f: F.caveat, w: 700, max: w * 0.86 }); }, { cw: 420, ch: 110 });
   }
 
-  // ---- the far end: a chair and a lamp, to sit and look back down the shop --------------------------------------
+  // ---- the back of the shop: the reading room. A stove on the chimney breast, two chairs, a rug, a lamp ---------
+  const OUT = 1.2, B0 = R1 + 0.03, B1 = D - 1.0, BS = (B0 + B1) / 2;          // the breast, in the party wall beyond the last case
+  const DOORA = W - (0.26 * (W + 1) - 0.5);                                    // the back door, where the yard door really is (backs.js)
   {
-    const p = at(AIS, D - 0.02, 0, 'street'), pw = 2.7, ph = 3.1, z = 6.5;
+    A.breast('right', BS, { w: B1 - B0, out: OUT });
+    R.box(A.TRIM, W - OUT - 0.05, W - OUT + 0.02, B0 - 0.05, B1 + 0.05, 0.004, 0.6); for (const d of [B0, B1]) R.box(A.TRIM, W - OUT, W - 0.07, Math.min(d, d + (d === B0 ? -0.05 : 0.05)), Math.max(d, d + (d === B0 ? -0.05 : 0.05)), 0.004, 0.6);
+    const SA = W - OUT - 1.1, STONE = 'c#55534f/0.85';                         // the stove stands on a stone, clear of the breast
+    R.box(STONE, W - OUT - 2.7, W - OUT - 0.07, BS - 1.7, BS + 1.7, 0.004, 0.09);
+    kit.model('st_wood_stove', at(W - OUT, BS, 0, 'left'), 0, 1.1, 0.09, 0, { scale: 1.3 }); R.block(SA - 0.85, W - OUT, BS - 0.9, BS + 0.9, 0, 3.2);
+    kit.lampAt(R, SA - 1.0, BS, 1.3, 0.4);                                    // what the fire gives the room
+    for (const [dd, z] of [[1.05, 0.25], [1.38, 0.25], [1.21, 0.53]]) hcyl(R, 'fir#7a5a40', 'x', W - OUT - 0.95, BS + dd, z, 1.25, 0.155, 0.155, 9);       // three logs, drying
+    // the one chart in the shop hangs over the stove, above where the pipe goes into the flue
+    const p = at(W - OUT, BS, 0, 'left'), pw = 2.7, ph = 3.1, z = 7.75, PX = 0.35;       // the stove's collar is off centre
+    tube(p, IRON, [[PX, 1.1, 2.95], [PX, 1.1, 4.8], [PX, 1.0, 5.15], [PX, 0.75, 5.35], [PX, -0.06, 5.35]], 0.2, 12);
     p.box(BLACK, -pw / 2 - 0.08, pw / 2 + 0.08, 0.01, 0.07, z - ph / 2 - 0.08, z + ph / 2 + 0.08); kit.sign(p, 0, 0.082, z, pw, ph, POSTER.mouth, { cw: Math.round(pw * 150), ch: Math.round(ph * 150) });
-    kit.rug(...(() => { const [X0, Y0] = lot.XY(AIS - 3.9, D - 7.0), [X1, Y1] = lot.XY(Math.min(W - 1.2, AIS + 3.9), D - 0.5); return [Math.min(X0, X1), Math.max(X0, X1), Math.min(Y0, Y1), Math.max(Y0, Y1)]; })(), FLOOR, 'tabriz');
-    kit.armchair(at(AIS, D - 0.3, 0, 'street'), 'velvet#3f5a48', 'linen#c9952a');
-    kit.floorLamp(R, Math.min(W - 1.5, AIS + 2.9), D - 1.5);
-    kit.model('round_wooden_table_02', R, AIS - 3.0, D - 1.8, 0, 0, { collide: true });
-    kit.openBook(at(AIS - 3.0, D - 1.9, 0, 'street'), 0, 0, 2.46, { cover: 'c#26364f/0.7' });
+    // the rug, an armchair against the back wall looking down the shop, a rocking chair turned to the stove, a lamp between them
+    const CA = SP + 1.45;
+    kit.rug(...(() => { const [X0, Y0] = lot.XY(SP - 1.2, D - 8.9), [X1, Y1] = lot.XY(W - OUT - 2.95, D - 1.7); return [Math.min(X0, X1), Math.max(X0, X1), Math.min(Y0, Y1), Math.max(Y0, Y1)]; })(), FLOOR, 'tabriz');
+    kit.armchair(at(CA, D - 0.3, 0, 'street'), 'velvet#3f5a48', 'linen#c9952a');
+    kit.model('Rockingchair_01', at(SP + 0.1, D - 6.4, 0, 'right'), 0, 0, 0, 0, { seat: 1.45, turn: -0.45, collide: true });
+    kit.floorLamp(R, SP - 0.55, D - 4.0);
+    // the back door's casing (town.js cuts the doorway, 3.1 wide and 6.95 high, and hangs the real door)
+    const hw = 1.55, top = 6.95, y0 = D - 0.07, y1 = D - 0.004, T_ = GREEN;
+    for (const s of [-1, 1]) R.box(T_, DOORA + s * hw + Math.min(0, s * 0.36), DOORA + s * hw + Math.max(0, s * 0.36), y0, y1, 0.004, top);
+    R.box(T_, DOORA - hw - 0.36, DOORA + hw + 0.36, y0, y1, top, top + 0.36); R.box(T_, DOORA - hw - 0.42, DOORA + hw + 0.42, y0 - 0.02, y1, top + 0.36, top + 0.46);
+    X.pendant(R, (CA + SA) / 2 - 0.4, D - 5.6, { kind: 'globe', drop: 3.4, power: 0.85 });
   }
+
+  // ---- the joinery that ties the room together: a picture rail above the cases, a boarded dado on the bare walls ----
+  const RL = { mat: WOOD }, WS = { mat: GREEN };
+  A.rail('left', 0.02, D - 0.24, RL); A.rail('right', 0.02, B0 - 0.004, RL); A.rail('right', B1 + 0.004, D - 0.24, RL); A.rail('back', 0.08, W - 0.08, RL);
+  A.wainscot('left', 0.02, L0 - 0.02, WS); A.wainscot('right', 0.02, 6.56, WS); A.wainscot('right', B1 + 0.06, D - 0.004, WS);
+  A.wainscot('back', SP - 0.96 + 0.1, DOORA - 1.912, WS); A.wainscot('back', DOORA + 1.912, W - 0.08, WS);
 
   // ---- the window: books to read at dusk, under a paper moon ---------------------------------------------------
   {
@@ -230,7 +262,7 @@ export default function books(kit, lot) {
   kit.pottedPlant(R, 1.5, 5.0, 0, 'leafy', { size: 1.5 });
 
   // ---- lamps down the aisles ------------------------------------------------------------------------------------
-  for (const d of [0.5, 0.72]) X.pendant(R, AIS, D * d, { kind: 'globe', drop: 3.4, power: 0.85 });
+  for (const d of [0.5, 0.7]) X.pendant(R, AIS, D * d, { kind: 'globe', drop: 3.4, power: 0.85 });
   X.pendant(R, (CD + SP - 0.96) / 2, D * 0.61, { kind: 'globe', drop: 3.4, power: 0.85 });
 
   // ---- out on the pavement: the free cart and the board ---------------------------------------------------------
@@ -264,7 +296,7 @@ export default function books(kit, lot) {
           { q: 'Any strong notes?', a: 'One handbook called singular "they" a modern error. It dates from about 1375. I wrote the date in the margin.' }] },
         { q: 'Anything good in Linguistics?', a: 'First tall case on the right. Syntax and semantics share a shelf; I can hear them at night.' },
         { q: 'How does the blind date shelf work?', a: 'Brown paper, three clues, no title. Nobody has brought one back.' },
-        { q: 'What is the typewriter for?', a: 'Each visitor adds one sentence. It is becoming a novel.' },
+        { q: 'What is the typewriter for?', a: 'Each visitor adds one sentence. So far it is a novel about a fox, a lighthouse, and somebody called asdf. I have notes.' },
       ],
     },
   });

@@ -39,7 +39,7 @@ export function buildPlaces(K, town) {
     K.collide(sx - 0.5, sx + 0.5, -sy - 0.5, -sy + 0.5, 10);
     sign(sx - 0.14, sy, CURB + 5.2, 1, 1.5, 1.0, (g, w, h) => { fill(g, w, h, '#24382f'); g.strokeStyle = '#efe7d2'; g.lineWidth = 3; g.strokeRect(5, 5, w - 10, h - 10); T(g, 'AIRSHIP', w / 2, h * 0.32, h * 0.26, '#efe7d2', { f: F.bebas, ls: 4 }); T(g, 'LINE 6 · ring the bell', w / 2, h * 0.7, h * 0.15, '#efe7d2', { f: F.fraunces, it: 1, w: 600 }); }, { cw: 180, ch: 120 });
     K.windsock = { x: sx, y: CURB + 13.2, z: -sy };
-    K.transit = { x: sx - 0.9, y: CURB + 6.4, z: -sy, arrive: { x: 12.4, y: CURB, z: 42.6, yaw: 0 } };
+    K.transit = { x: sx - 0.9, y: CURB + 6.4, z: -sy, arrive: { x: 13.2, y: CURB, z: 23.6, yaw: 0 } };
     // The waiting shelter, back by request: four posts, a roof, a bench and the timetable. Nothing else.
     {
       const hx = 17.5, hy = -30;
@@ -50,10 +50,10 @@ export function buildPlaces(K, town) {
       lantern(hx, hy, CURB + 8.0, 0.24, 'e#ffe2b4/1.7'); K.lamp(hx, CURB + 7.6, -hy, 0.8);
       sign(hx + 2.9, hy - 2.6, CURB + 5, 1, 2.6, 3.4, (g, w, h) => {
         paper(g, w, h, '#efe7d2'); rect(g, 0, 0, w, h * 0.17, '#2f4a40'); T(g, 'AIRSHIP', w / 2, h * 0.09, h * 0.09, '#efe7d2', { f: F.bebas, ls: 6 });
-        T(g, "LINE 6  ·  TO ANNA'S HOUSE", w / 2, h * 0.24, h * 0.05, '#2f4a40', { f: F.bebas, ls: 2 });
-        const rows = [['arrives', 'at dusk'], ['departs', 'at dusk'], ['next one', 'shortly'], ['after that', 'also shortly'], ['fare', 'a nice thought']];
+        T(g, 'LINE 6  ·  VESPER STREET', w / 2, h * 0.24, h * 0.05, '#2f4a40', { f: F.bebas, ls: 2 });
+        const rows = [['to', 'Anna’s House'], ['arrives', 'when rung'], ['departs', 'when aboard'], ['journey', 'one cloud'], ['fare', 'a nice thought']];      // the same card as the stop at the house, the other way round
         rows.forEach(([a, b], i) => { const y = h * (0.36 + i * 0.1); T(g, a, w * 0.1, y, h * 0.052, '#2a1c13', { f: F.elite, a: 'left' }); T(g, b, w * 0.9, y, h * 0.052, '#2a1c13', { f: F.elite, a: 'right' }); line(g, [[w * 0.1, y + h * 0.04], [w * 0.9, y + h * 0.04]], 'rgba(42,28,19,.25)', 1); });
-        T(g, 'Please do not feed the clouds.', w / 2, h * 0.92, h * 0.045, '#a8361f', { f: F.fraunces, it: 1, w: 600 });
+        T(g, 'Please keep your hands inside the sky.', w / 2, h * 0.92, h * 0.045, '#a8361f', { f: F.fraunces, it: 1, w: 600 });
       }, { cw: 300, ch: 392 });
     }
     // the town's sign, and a fingerpost
@@ -62,7 +62,7 @@ export function buildPlaces(K, town) {
     P(GREEN, tx - 0.12, tx + 0.12, ty - 4, ty + 4, CURB + 3.6, CURB + 7.8);
     K.collide(tx - 0.4, tx + 0.4, -(ty + 4), -(ty - 4), 7.8);
     const TOWN = (g, w, h) => { board(g, w, h, '#24382f', '#d2ae62', { inset: h * 0.05 }); ICON.sun(g, w / 2, h * 0.22, h * 0.26, '#e9b44c'); T(g, 'Vesper Street', w / 2, h * 0.5, h * 0.19, '#efe6cf', { f: F.playfair, w: 700, it: 1 });
-      T(g, 'POP. 9 ROBOTS & YOU   ·   ELEV. CONSIDERABLE', w / 2, h * 0.7, h * 0.062, '#d2ae62', { f: F.bebas, ls: 2 }); T(g, 'evenings a speciality', w / 2, h * 0.84, h * 0.085, '#efe6cf', { f: F.caveat, w: 600 }); };
+      T(g, 'POP. 15 ROBOTS & YOU   ·   ELEV. CONSIDERABLE', w / 2, h * 0.7, h * 0.062, '#d2ae62', { f: F.bebas, ls: 2 }); T(g, 'evenings a speciality', w / 2, h * 0.84, h * 0.085, '#efe6cf', { f: F.caveat, w: 600 }); };
     sign(tx + 0.14, ty, CURB + 5.7, 3, 7.6, 4, TOWN, { cw: 760, ch: 400 }); sign(tx - 0.14, ty, CURB + 5.7, 1, 7.6, 4, TOWN, { cw: 760, ch: 400 });
     for (let i = 0; i < 9; i++) K.F.add(K.pick(['cosmos', 'lavender', 'catmint', 'grass']), -27 + (r() - 0.5) * 3, 27 + (r() - 0.5) * 9, 0.8 + r() * 0.3, { y: 0 });
   }
@@ -99,11 +99,16 @@ export function buildPlaces(K, town) {
     K.screen = sc;
     K.G.poly('lawn', [[bx, -88.6], [72, -88.6], [72, -112], [bx, -112]], {});
     // deck chairs and benches in rows, facing the screen
+    // A deck chair, facing the screen (toward -x): the long back frame leaning away from it, the short seat frame
+    // crossing under, and a striped canvas slung between the front rail and the top rail, sagging as canvas does.
     const chair = (x, y, col) => {
-      const z = -y; for (const dz of [-0.95, 0.95]) { K.tube(WOOD, [x + 1.5, 0, z + dz], [x - 1.4, 3.3, z + dz], 0.06, 4); K.tube(WOOD, [x - 1.3, 0, z + dz], [x + 0.6, 1.9, z + dz], 0.06, 4); }
-      K.tube(WOOD, [x - 1.4, 3.3, z - 0.95], [x - 1.4, 3.3, z + 0.95], 0.06, 4); K.tube(WOOD, [x + 1.2, 0.5, z - 0.95], [x + 1.2, 0.5, z + 0.95], 0.06, 4);
-      K.box(col, x - 0.05, x + 0.05, 0.5, 3.6, z - 0.9, z + 0.9, { rot: [0, 0, -0.76] });
-      K.seat(x - 0.1, 1.5, z, Math.PI / 2 + 0.0, 'sit and watch the picture'); K.collide(x - 1.4, x + 1.5, z - 1, z + 1, 1.5);
+      const z = -y, HW = 0.95, STRIPE = 'c#efe6d2/0.9';
+      for (const dz of [-HW, HW]) { K.tube(WOOD, [x - 1.55, 0.04, z + dz], [x + 1.45, 3.45, z + dz], 0.07, 5); K.tube(WOOD, [x + 1.5, 0.04, z + dz], [x - 1.0, 1.5, z + dz], 0.07, 5); K.tube(WOOD, [x + 0.95, 0.5, z + dz], [x + 1.2, 2.3, z + dz], 0.05, 4); }
+      for (const [u, h] of [[1.45, 3.45], [-1.0, 1.5], [-1.55, 0.04], [1.5, 0.04]]) K.tube(WOOD, [x + u, h, z - HW - 0.05], [x + u, h, z + HW + 0.05], 0.07, 5);
+      const sling = [[-1.0, 1.52], [-0.55, 1.14], [-0.05, 0.98], [0.4, 1.18], [0.8, 1.75], [1.15, 2.55], [1.45, 3.47]];
+      for (let k = 0; k < sling.length - 1; k++) { const [u0, h0] = sling[k], [u1, h1] = sling[k + 1], L = Math.hypot(u1 - u0, h1 - h0) + 0.03, um = x + (u0 + u1) / 2, hm = (h0 + h1) / 2, o = { rot: [0, 0, Math.atan2(h1 - h0, u1 - u0)] };
+        for (let b = 0; b < 5; b++) { const z0 = z - 0.86 + b * 0.344; K.box(b % 2 ? STRIPE : col, um - L / 2, um + L / 2, hm - 0.018, hm + 0.018, z0, z0 + 0.344, o); } }
+      K.seat(x + 0.1, 1.15, z, Math.PI / 2, 'sit and watch the picture'); K.collide(x - 1.6, x + 1.6, z - 1.05, z + 1.05, 1.5);
     };
     const cols = ['c#b8452e/0.9', 'c#e9e0cc/0.9', 'c#34405a/0.9', 'c#c9952a/0.9', 'c#2f4a40/0.9'];
     for (let row = 0; row < 3; row++) for (let i = 0; i < 5; i++) { if (row === 1 && i === 2) continue; chair(bx + 15 + row * 6.5, 91 + i * 4.1 + (row % 2) * 1.4, cols[(row * 2 + i) % cols.length]); }
@@ -125,7 +130,7 @@ export function buildPlaces(K, town) {
         idle: ['*whispering* This is the good part.', '*straightens a deck chair by one degree*', '*whispering* I have seen it four thousand times. I still gasp.'],
         bye: ['*whispering* Mind the hedge on your way out.'],
         topics: [
-          { q: '*whisper* What is showing?', a: '*whispering* Between sunsets, the short features: crabs, a sphere turned inside out, a rabbit and some tomatoes. Take a deck chair and it starts. The projector changes the reel.' },
+          { q: '*whisper* What is showing?', a: '*whispering* Between sunsets, the old one-reelers. A rocket in the eye of the Moon. A house built in a week. A dinosaur who does as she is told. Take a deck chair and it starts. The projector changes the reel.' },
           { q: '*whisper* Why is the cinema outside?', a: '*whispering* The front of the building was all we could afford. Then we noticed the sky was free.' },
           { q: '*whisper* How does it end?', a: '*whispering* I will not spoil it. But walk to the far end of the street, past the rail, to the last bench. That is all I will say.' },
           { q: 'IS THE POPCORN FREE?', a: '*whispering, pained* Yes. It is free. Please. People are watching a sunset.', expr: 'surprised' },
@@ -146,7 +151,7 @@ export function buildPlaces(K, town) {
   // ======================================================================================
   {
     const y0 = 78, y1 = 118, xb = -90;
-    K.G.poly('gravel', [[-FRONT, -y0], [xb, -y0 - 2], [xb - 4, -y1 + 3], [-FRONT, -y1]], { y: CURB + 0.02 });
+    K.G.poly('gravel', [[-FRONT, -(y0 - 3)], [xb - 6, -(y0 - 3)], [xb - 6, -(y1 + 1)], [-FRONT, -(y1 + 1)]], { y: CURB + 0.02 });      // the whole of its slab, so no pale margin shows
     P('concrete', xb - 6, -FRONT, y0 - 3, y1 + 1, -0.6, CURB - 0.02); K.surface(xb - 6, -FRONT, -(y1 + 1), -(y0 - 3), CURB);
     // the oak's ring bench
     const ox = -52, oy = 98;
@@ -232,7 +237,7 @@ export function buildPlaces(K, town) {
     rail(-hw + 0.5, -4); rail(4, hw - 0.5);
     for (const [x, yaw] of [[-20, 0], [-10.5, 0], [10.5, 0], [20, 0]]) { K.bench(x, -(y1 - 5.5), Math.PI, { y: CURB, w: 6 }); K.seat(x, CURB + 1.4, -(y1 - 5.5), 0, 'sit and watch the sun not set'); }
     // the telescope, on a plinth
-    K.cyl('concrete', 27, CURB, CURB + 1.2, -(y1 - 5), 1.5, 1.7, 14); K.model('st_telescope', 27, -(y1 - 5), 0.2, { y: CURB + 1.2, scale: 0.8 }); K.collide(25.4, 28.6, -(y1 - 3.4), -(y1 - 6.6), 4);
+    K.cyl('concrete', 27, CURB, CURB + 1.2, -(y1 - 5), 1.5, 1.7, 14); K.model('st_telescope', 27, -(y1 - 5), 0.2 + Math.PI, { y: CURB + 1.2, scale: 0.8 });      // its big end to the sunset K.collide(25.4, 28.6, -(y1 - 3.4), -(y1 - 6.6), 4);
     K.scope = { x: 27, y: CURB + 5.4, z: -(y1 - 5) };
     // a plaque on a stone
     K.rock?.(PAINT.stone, -27, CURB + 0.6, -(y1 - 5), 1.8, 1.5, 1.3, 0.4);
@@ -279,26 +284,33 @@ export function placesLife(ctx, K) {
       const k = 0.5 + 0.5 * on(); mat.color.setScalar((reel.on ? 0.02 : 1) * k * (0.92 + 0.08 * Math.sin(t * 31) * Math.sin(t * 7.3))); cone.material.opacity = 0.05 * k * (0.9 + 0.1 * Math.sin(t * 31));
       reel.update();
     });
-    // ---- the real pictures. Take a deck chair and the Lantern shows one of Anna's favourite strange films
-    // (the list is the "Amazing Videos" page of her recursite). They are YouTube's own players, laid exactly
-    // over the screen while you sit; get up and the reel stops. E at the projector changes the reel.
-    const FILMS = [['W92SB_SW9E0', 'Crabs LOVE Science!'], ['sKqt6e7EcCs', 'How to Theoretically Turn a Sphere Inside Out'], ['9mDngl11P3k', 'Pet Crab Eating Onion Ring'], ['Bs8vLmo7Rsc', 'Will Elmo Survive the Particle Accelerator?'], ['p2HipedgM3I', 'Spiders On Drugs'],
-      ['hRlmn_w1qck', 'Do You Still Want to Take This Train?'], ['P6GyeDQTZlk', 'Waking a Sleeping Rabbit by Surrounding Him with Tomatoes'], ['8cn0kf8mhS4', 'Whales Evolution'], ['VNM7Z7hir_I', 'Ice Cube, Kevin Hart and Conan Share a Car']];
+    // ---- the real pictures. Take a deck chair and the Lantern shows an old one-reeler: silent films in the public
+    // domain, streamed from the Internet Archive (archive.org/details/<item>). The picture is the browser's own
+    // player laid exactly over the screen while you sit (the Archive's file servers do not allow a web page to
+    // use their video as a texture); get up and the reel stops. E at the projector changes the reel.
+    const FILMS = [
+      ['ATripToTheMoonGeorgeMelies', 'A Trip to the Moon-George Méliès.mp4', 'A Trip to the Moon (Georges Méliès, 1902)'],
+      ['OneWeek512kb', 'One_Week_512kb.mp4', 'One Week (Buster Keaton, 1920)'],
+      ['Gertie', 'GertietheDinosaur.mp4', 'Gertie the Dinosaur (Winsor McCay, 1914)'],
+      ['Cops1922', 'Cops-v2.mp4', 'Cops (Buster Keaton, 1922)'],
+      ['CC_1917_06_17_TheImmigrant', 'CC_1917_06_17_TheImmigrant_512kb.mp4', 'The Immigrant (Charlie Chaplin, 1917)'],
+      ['sherlockjr1924_201909', 'Sherlock Jr. - Buster Keaton (1924) HD [720p].mp4', 'Sherlock Jr. (Buster Keaton, 1924)'],
+    ];
     let first = Math.floor(Math.random() * FILMS.length);
     CARDS.push(['NOW SHOWING', ''], ['take a deck chair', 'and the picture starts']);
     const nowCard = CARDS.length - 2, corners = [[sc.y0, sc.h0], [sc.y1, sc.h0], [sc.y0, sc.h1], [sc.y1, sc.h1]].map(([y, hh]) => new THREE.Vector3(sc.x + 0.03, hh, -y)), v = new THREE.Vector3();
     const reel = { on: false, el: null,
+      load() { const [item, file] = FILMS[first]; reel.el.src = `https://archive.org/download/${item}/${encodeURIComponent(file)}`; reel.el.play?.().catch(() => {}); ctx.flash(`Now showing: ${FILMS[first][2]}. (The projector changes the reel.)`); },
       start() {
-        const ids = FILMS.map((_, i) => FILMS[(first + i) % FILMS.length][0]), el = document.createElement('iframe');
-        el.src = `https://www.youtube-nocookie.com/embed/${ids[0]}?autoplay=1&playsinline=1&rel=0&modestbranding=1&playlist=${ids.slice(1).join(',')}`;
-        el.allow = 'autoplay; encrypted-media; picture-in-picture'; el.title = 'The picture at the Lantern';
-        el.style.cssText = 'position:fixed;border:0;z-index:1;pointer-events:none;background:#000;left:0;top:0;width:10px;height:10px';
-        document.body.appendChild(el); reel.el = el; reel.on = true; ctx.sound?.setDuck?.(true);
-        ctx.flash(`Now showing: ${FILMS[first][1]}. (The projector changes the reel.)`);
+        const el = document.createElement('video'); el.playsInline = true; el.preload = 'auto'; el.volume = 0.5; el.title = 'The picture at the Lantern';
+        el.style.cssText = 'position:fixed;border:0;z-index:1;pointer-events:none;background:#000;object-fit:contain;left:0;top:0;width:10px;height:10px';
+        el.addEventListener('ended', () => { first = (first + 1) % FILMS.length; if (reel.el === el) reel.load(); });
+        el.addEventListener('error', () => { if (reel.el === el && !el.dataset.failed) { el.dataset.failed = '1'; ctx.flash('The reel has jammed. (The projector will try another.)'); } });
+        document.body.appendChild(el); reel.el = el; reel.on = true; ctx.sound?.setDuck?.(true); reel.load();
       },
-      stop() { reel.el?.remove(); reel.el = null; reel.on = false; ctx.sound?.setDuck?.(false); },
+      stop() { try { reel.el?.pause(); reel.el?.removeAttribute('src'); reel.el?.load?.(); } catch { /* gone already */ } reel.el?.remove(); reel.el = null; reel.on = false; ctx.sound?.setDuck?.(false); },
       update() {
-        CARDS[nowCard][1] = FILMS[first][1];
+        CARDS[nowCard][1] = FILMS[first][2];
         const watching = /watch the picture/.test(ctx.walker?.seated?.label ?? '');
         if (watching && !reel.on) reel.start(); else if (!watching && reel.on) reel.stop();
         if (!reel.el) return;
@@ -306,7 +318,7 @@ export function placesLife(ctx, K) {
         for (const c of corners) { v.copy(c).project(camera); if (v.z > 1) ok = false; const x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
         const st = reel.el.style; st.display = ok ? '' : 'none'; st.left = x0.toFixed(1) + 'px'; st.top = y0.toFixed(1) + 'px'; st.width = (x1 - x0).toFixed(1) + 'px'; st.height = (y1 - y0).toFixed(1) + 'px';
       } };
-    if (K.projector) ctx.interact.push({ x: K.projector.x + 1.5, y: K.projector.y, z: K.projector.z, reach: 8, size: 1.6, label: () => 'change the reel', act: () => { first = (first + 1) % FILMS.length; ctx.flash(`Next reel: ${FILMS[first][1]}.`); if (reel.on) { reel.stop(); reel.start(); } } });
+    if (K.projector) ctx.interact.push({ x: K.projector.x + 1.5, y: K.projector.y, z: K.projector.z, reach: 8, size: 1.6, label: () => 'change the reel', act: () => { first = (first + 1) % FILMS.length; if (reel.on) reel.load(); else ctx.flash(`Next reel: ${FILMS[first][2]}.`); } });
   }
   // The fire in the Yard
   if (K.fire) {
@@ -350,38 +362,42 @@ export function placesLife(ctx, K) {
     animated.push(t => { sock.rotation.y = -0.5 + 0.25 * Math.sin(t * 0.4) + 0.08 * Math.sin(t * 1.7); sock.rotation.z = 0.28 + 0.1 * Math.sin(t * 1.1); });
   }
   // ---- The airship: Dandelion, Line 6 (airship/bus.js and ride.js, shared with Anna's House, where she was built).
-  // She docks over the Landing's apron with her nose down the street and her door to the north pavement by the
-  // shelter. Ring the bell and she comes; board her for a flight round the island, or, once TRANSIT.house has an
-  // address, on to Anna's House.
+  // She comes in over the Mooring Field, down the clear way between the trees, and stands on her wheels in the road
+  // at the kerb by the shelter, nose down the street, her gangplank down to the north pavement. Ring the bell and
+  // she comes; walk aboard and she goes: on to Anna's House while TRANSIT.house has an address, or else round the
+  // island. Aboard you can walk about or sit on any bench.
   if (K.transit) {
-    const t = K.transit, DOCK = { x: 5, y: 1.0, z: 49, yaw: Math.PI }, ALIGHT = { x: 12.4, y: CURB, z: 42.6, yaw: 0 };
+    const t = K.transit, WHEEL = 2.63, DOCK = { x: 2.6, y: 0.07 + WHEEL, z: 30, yaw: Math.PI }, ALIGHT = t.arrive;
     const say = text => ctx.flash('Dandelion: ' + text);
     let h0 = null, airHint = null;
-    ctx.hint = () => airHint;                                              // what the line at the foot of the screen says while aboard (main.js)
+    ctx.hint = () => airHint;                                              // what the line at the foot of the screen says while sat aboard in flight (main.js)
+    // the way in: high over the east rim (the tallest tree out there is 54 ft), then down the gap between the trees
+    const IN = [[30, 78, 262], [3, 60, 176], [3, 20, 100], [2.6, DOCK.y + 0.6, 52]];
     const air = makeAirship(ctx, {
-      dock: DOCK, alight: ALIGHT,
-      approach: [[700, 200, 700], [300, 120, 330], [90, 44, 160], [5, 8, 98], [5, 1.0, 62]],
-      leave: [[5, 16, 12], [0, 62, -80], [-200, 160, -300], [-800, 260, -700]],
+      dock: DOCK, alight: ALIGHT, lineup: 3,
+      approach: [[700, 200, 700], [300, 130, 430], ...IN],
+      // the way out: straight up out of the street (the string lights and the street trees are below 30 ft), then west above the roofs
+      leave: [[2.6, 22, 24], [1, 44, 2], [0, 70, -80], [-200, 160, -300], [-800, 260, -700]],
       tour: [
-        // once round, just off the rim, the island always on the right-hand side, where the windows are
-        { p: [-6, 14, 26] }, { p: [-70, 62, 30] },
+        // once round, just off the rim, the island always on the right-hand side, where the long window is
+        { p: [0, 24, 26] }, { p: [-70, 66, 30] },
         { p: [-158, 92, -50], say: 'Below us, the Yard. That thread of steam is Bao. Wave; he will not see, but he will know.' },
         { p: [-160, 98, -165], say: 'The chapel. Somebody carried it here from Indiana, brick by brick, and lost a third of them on the way.' },
         { p: [-95, 112, -300], say: 'The Overlook. See the last bench, out past the rail? People sit there for a long time.' },
         { p: [10, 122, -338] }, { p: [118, 112, -288] },
         { p: [160, 100, -150], say: 'On the last roof, the Gloaming. And behind the picture house, the picture. I have seen it from here. Twice.' },
-        { p: [158, 96, -40] }, { p: [112, 84, 96], say: 'And the street, end to end. Somebody has put the lights on. Somebody always does.' },
-        { p: [44, 42, 150] }, { p: [5, 9, 100] }, { p: [5, 1.0, 62] },
+        { p: [158, 96, -40] }, { p: [118, 88, 110], say: 'And the street, end to end. Somebody has put the lights on. Somebody always does.' },
+        ...IN.map(p => ({ p })),
       ],
-      transit: { url: TRANSIT.house, cloud: [[5, 16, 12], [60, 120, -120], [260, 330, -420], [520, 560, -800]],
+      transit: { url: TRANSIT.house, cloud: [[2.6, 22, 24], [4, 48, -4], [60, 120, -120], [260, 330, -420], [520, 560, -800]],
         query: () => '?from=town' + (ctx.hourMoved || (h0 !== null && Math.abs(ctx.hourNow() - h0) > 0.01) ? '&time=' + (((ctx.hourNow() % 24) + 24) % 24).toFixed(2) : '') + (['low', 'medium', 'high'].includes(window.house?.quality?.get?.()) ? '&quality=' + window.house.quality.get() : '') },
-      arrive: [[600, 420, 900], [330, 220, 520], [120, 70, 230], [5, 9, 100], [5, 1.0, 62]],
+      arrive: [[600, 420, 900], [330, 230, 560], [120, 110, 360], ...IN],
       passes: [[[-1100, 240, -560], [-200, 270, -820], [900, 230, -600]], [[1000, 180, 560], [100, 220, 800], [-1000, 200, 520]], [[820, 160, 300], [760, 190, -320], [600, 210, -900]]],
       blind: { tour: 'ROUND THE ISLAND', transit: 'ANNA’S HOUSE', home: 'VESPER STREET' },
-      secs: { tour: 120 }, bus: { plank: 3 },                                // a short gangplank from her door to the kerb
+      secs: { tour: 125 }, bus: { plank: 5.5, drop: 2.2 },                  // she stands WHEEL above the road; the gangplank comes down to the pavement, a kerb higher
       lines: { welcome: ['Vesper Street. Mind the kerb, and the sunset.'] },
       lookOnBoard: -1.4, pitchOnBoard: -0.2, pitchOnTour: -0.6, lookOnArrive: -1.3, pitchOnArrive: -0.35,
-      say, hint: text => { airHint = text || null; }, hintAboard: 'E or Esc · get off (she takes you back to the stop) · the mouse looks about',
+      say, hint: text => { airHint = text || null; }, hintAboard: 'Esc · back to the stop · any step stands you up, and you can walk about',
       onStart: () => { h0 = ctx.hourNow?.() ?? null; },
     });
     window.__airship = air; ctx.airship = air;
@@ -389,12 +405,9 @@ export function placesLife(ctx, K) {
       ctx.sound?.note?.(81, 0, 2.4, 0.2); ctx.sound?.note?.(88, 0.02, 2.0, 0.08);
       if (air.call() === 'rung') ctx.flash('The bell rings out over the clouds. Somewhere, something yellow turns round.');
     } });
-    const boardSpot = { x: 0, y: -999, z: 0, reach: 7, size: 1.6, label: () => (TRANSIT.house ? "board the airship to Anna's House" : 'board the airship'), act: () => air.board() };
-    ctx.interact.push(boardSpot);
-    addEventListener('keydown', e => { if (e.code === 'Escape' && air.aboard) air.getOff(); });
-    animated.push(() => { const d = air.canBoard ? air.doorAt : null; if (d) { const R = air.bus.root, lx = Math.cos(R.rotation.y), lz = -Math.sin(R.rotation.y), sg = Math.sign((R.position.x - d.x) * lx + (R.position.z - d.z) * lz) || 1; boardSpot.x = d.x + sg * lx * 2.2; boardSpot.y = d.y + 4.2; boardSpot.z = d.z + sg * lz * 2.2; } else boardSpot.y = -999; });      // in the doorway, so it shows from the kerb as well as on the way up
+    addEventListener('keydown', e => { if (e.code === 'Escape' && air.aboard) air.getOff(); });      // boarding is on foot: up her gangplank (airship/ride.js)
     if (new URLSearchParams(location.search).get('from') === 'house') setTimeout(() => air.arrive(), 0);
-    const stage = new URLSearchParams(location.search).get('airship'); if (stage) setTimeout(() => air.stage(...stage.split(',').map((v, i) => (i ? Number(v) : v))), 500);      // ?airship=docked or tour,0.4 for test views
+    const stage = new URLSearchParams(location.search).get('airship'); if (stage) setTimeout(() => air.stage(...stage.split(',').map((v, i) => (i ? Number(v) : v))), 500);      // ?airship=docked, aboard,0.5 or tour,0.4 for test views
   }
   // The telescope: look through it, and the sun is very close
   if (K.scope) {

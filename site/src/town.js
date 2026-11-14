@@ -41,36 +41,36 @@ const WALL = 0.8, SIDE = 0.5;
 // up: storeys over the shop;  bays: windows across;  head: 'arch' | 'hood' | 'lintel' (how the upper windows are finished)
 // cornice: 'bracket' (pressed metal or wood, on brackets) | 'dentil' (corbelled brick);  roof: 'ridge' | 'flat'
 // piers: 'stone' | 'iron' | 'brick' | 'coursed' | 'plaster' (what carries the shopfront);  dh: feet taller or lower than the rule
-// inside: plaster tint;  floor: floor material
+// inside: plaster tint;  floor: floor material;  bd: where the yard door is, as a fraction of the way along the back wall
 const MADISON = 'Mulberry Street Block, Madison, Indiana (HABS IN-83)', NORWALK = 'South Main Street, Block 43, South Norwalk, Connecticut (HABS CT-349)';
 export const LOTS = [
   // ---- north side: Mulberry Street, Madison, 301 to 315 ----------------------------------------------
-  { id: 'coffee', name: 'Slow Hand Coffee', side: 1, y0: 3.8, y1: 27.8, depth: 44, door: 0.5, enter: true, src: '301 ' + MADISON, up: 2, bays: 4, head: 'arch', cornice: 'bracket', roof: 'ridge', piers: 'stone',
+  { id: 'coffee', bd: 0.2, name: 'Slow Hand Coffee', side: 1, y0: 3.8, y1: 27.8, depth: 44, door: 0.5, enter: true, src: '301 ' + MADISON, up: 2, bays: 4, head: 'arch', cornice: 'bracket', roof: 'ridge', piers: 'stone',
     face: 'brick#b98f7c', paint: 'painted_wood#2f4a40', trim: 'c#e6dcc6/0.7', inside: 'plaster#f0e8d6', floor: 'floor', awning: ['c#2f4a40/0.9', 'c#e9e0cc/0.9'] },
-  { id: 'yoga', name: 'Low Sun Yoga', side: 1, y0: 27.8, y1: 48.05, depth: 44, door: 0.5, enter: true, src: '303 ' + MADISON, up: 2, bays: 3, head: 'hood', cornice: 'bracket', roof: 'ridge', piers: 'plaster',
+  { id: 'yoga', bd: 0.72, name: 'Low Sun Yoga', side: 1, y0: 27.8, y1: 48.05, depth: 44, door: 0.5, enter: true, src: '303 ' + MADISON, up: 2, bays: 3, head: 'hood', cornice: 'bracket', roof: 'ridge', piers: 'plaster',
     face: 'brick#c4a08c', paint: 'painted_wood#c98a6a', trim: 'c#f1ebdd/0.7', inside: 'plaster#f3ece0', floor: 'floor' },
-  { id: 'books', name: 'Marginalia', side: 1, y0: 48.05, y1: 68.8, depth: 44, door: 0.26, enter: true, src: '305 ' + MADISON, up: 2, bays: 3, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'stone',
+  { id: 'books', bd: 0.26, name: 'Marginalia', side: 1, y0: 48.05, y1: 68.8, depth: 44, door: 0.26, enter: true, src: '305 ' + MADISON, up: 2, bays: 3, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'stone',
     face: 'brick#a87c68', paint: 'painted_wood#7a2f2a', trim: 'c#e3dccb/0.8', inside: 'plaster#e9dcc2', floor: 'floor' },
-  { id: 'bikes', name: 'Spoke & Sprocket', side: 1, y0: 68.8, y1: 88.47, depth: 44, door: 0.74, enter: true, src: '307 ' + MADISON, up: 2, bays: 3, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'coursed',
+  { id: 'bikes', bd: 0.2, name: 'Spoke & Sprocket', side: 1, y0: 68.8, y1: 88.47, depth: 44, door: 0.74, enter: true, src: '307 ' + MADISON, up: 2, bays: 3, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'coursed',
     face: 'brick#b08672', paint: 'painted_wood#d4a02a', trim: 'c#d9d2c2/0.8', inside: 'plaster#e6e2d6', floor: 'floor' },
   { id: 'cinema', name: 'The Lantern', side: 1, y0: 88.47, y1: 112, depth: 10, show: 6, door: 0.5, enter: false, src: '309 ' + MADISON, up: 2, bays: 4, head: 'lintel', cornice: 'dentil', roof: 'flat', piers: 'iron',
     face: 'brick#9c7260', paint: 'painted_wood#1f2c3a', trim: 'c#c9a45c/0.4/1', inside: 'plaster#7a2f2f', floor: 'tile_hex' },
   // (112 to 120: Pickle Alley)
-  { id: 'grocery', name: 'Salt & Larder', side: 1, y0: 120, y1: 140.75, depth: 44, door: 0.5, enter: true, src: '311 ' + MADISON, up: 2, dh: -1.6, bays: 3, head: 'lintel', cornice: 'bracket', roof: 'flat', piers: 'iron',
+  { id: 'grocery', bd: 0.68, name: 'Salt & Larder', side: 1, y0: 120, y1: 140.75, depth: 44, door: 0.5, enter: true, src: '311 ' + MADISON, up: 2, dh: -1.6, bays: 3, head: 'lintel', cornice: 'bracket', roof: 'flat', piers: 'iron',
     face: 'brick#a8806c', paint: 'painted_wood#e8dfc8', trim: 'c#ddd5c4/0.7', inside: 'tile_subway', floor: 'tile_hex', awning: ['c#b8452e/0.9', 'c#efe6d2/0.9'] },
-  { id: 'apothecary', name: 'Wick & Sundry', side: 1, y0: 140.75, y1: 160.83, depth: 44, door: 0.5, enter: true, src: '313 ' + MADISON, up: 2, dh: 1.6, bays: 4, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'brick',
+  { id: 'apothecary', bd: 0.1594, name: 'Wick & Sundry', side: 1, y0: 140.75, y1: 160.83, depth: 44, door: 0.5, enter: true, src: '313 ' + MADISON, up: 2, dh: 1.6, bays: 4, head: 'lintel', cornice: 'dentil', roof: 'ridge', piers: 'brick',
     face: 'brick#94685a', paint: 'painted_wood#34405a', trim: 'c#e3dccb/0.8', inside: 'plaster#e4dfd2', floor: 'floor' },
-  { id: 'plants', name: 'Frond', side: 1, y0: 160.83, y1: 181.5, depth: 44, door: 0.72, enter: true, src: '315 ' + MADISON, up: 1, bays: 4, head: 'lintel', cornice: 'bracket', roof: 'flat', piers: 'iron',
+  { id: 'plants', bd: 0.22, name: 'Frond', side: 1, y0: 160.83, y1: 181.5, depth: 44, door: 0.72, enter: true, src: '315 ' + MADISON, up: 1, bays: 4, head: 'lintel', cornice: 'bracket', roof: 'flat', piers: 'iron',
     face: 'brick#b08a78', paint: 'painted_wood#d9d2bf', trim: 'c#efe7d6/0.7', inside: 'plaster#ece6d6', floor: 'pavers' },
   // ---- south side: South Main Street, South Norwalk, Block 43 ------------------------------------------
-  { id: 'records', name: 'Low Tide Records', side: -1, y0: 1, y1: 31, depth: 44, door: 0.3, enter: true, src: 'no. 24, the Rogers & Stevens Building of 1875, ' + NORWALK, up: 3, bays: 4, head: 'arch', cornice: 'bracket', roof: 'flat', piers: 'iron',
+  { id: 'records', bd: 0.22, name: 'Low Tide Records', side: -1, y0: 1, y1: 31, depth: 44, door: 0.3, enter: true, src: 'no. 24, the Rogers & Stevens Building of 1875, ' + NORWALK, up: 3, bays: 4, head: 'arch', cornice: 'bracket', roof: 'flat', piers: 'iron',
     face: 'plaster#d6cdb9', paint: 'painted_wood#1d1d1f', trim: 'c#e9e2d0/0.6', inside: 'plaster#e6dccb', floor: 'floor' },
-  { id: 'museum', name: 'The Museum of Small Wonders', side: -1, y0: 31, y1: 61, depth: 44, door: 0.5, enter: true, src: 'no. 22, ' + NORWALK, up: 2, bays: 3, head: 'arch', cornice: 'dentil', roof: 'flat', piers: 'brick',
+  { id: 'museum', bd: 0.76, name: 'The Museum of Small Wonders', side: -1, y0: 31, y1: 61, depth: 44, door: 0.5, enter: true, src: 'no. 22, ' + NORWALK, up: 2, bays: 3, head: 'arch', cornice: 'dentil', roof: 'flat', piers: 'brick',
     face: 'brick#a08474', paint: 'painted_wood#3a4a44', trim: 'c#e8dfcc/0.7', inside: 'plaster#ece6da', floor: 'floor' },
-  { id: 'bakery', name: 'Tomorrow Bread', side: -1, y0: 61, y1: 78, depth: 44, door: 0.72, enter: true, src: 'no. 23 (the 17 ft shopfront), ' + NORWALK, up: 2, bays: 2, head: 'hood', cornice: 'bracket', roof: 'flat', piers: 'brick',
+  { id: 'bakery', bd: 0.24, name: 'Tomorrow Bread', side: -1, y0: 61, y1: 78, depth: 44, door: 0.72, enter: true, src: 'no. 23 (the 17 ft shopfront), ' + NORWALK, up: 2, bays: 2, head: 'hood', cornice: 'bracket', roof: 'flat', piers: 'brick',
     face: 'brick#b4907e', paint: 'painted_wood#d8b7a6', trim: 'c#f1ebdd/0.7', inside: 'plaster#efe6d4', floor: 'tile_hex', awning: ['c#d59a8a/0.9', 'c#f3ecdd/0.9'] },
   // (78 to 118: the Yard, with the dumpling cart)
-  { id: 'noodles', name: 'Night Noodle', side: -1, y0: 118, y1: 138, depth: 44, door: 0.28, enter: true, src: 'no. 23 (the 20 ft shopfront), ' + NORWALK, up: 2, bays: 3, head: 'hood', cornice: 'bracket', roof: 'flat', piers: 'brick',
+  { id: 'noodles', bd: 0.74, name: 'Night Noodle', side: -1, y0: 118, y1: 138, depth: 44, door: 0.28, enter: true, src: 'no. 23 (the 20 ft shopfront), ' + NORWALK, up: 2, bays: 3, head: 'hood', cornice: 'bracket', roof: 'flat', piers: 'brick',
     face: 'brick#7d5a50', paint: 'painted_wood#2a2320', trim: 'c#d9cdb8/0.7', inside: 'plaster#c9a070', floor: 'tile' },
   // (138 to 160: a green; 160 to 198: the chapel, its own building: chapel.js)
 ];
@@ -97,12 +97,27 @@ export function buildTown(B) {
     // inside faces, front and back (a closed shop is only its window: a few feet of display, then a wall)
     const ui = FRONT + WALL, ub = lot.enter ? back - SIDE : Math.min(back - SIDE, FRONT + WALL + (lot.show ?? 6));
     for (const [v, sg] of [[y0, 1], [y1, -1]]) {                       // side walls: brick outside, plaster within
-      L(EXT.startsWith('brick') ? EXT : 'brick#8a6a5c', FRONT, back, v, v + sg * SIDE / 2, 0, top, C);
+      L(EXT.startsWith('brick') ? EXT : 'brick#8a6a5c', FRONT + WALL / 2, back - SIDE / 2, v, v + sg * SIDE / 2, 0, top, C);      // between the front wall and the back wall, sharing no face with either
       L(INT, ui, ub, v + sg * SIDE / 2, v + sg * SIDE, FL, CEIL);
-      L('brick#8a6a5c', FRONT + 0.1, back, v + sg * SIDE / 2, v + sg * SIDE, CEIL, top);
+      L('brick#8a6a5c', FRONT + WALL / 2, back - SIDE / 2, v + sg * SIDE / 2, v + sg * SIDE, CEIL, top);
     }
-    L('brick#8a6a5c', back - SIDE / 2, back, y0, y1, 0, top, C);
-    L(INT, ub, lot.enter ? back - SIDE / 2 : ub + 0.3, y0 + SIDE, y1 - SIDE, FL, CEIL);
+    // the back wall, with the yard door cut through it where the building has one (bd): 3.1 wide, 0.5 to 7.5
+    const BW = 3.1, BH0 = 0.5, BH1 = 7.5, bv = lot.bd !== undefined && lot.enter ? y0 + lot.bd * (y1 - y0) : null;
+    if (bv === null) { L('brick#8a6a5c', back - SIDE / 2, back, y0, y1, 0, top, C); L(INT, ub, lot.enter ? back - SIDE / 2 : ub + 0.3, y0 + SIDE, y1 - SIDE, FL, CEIL); }
+    else {
+      const v0 = bv - BW / 2, v1 = bv + BW / 2, c = s * (back - 0.3);
+      for (const [va, vb, ha, hb] of [[y0, v0, 0, top], [v1, y1, 0, top], [v0, v1, BH1, top], [v0, v1, 0, BH0]]) L('brick#8a6a5c', back - SIDE / 2, back, va, vb, ha, hb);
+      for (const [va, vb, ha, hb] of [[y0 + SIDE, v0, FL, CEIL], [v1, y1 - SIDE, FL, CEIL], [v0, v1, BH1, CEIL]]) L(INT, ub, back - SIDE / 2, va, vb, ha, hb);
+      B.block(Math.min(s * ub, s * back), Math.max(s * ub, s * back), y0, v0, 0, top); B.block(Math.min(s * ub, s * back), Math.max(s * ub, s * back), v1, y1, 0, top); B.block(Math.min(s * ub, s * back), Math.max(s * ub, s * back), v0, v1, BH1, top);
+      L('painted_wood#3a342e', ub - 0.02, back, v0, v0 + 0.07, BH0, BH1, G); L('painted_wood#3a342e', ub - 0.02, back, v1 - 0.07, v1, BH0, BH1, G); L('painted_wood#3a342e', ub - 0.02, back, v0 + 0.07, v1 - 0.07, BH1 - 0.07, BH1, G);      // the lining of the opening
+      L('flagstone', ub - 0.02, back + 0.02, v0 + 0.07, v1 - 0.07, FL - 0.5, FL + 0.012);                          // the threshold stone
+      surfaces.push({ x0: Math.min(s * ub, s * (back + 0.05)), x1: Math.max(s * ub, s * (back + 0.05)), z0: wz(v1), z1: wz(v0), h: FL });
+      const stop = { x0: c - 0.12, x1: c + 0.12, z0: wz(v1 - 0.07), z1: wz(v0 + 0.07), y0: FL, y1: BH1 };
+      B.colliders.push(stop);
+      doors.push({ x: wx(c), z: wz(v0 + 0.09), closed: Math.PI / 2, open: Math.PI / 2 - s * 1.6, w: BW - 0.18, y0: FL + 0.03, y1: BH1 - 0.09, stop, cx: c, cz: (stop.z0 + stop.z1) / 2, exterior: true, lot: lot.id, back: true });      // it swings out into the yard
+      portals.push({ x0: Math.min(s * ub, s * back), x1: Math.max(s * ub, s * back), y0: FL, y1: BH1, z0: wz(v1), z1: wz(v0), n: 'x', kind: 'door' });
+      lot.backDoorV = bv;
+    }
     L(lot.floor, ui - 0.3, ub, y0 + SIDE, y1 - SIDE, FL - 0.5, FL, lot.floor === 'floor' ? { swap: s > 0 } : undefined);
     L('ceil', ui, ub, y0 + SIDE, y1 - SIDE, CEIL, CEIL + 0.4);
     L('roof', FRONT + 0.4, back - 0.3, y0 + 0.3, y1 - 0.3, top - 1.6, top - 1.2);
@@ -114,7 +129,7 @@ export function buildTown(B) {
         B.wbox('roof', s * uc - len / 2 - 0.3, s * uc + len / 2 + 0.3, top + rise / 2 - 0.12, top + rise / 2 + 0.12, wz(y1 - 0.5), wz(y0 + 0.5), { rot: [0, 0, s * sgn * ang] });
         for (const v of [y0, y1 - 0.5]) B.wbox('brick#8a6a5c', s * uc - len / 2 - 0.4, s * uc + len / 2 + 0.4, top + rise / 2 - 0.5, top + rise / 2 + 0.75, wz(v + 0.5), wz(v), { rot: [0, 0, s * sgn * ang] });
       }
-      for (const v of [y0, y1 - 0.5]) L('brick#8a6a5c', FRONT + 0.2, FRONT + 2 * run, v, v + 0.5, top - 0.4, top + 0.3);
+      for (const v of [y0, y1 - 0.5]) L('brick#8a6a5c', FRONT + WALL / 2, FRONT + 2 * run, v, v + 0.5, top, top + 0.3);
       if (lot.id === 'apothecary') { L('brick#8a6a5c', FRONT + run - 1.2, FRONT + run + 1.2, y1 - 2.6, y1 - 0.2, top, top + rise + 3.4); L('c#3a342e/0.9', FRONT + run - 1.4, FRONT + run + 1.4, y1 - 2.8, y1, top + rise + 3.4, top + rise + 3.7); }
     }
     surfaces.push({ x0: Math.min(s * (FRONT - 0.2), s * ub), x1: Math.max(s * (FRONT - 0.2), s * ub), z0: wz(y1 - SIDE), z1: wz(y0 + SIDE), h: FL });
@@ -174,7 +189,7 @@ export function buildTown(B) {
     L(PAINT, uo - 0.06, ui, d0 - 0.02, d0 + 0.22, FL, TRAN, G); L(PAINT, uo - 0.06, ui, d1 - 0.22, d1 + 0.02, FL, TRAN, G);
     L(PAINT, uo - 0.06, ui, d0 + 0.22, d1 - 0.22, DOORH, DOORH + 0.3, G);
     L('glass', uo + 0.3, uo + 0.33, d0 + 0.22, d1 - 0.22, DOORH + 0.3, TRAN);
-    L('pavers', uo - 0.1, ui, d0 + 0.22, d1 - 0.22, FL - 0.5, FL + 0.004);                                       // the threshold
+    L('pavers', uo - 0.1, ui, d0 + 0.22, d1 - 0.22, FL - 0.5, FL + 0.016);                                       // the threshold
     B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), d0, d0 + 0.22, 0, TRAN); B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), d1 - 0.22, d1, 0, TRAN);
     B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), d0, d1, DOORH, TRAN);
     {
@@ -203,15 +218,15 @@ export function buildTown(B) {
         if (!hole) L(EXT, uo, um, vs[i], vs[i + 1], hs[j], hs[j + 1]);
       }
       for (const w of wins) {
-        L(TRIM, uo - 0.16, uo + 0.3, w.v0 - 0.3, w.v1 + 0.3, w.h0 - 0.3, w.h0);                                  // sill
+        L(TRIM, uo - 0.16, uo + 0.3, w.v0 - 0.3, w.v1 + 0.3, w.h0 - 0.3, w.h0 + 0.014);                                  // sill
         if (lot.head === 'arch') {                                       // a round-arched hood, in three steps
           const m = (w.v0 + w.v1) / 2, hw = (w.v1 - w.v0) / 2;
-          L(EXT, uo + 0.04, uo + 0.3, w.v0, w.v1, w.h1, w.h1 + 0.02); L(TRIM, uo - 0.14, uo + 0.3, w.v0 - 0.28, w.v1 + 0.28, w.h1, w.h1 + 0.34);
+          L(TRIM, uo - 0.14, uo + 0.3, w.v0 - 0.28, w.v1 + 0.28, w.h1 - 0.014, w.h1 + 0.34);
           L(TRIM, uo - 0.14, uo + 0.3, m - hw * 0.72, m + hw * 0.72, w.h1 + 0.34, w.h1 + 0.68); L(TRIM, uo - 0.18, uo + 0.3, m - hw * 0.3, m + hw * 0.3, w.h1 + 0.68, w.h1 + 0.92);
         } else if (lot.head === 'hood') {                                // a pressed-metal cap on little brackets
-          L(TRIM, uo - 0.08, uo + 0.3, w.v0 - 0.2, w.v1 + 0.2, w.h1, w.h1 + 0.36); L(TRIM, uo - 0.3, uo + 0.3, w.v0 - 0.42, w.v1 + 0.42, w.h1 + 0.36, w.h1 + 0.56);
+          L(TRIM, uo - 0.08, uo + 0.3, w.v0 - 0.2, w.v1 + 0.2, w.h1 - 0.014, w.h1 + 0.36); L(TRIM, uo - 0.3, uo + 0.3, w.v0 - 0.42, w.v1 + 0.42, w.h1 + 0.36, w.h1 + 0.56);
           for (const v of [w.v0 - 0.18, w.v1 + 0.18]) L(TRIM, uo - 0.24, uo, v - 0.1, v + 0.1, w.h1 - 0.35, w.h1 + 0.36);
-        } else L(TRIM, uo - 0.08, uo + 0.3, w.v0 - 0.2, w.v1 + 0.2, w.h1, w.h1 + 0.5);                           // a plain stone lintel
+        } else L(TRIM, uo - 0.08, uo + 0.3, w.v0 - 0.2, w.v1 + 0.2, w.h1 - 0.014, w.h1 + 0.5);                           // a plain stone lintel
         for (const v of [w.v0, w.v1]) L(TRIM, uo + 0.1, uo + 0.34, v - 0.1, v + 0.1, w.h0, w.h1);                // sash frame
         L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, (w.h0 + w.h1) / 2 - 0.07, (w.h0 + w.h1) / 2 + 0.07);            // meeting rail
         L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, w.h1 - 0.12, w.h1); L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, w.h0, w.h0 + 0.12);
@@ -219,12 +234,12 @@ export function buildTown(B) {
         upWindows.push({ x: s * (uo + 0.36), y: (w.h0 + w.h1) / 2, z: wz((w.v0 + w.v1) / 2), w: w.v1 - w.v0, h: w.h1 - w.h0, side: s, lot: lot.id });
       }
       // cornice and parapet coping
-      { const CT = lot.cornice === 'dentil' ? EXT : TRIM, k = lot.cornice === 'dentil' ? 0.55 : 1; L(CT, uo - 0.35 * k, um, y0, y1, top - 0.2, top + 0.25); L(CT, uo - 0.75 * k, um, y0 - 0.1, y1 + 0.1, top + 0.25, top + 0.6); L(CT, uo - 0.5 * k, um, y0 - 0.05, y1 + 0.05, top + 0.6, top + 0.8); }
+      { const CT = lot.cornice === 'dentil' ? EXT : TRIM, k = lot.cornice === 'dentil' ? 0.55 : 1; L(CT, uo - 0.35 * k, uo + 0.05, y0, y1, top - 0.2, top + 0.25); L(CT, uo - 0.75 * k, uo + 0.05, y0 - 0.1, y1 + 0.1, top + 0.25, top + 0.6); L(CT, uo - 0.5 * k, uo + 0.05, y0 - 0.05, y1 + 0.05, top + 0.6, top + 0.8); }      // (let into the wall's face only: carried through, they flickered on the inside of the parapet)
       if (lot.cornice === 'dentil') { for (let v = y0 + 0.35; v < y1 - 0.2; v += 0.72) L(EXT, uo - 0.26, uo, v - 0.17, v + 0.17, top - 0.42, top + 0.02); L(EXT, uo - 0.16, uo, y0, y1, top - 0.7, top - 0.42); }      // corbelled brick teeth
       else for (let v = y0 + 0.9; v < y1 - 0.5; v += 1.8) L(TRIM, uo - 0.6, uo, v - 0.22, v + 0.22, top - 0.35, top + 0.25);   // brackets under it
       L(TRIM, uo - 0.1, um + 0.15, y0, y1, wallTo, wallTo + 0.22);
       // behind the front: a lower parapet round the roof
-      for (const v of [y0, y1 - SIDE]) L('brick#8a6a5c', FRONT + 0.4, back, v, v + SIDE, top, top + 0.6);
+      for (const v of [y0, y1 - SIDE]) L('brick#8a6a5c', FRONT + 0.4, back - SIDE, v, v + SIDE, top, top + 0.6);
       L('brick#8a6a5c', back - SIDE, back, y0, y1, top, top + 0.6);
       B.block(Math.min(s * uo, s * um), Math.max(s * uo, s * um), y0, y1, SHOPTOP, wallTo);
     }

@@ -9,19 +9,37 @@ import * as THREE from 'three';
 const shared = new Map();
 let texTier = 'full';
 export function setTextureTier(t) { texTier = t ?? 'full'; }
+// Every photo arrives first at half size (a quarter of the bytes: the whole set is 5 MB instead of 20), so the street
+// is dressed almost at once; those the quality tier wants at full size are then fetched one at a time once the
+// street is up (sharpenTextures, called from main.js) and swapped in, which nobody sees happen.
 export function sharedTexture(file) {
-  const half = texTier === 'half' || (texTier === 'detail' && /_(rough|normal)$/.test(file));
-  const url = `assets/tex/${half ? '512/' : ''}${file}.jpg`;
+  const wantFull = !(texTier === 'half' || (texTier === 'detail' && /_(rough|normal)$/.test(file)));
+  const url = `assets/tex/512/${file}.jpg`;
   let e = shared.get(url);
   if (!e) {
-    e = { clones: [], loaded: false };
-    e.base = new THREE.TextureLoader().load(url, () => { e.loaded = true; for (const c of e.clones) c.needsUpdate = true; });
+    e = { clones: [], loaded: false, full: wantFull ? `assets/tex/${file}.jpg` : null };
+    e.base = new THREE.TextureLoader().load(url, () => { e.loaded = true; for (const c of e.clones) c.needsUpdate = true; },
+      undefined, () => { if (e.full) { const f = e.full; e.full = null; new THREE.ImageLoader().load(f, img => { e.base.image = img; e.loaded = true; e.base.needsUpdate = true; for (const c of e.clones) c.needsUpdate = true; }); } });      // (no half-size copy of this one: take the full one)
     shared.set(url, e);
   }
   // (a clone is born "needing an update"; until the photo has arrived that only made the renderer
   // warn, every frame, that there was nothing to upload)
   const t = e.base.clone(); if (e.loaded) t.needsUpdate = true; else t.version = 0; e.clones.push(t);
   return t;
+}
+// Fetch the full-size photos, one after another, and swap each in. (The textures are let go of first: a texture's
+// size cannot change once it is on the GPU.)
+export function sharpenTextures(gap = 220) {
+  const todo = [...shared.values()].filter(e => e.full);
+  const next = () => {
+    const e = todo.shift(); if (!e) return;
+    const url = e.full; e.full = null;
+    new THREE.ImageLoader().load(url, img => {
+      if (e.loaded) { for (const t of [e.base, ...e.clones]) t.dispose(); e.base.image = img; e.base.needsUpdate = true; for (const c of e.clones) c.needsUpdate = true; }
+      setTimeout(next, gap);
+    }, undefined, () => setTimeout(next, gap));
+  };
+  next();
 }
 
 export function makeMaterials(renderer, quality = {}) {

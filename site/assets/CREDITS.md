@@ -42,7 +42,7 @@ labels, posters, packaging, robots, trees, the sky.
   Poly by Google; Robin by jeremy (https://poly.pizza/m/53HOg-b1F4r). The fox is by Quaternius, CC0
   (https://poly.pizza/m/Bc97C66HKi). Swallows, butterflies, moths and fireflies are built in code.
 - The chapel's windows are Anna's, from the chapel in the garden of Anna's House, with four more in the same
-  hand; Moth, who keeps it, will tell you what each one honours.
+  hand; Wren, who keeps it, will tell you what each one honours.
 - Dandelion the airship (src/airship) was designed and built for Anna's House and is shared with it.
 - The picture garden shows films from YouTube in YouTube's own player; they remain their makers'.
 - Music (assets/audio): public-domain and CC0 recordings of Satie, Bach, Chopin, Schumann, Mozart
@@ -58,3 +58,6 @@ labels, posters, packaging, robots, trees, the sky.
   Special Elite (Astigmatic) is under the Apache Licence 2.0.
 - The shops, brands, bands, book jackets and products on the street are invented; the breads, poses, cocktails,
   constellations, museum objects and paintings are real.
+- The pictures at the Lantern are silent films in the public domain, streamed from the Internet Archive
+  (https://archive.org): *A Trip to the Moon* (Méliès, 1902), *Gertie the Dinosaur* (McCay, 1914), *The Immigrant*
+  (Chaplin, 1917), *One Week* (1920), *Cops* (1922) and *Sherlock Jr.* (1924) (Keaton).

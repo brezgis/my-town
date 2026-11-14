@@ -5,6 +5,7 @@ import { Builder } from './builder.js';
 import { makeMaterials } from './materials.js';
 import { buildTown, FL, CEIL } from './town.js';
 import { furnish } from './shops/index.js';
+import { buildIsland } from './island.js';
 import { layStreet, TREES, ISLAND, placeName } from './street.js';
 import { makeTrees } from './trees.js';
 import { bringToLife } from './life.js';
@@ -15,7 +16,7 @@ import { makeAbout } from './about.js';
 import { namedView, statsDump, VIEWS } from './perf.js';
 import { makeVisibility } from './visibility.js';
 import { chooseQuality, rememberSlow, QUALITY_OPTIONS, storedChoice, chooseTier } from './quality.js';
-import { setTextureTier } from './materials.js';
+import { setTextureTier, sharpenTextures } from './materials.js';
 import { HL, installHouseLight, setHourLight, makeLampPool, makeExposure, makeWindowGlow, makeVignette, makeHalos } from './lighting.js';
 import { makeWarmer } from './warm.js';
 import { makeShade } from './shade.js';
@@ -92,39 +93,18 @@ const outdoors = new THREE.Group(); outdoors.name = 'outdoors'; scene.add(outdoo
 if (Q.get('trees') !== '0') makeTrees(outdoors, materials, builder.colliders, TREES);
 mark('trees');
 
-// The ground: a floating island. Lawn on top, a rounded meadow rim, and a rocky
-// underside hanging in the clouds. Nothing lies beyond it but sky.
+// The ground: a floating island. Lawn on top, a soft shoulder of rough grass rolling over a ragged lip of sod,
+// and a rocky underside hanging in the clouds (island.js). Nothing lies beyond it but sky.
 function outlineAt(a) {                                 // smooth radius from ISLAND.outline at angle a
   const o = ISLAND.outline, n = o.length, t = ((a / (Math.PI * 2)) % 1 + 1) % 1 * n, i = Math.floor(t), f = t - i;
   const p0 = o[(i - 1 + n) % n], p1 = o[i % n], p2 = o[(i + 1) % n], p3 = o[(i + 2) % n];
   return 0.5 * ((2 * p1) + (-p0 + p2) * f + (2 * p0 - 5 * p1 + 4 * p2 - p3) * f * f + (-p0 + 3 * p1 - 3 * p2 + p3) * f * f * f);
 }
-{
-  // The island need not be round. garden.js may give ISLAND.outline: radii in feet at equal
-  // angles round the centre (angle = atan2(z - centre.z, x - centre.x), starting at 0), which
-  // are smoothly joined; otherwise it is a wobbly circle of radius r.
-  const N = 160, wob = a => 1 + 0.03 * Math.sin(a * 7 + 2.3) + 0.018 * Math.sin(a * 13 + 0.7);
-  const rimR = a => ISLAND.outline ? outlineAt(a) * 1.08 * wob(a) : ISLAND.r * 1.1 * wob(a) * (1 + 0.05 * Math.sin(a * 3 + 1));
-  const ring = (scale, y, wob = 0) => Array.from({ length: N }, (_, i) => { const a = (i / N) * Math.PI * 2, r = rimR(a) * scale * (1 + wob * Math.sin(a * 5 + y)); return [ISLAND.x + Math.cos(a) * r, y, ISLAND.z + Math.sin(a) * r]; });
-  const strip = (r0, r1, uvScale, vOf) => {                       // a band of triangles between two rings
-    const pos = [], uv = [], idx = [];
-    for (let i = 0; i < N; i++) { pos.push(...r0[i], ...r1[i]); uv.push(...vOf(r0[i], i, 0, uvScale), ...vOf(r1[i], i, 1, uvScale)); const a = i * 2, b = ((i + 1) % N) * 2; idx.push(a, b, a + 1, b, b + 1, a + 1); }
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
-  };
-  const flatUV = p => [p[0], p[2]], wallUV = (p, i, k, sc) => [(i / N) * 90 * 6.6 / sc, -p[1] * 6.6 / (sc * 1.2)];
-  // Top: lawn out to nine-tenths, then long grass rolling over the edge
-  const centre = Array.from({ length: N }, () => [ISLAND.x, 0.03, ISLAND.z]);
-  const lawn = new THREE.Mesh(strip(centre, ring(0.9, 0.03), 1, flatUV), materials.grass);
-  const rim = new THREE.Mesh(strip(ring(0.9, 0.03), ring(1.0, -1.2), 1, flatUV), materials.meadow);
-  const lip = new THREE.Mesh(strip(ring(1.0, -1.2), ring(1.015, -9), 6, wallUV), materials.meadow);
-  for (const m of [lawn, rim, lip]) { m.receiveShadow = true; m.userData.cat = 'island'; outdoors.add(m); }
-  // Underside: rock narrowing to a hanging point
-  const rock = materials.flagstone.clone(); rock.color.set(0x8a8478); rock.roughnessMap = null; rock.roughness = 1; rock.normalScale.set(2.2, 2.2);
-  const levels = [[1.015, -9, 0], [0.96, -38, 0.03], [0.82, -82, 0.05], [0.62, -128, 0.07], [0.4, -172, 0.09], [0.2, -214, 0.1], [0.04, -250, 0]];
-  const under = []; for (let k = 0; k < levels.length - 1; k++) { const [s0, y0, w0] = levels[k], [s1, y1, w1] = levels[k + 1]; under.push(strip(ring(s0, y0, w0), ring(s1, y1, w1), 14, wallUV)); }
-  const rockMesh = new THREE.Mesh(mergeGeometries(under), rock); rockMesh.userData.cat = 'island'; outdoors.add(rockMesh);      // one draw for the whole underside
-  const soil = new THREE.Mesh(strip(ring(1.012, -3), ring(1.015, -9), 6, wallUV), materials.soilbed); soil.scale.set(1.001, 1, 1.001); soil.userData.cat = 'island'; outdoors.add(soil);
-}
+// The island need not be round: ISLAND.outline (street.js) gives radii in feet at equal angles round the
+// centre, smoothly joined. It is built exactly as the island of Anna's House is (island.js, copied from there:
+// keep the two the same): mown grass to where the walker stops, a shoulder of rough grass rolling over a
+// ragged lip of sod, earth and strata, and rock tapering down into the clouds.
+buildIsland({ ISLAND, outlineAt, materials, outdoors });
 
 mark('island');
 const life = bringToLife({ scene, outdoors, vis, quality: QUALITY, renderer, camera, items, garden, materials, doors: house.doors, colliders: builder.colliders, onChange: () => { sun.shadow.needsUpdate = true; } });
@@ -383,7 +363,8 @@ window.__house = perf; perf.light = { HL, lampPool, sun, exposure };      // for
 perf.lampChoice = (names = Object.keys(VIEWS), h) => { if (h !== undefined) setHour(h); const out = {}; for (const n of names) { setView(VIEWS[n]); camera.updateMatrixWorld(); vis.update(camera); out[n] = (vis.state.here.join('+') || 'out').replace(/r:/g, '') + ' -> ' + lampPool.choose(camera.position, QUALITY.lamps).map(lampPool.describe).join(', '); } return out; };
 if (Q.has('statsdump')) statsDump(perf, Q.get('statsdump') || null, (Q.get('hours') ?? '13,22').split(',').map(Number));
 
-THREE.DefaultLoadingManager.onLoad = () => { sun.shadow.needsUpdate = true; document.body.classList.add('ready'); window.__ready = true; };
+let sharpened = false;
+THREE.DefaultLoadingManager.onLoad = () => { sun.shadow.needsUpdate = true; document.body.classList.add('ready'); window.__ready = true; if (!sharpened) { sharpened = true; setTimeout(() => sharpenTextures(), 2500); } };      // (the photos came at half size; now the full ones, one at a time)
 if (Q.has('view') || Q.has('shot')) { renderer.domElement.style.transition = 'none'; document.body.classList.add('ready'); }
 window.house = { ctx, setHour: h => { setHour(h); ctx.hourMoved = true; }, get hour() { return hour; } };
 ctx.hourMoved = Q.has('time'); ctx.hourNow = () => hour;      // carried on the airship, so the sky is the same at both ends

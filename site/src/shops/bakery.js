@@ -1,18 +1,24 @@
 // Tomorrow Bread  (south side; the 17 ft shopfront of no. 23 South Main Street: 16 ft wide inside, 42.7 deep)
-// A counter down one side and a queue down the other. The shop is the front third: the counter with
-// one pastry case, the till and the baguettes, and behind it on the left wall the bread wall, nine
-// breads on three slanted racks, each with a label that says what is actually in it. Behind that the
-// room simply carries on as the bakehouse: flour sacks and the rack trolley down the left wall, the
-// bench down the right (dough under cloths; Doris the starter at its near end, her feeding log above
-// her), the mixer, and at the far end the deck oven with its middle door down and the mouth glowing:
-// that glow, seen from the door, is the picture. Crumb is behind the counter.
+// A front shop and a bakehouse behind it, as the building had. THE SHOP: the counter down the left with the
+// pastry case, the till and the baguettes; behind it the bread wall, nine breads on three slanted racks, each
+// with a label that says what is actually in it; down the right, under the slate, a long settle to eat a bun
+// on. A boarded dado and a rail at the height of the bread wall's cornice run round the room. THE PARTITION:
+// a wide hatch behind the counter with the loaves cooling on its sill, and beside it a cased doorway that
+// lines up with the street door, so that from the pavement you look straight through to the oven. THE
+// BAKEHOUSE (white tile to shoulder height): the long floured bench in the middle under two lamps (Doris the
+// starter at its near end, her feeding log on the wall by her), open shelves and the proving cupboard down
+// the left, the mixer, the flour and the rack trolley down the right, and across the back the yard door and
+// the brick chimney breast with the deck oven set into it, its middle door down and the mouth glowing: that
+// glow, seen from the door, is the picture. Crumb is behind the counter and fetches from the hatch.
 import { tools, fixtures, snapMat } from '../shopkit.js';
 import { BRASS, G } from '../kit.js';
+import { arch } from './arch.js';
 import { T, F, fill, slate, chalk, paper, board, grain, disc, rect, rrect, line, para, ICON } from '../draw.js';
 
 const OAK = 'oak_light#a3825c', PALEW = 'oak_light#c4a477', BLUSH = 'painted_wood#d8b7a6', CREAM = 'painted_wood#efe6d4', DARKW = 'fir#3a2c24';
 const STEEL = 'c#c9ccd0/0.45/1', IRON = 'c#2b2724/0.45/1', PORC = 'c#ebe6dc/0.18', ENAMEL = 'c#2b2724/0.45', LINEN = 'linen#e9dfc8', SACK = 'linen#d9c9a8';
 const CR1 = 'c#a8784a/0.8', CR2 = 'c#8a5a2a/0.8', CR3 = 'c#6a4a2a/0.8', RYE = 'c#3a2214/0.8', PALE = 'c#c9a77a/0.8', BUN = 'c#b08a5a/0.45', GOLD = 'c#c9952a/0.45', FLOUR = 'c#e8e2d4/0.8', WHITE = 'c#f4f1ea/0.8', DOUGH = 'c#efe2bc/0.8';
+const BRICK = 'brick#8f7a6e', TILEW = 'tile_subway';
 const GLOW = 'e#ff7a2a/1.1';                                    // the one new glow: the oven
 const INK = '#2a1c13', RED = '#a8554a', PAPER = '#f6efdc', PINK = '#f3d9cf';
 
@@ -42,7 +48,7 @@ const SACKLABEL = (kind, sub, c = '#8a3a2a') => (g, w, h) => {
   fill(g, w, h, '#dccdaa'); grain(g, w, h, 0.09, kind.length);
   const r = Math.min(h * 0.3, w * 0.16), cx = h > w ? w / 2 : r * 1.35, cy = h > w ? h * 0.24 : h / 2;
   disc(g, cx, cy, r, null, c, r * 0.12); disc(g, cx, cy, r * 0.2, c); for (let i = 0; i < 8; i++) line(g, [[cx + Math.cos(i * 0.785) * r * 0.2, cy + Math.sin(i * 0.785) * r * 0.2], [cx + Math.cos(i * 0.785) * r * 0.94, cy + Math.sin(i * 0.785) * r * 0.94]], c, r * 0.09);
-  if (h > w) { T(g, 'HOLLOW WHEEL MILL', w / 2, h * 0.47, h * 0.058, c, { f: F.bebas, ls: 2, max: w * 0.88 }); T(g, kind, w / 2, h * 0.585, h * 0.095, INK, { f: F.abril, max: w * 0.88 }); T(g, sub, w / 2, h * 0.69, h * 0.045, INK, { f: F.elite, max: w * 0.88 }); T(g, 'stoneground · unbleached · 25 kg', w / 2, h * 0.79, h * 0.042, c, { f: F.fraunces, it: 1, max: w * 0.88 }); T(g, 'store cool & dry. keep the cat off', w / 2, h * 0.89, h * 0.05, INK, { f: F.caveat, w: 600, max: w * 0.88 }); }
+  if (h > w) { T(g, 'HOLLOW WHEEL MILL', w / 2, h * 0.47, h * 0.058, c, { f: F.bebas, ls: 2, max: w * 0.88 }); T(g, kind, w / 2, h * 0.585, h * 0.095, INK, { f: F.abril, max: w * 0.88 }); T(g, sub, w / 2, h * 0.69, h * 0.045, INK, { f: F.elite, max: w * 0.88 }); T(g, 'stoneground · unbleached · 25 kg', w / 2, h * 0.79, h * 0.042, c, { f: F.fraunces, it: 1, max: w * 0.88 }); T(g, 'store cool & dry', w / 2, h * 0.89, h * 0.05, INK, { f: F.caveat, w: 600, max: w * 0.88 }); }
   else { const x = r * 2.7 + (w - r * 2.7) / 2, mx = (w - r * 2.9) * 0.94; T(g, 'HOLLOW WHEEL MILL · STONEGROUND', x, h * 0.2, h * 0.16, c, { f: F.bebas, ls: 2, max: mx }); T(g, kind, x, h * 0.5, h * 0.3, INK, { f: F.abril, max: mx }); T(g, sub + ' · 25 kg', x, h * 0.82, h * 0.14, INK, { f: F.elite, max: mx }); }
 };
 const WINCARD = (g, w, h) => {
@@ -110,6 +116,18 @@ export default function bakery(kit, lot) {
   const baguette = (f, x, y, z, dx, dy, len = 2.1, col = CR1) => tube(f, col, [[x, y, z], [x + dx * 0.25, y + dy * 0.25, z + len * 0.25], [x + dx * 0.5, y + dy * 0.5, z + len * 0.5], [x + dx * 0.75, y + dy * 0.75, z + len * 0.75], [x + dx, y + dy, z + len]], t => 0.04 + 0.062 * Math.sin(Math.PI * t) ** 0.5, 7, true);
   const basket = (f, x, y, z, r, h, sx = 1) => K.put(f, L([[0, 0], [r * 0.78, 0], [r, h], [r * 0.95, h], [r * 0.74, 0.05], [0, 0.05]], sx, 1, 16), 'wicker', x, y, z);
 
+  // ---- the room: a partition two fifths of the way back, a dado and a rail in the shop, tile in the bakehouse ----
+  const A = arch(kit, lot, K), PD = 19.8, HA0 = 1.3, HA1 = 8.2, HZ = 3.5, DA0 = 10.6, DA1 = 14.6;
+  const P = A.partition(PD, { openings: [{ a0: HA0, a1: HA1, z0: HZ, z1: 7.8 }, { a0: DA0, a1: DA1, z0: 0, z1: 8.2 }] });
+  const BW0 = D * 0.246 - 4.78, BW1 = D * 0.246 + 4.78, RZ = 9.12;   // the bread wall's ends on the left wall; its cornice height
+  const WS = { mat: BLUSH, cap: A.TRIM };                      // the boarding is the counter's pink, capped in the trim's cream
+  A.wainscot('right', 0.03, P.front - 0.02, WS); A.wainscot('left', 0.03, BW0 - 0.02, WS); A.wainscot('left', BW1 + 0.02, P.front - 0.02, WS);
+  A.wainscot({ d: P.front, side: 'front' }, 0.22, DA0 - 0.44, WS); A.wainscot({ d: P.front, side: 'front' }, DA1 + 0.44, W - 0.22, WS);
+  A.rail('right', 0.03, P.front - 0.02, { z: RZ, tall: 0.12 }); A.rail('left', 0.03, BW0 - 0.1, { z: RZ, tall: 0.12 }); A.rail('left', BW1 + 0.1, P.front - 0.02, { z: RZ, tall: 0.12 }); A.rail({ d: P.front, side: 'front' }, 0.08, W - 0.08, { z: RZ, tall: 0.12 });
+  const OA = 12, BR = 2.9, DRA = 0.24 * (W + 1) - 0.5;                        // the oven's centre and the breast's depth; the yard door's centre (backs.js)
+  { const TZ = 4.7, tile = (wall, s0, s1) => { A.on(wall, TILEW, s0, s1, 0.004, 0.085, 0.004, TZ); A.on(wall, 'c#3a3632/0.5', s0, s1, 0.004, 0.11, TZ, TZ + 0.07); };
+    tile('left', P.back + 0.02, D - 0.02); tile('right', P.back + 0.02, D - BR - 0.02); tile('back', 0.1, DRA - 1.93); tile('back', DRA + 1.93, OA - 4.22); }
+
   // ---- the counter: down the left side of the front third, the queue on the door side ------------------------
   const CA = W * 0.44, CD = D * 0.246;                         // its customer face is at a = CA; its middle at d = CD
   const c = at(CA, CD, 0, 'right');                            // +x toward the street; +y the customers' side
@@ -169,7 +187,7 @@ export default function bakery(kit, lot) {
   });
 
   // ---- the oven, at the far end: three decks, the middle door down ---------------------------------------------
-  const o = at(W * 0.56, D, 0, 'street');
+  const o = at(OA, D, 0, 'street');
   { const F0 = 2.3, F1 = 3.0;
     for (const [x, y] of [[-3.4, 0.25], [3.4, 0.25], [-3.4, 2.75], [3.4, 2.75]]) o.box(STEEL, x - 0.1, x + 0.1, y - 0.1, y + 0.1, 0, 1.5);
     o.box(STEEL, -3.5, 3.5, 0.15, 2.85, 0.5, 0.56); o.box(ENAMEL, -3.3, 3.3, 0.02, 2.6, 0.56, 1.5);     // it stands on a closed base
@@ -184,21 +202,33 @@ export default function bakery(kit, lot) {
     for (const [z0, z1] of [[1.8, 3.25], [5.25, 6.75]]) { o.box(STEEL, -2.5, 2.9, F1, F1 + 0.06, z0, z1); o.box('c#17140f/0.45', -2.1, 2.5, F1 + 0.06, F1 + 0.07, (z0 + z1) / 2 - 0.2, (z0 + z1) / 2 + 0.2); o.box(GLOW, -2.0, 2.4, F1 + 0.07, F1 + 0.082, (z0 + z1) / 2 - 0.1, (z0 + z1) / 2 + 0.1); hcyl(o, STEEL, 'x', 0.2, F1 + 0.22, z1 - 0.22, 4.8, 0.035); for (const x of [-2.1, 2.5]) o.box(STEEL, x - 0.03, x + 0.03, F1 + 0.06, F1 + 0.22, z1 - 0.25, z1 - 0.19); }
     for (const z of [3.42, 5.08, 6.92]) o.box(STEEL, -3.62, 3.62, F1, F1 + 0.02, z - 0.04, z + 0.04);
     kit.sign(o, -3.05, F1 + 0.012, 4.25, 0.86, 1.2, (g, w, h) => { fill(g, w, h, '#d8d9d6'); for (const [y, t, v] of [[0.2, 'TOP', '250°'], [0.5, 'SOLE', '240°'], [0.8, 'STEAM', '8 s']]) { disc(g, w * 0.3, h * y, w * 0.2, '#1d1b18', '#8a8a86', 2); line(g, [[w * 0.3, h * y], [w * 0.3 + w * 0.14, h * y - w * 0.1]], '#f6efdc', 3); T(g, t, w * 0.74, h * (y - 0.045), h * 0.05, '#1d1b18', { f: F.bebas, ls: 1 }); T(g, v, w * 0.74, h * (y + 0.035), h * 0.075, '#b3261e', { f: F.elite }); } }, { cw: 110, ch: 154 });
-    o.box(STEEL, -3.75, 3.75, 0.02, 3.7, 7.1, 7.22); kit.put(o, snapMat(STEEL), G3.xf(G3.lathe([[2.6, 0], [0.5, 1.1], [0.5, 1.15], [0, 1.15]], { seg: 4 }), { rz: Math.PI / 4 }), { s: [2.04, 1, 1], at: [0, 1.9, 7.22] }); o.cyl(STEEL, 0, 1.9, 8.3, 11.95, 0.42, 0.42, 14);
-    o.block(-3.6, 3.6, 0, 4.0, 0, 7); kit.lampAt(o, 0.2, 4.3, 4.3, 0.75); kit.lamps[kit.lamps.length - 1].halo = 0.5;
+    o.box(STEEL, -3.6, 3.6, 0.03, 3.7, 7.1, 7.22);                                                    // a short steel canopy over the doors
+    // the chimney breast it is set into: a brick pier each side, brick above to the ceiling, an iron bar over the canopy
+    o.box(BRICK, 3.62, 4.2, 0.004, BR, 0.004, 11.98); o.box(BRICK, -4.1, -3.62, 0.004, BR, 0.004, 11.98); o.box(BRICK, -3.62, 3.62, 0.004, BR, 7.24, 11.98);
+    o.box(IRON, -3.9, 4.0, BR, BR + 0.05, 7.3, 7.62);
+    o.block(-4.0, 4.2, 0, 4.0, 0, 7); kit.lampAt(o, 0.2, 4.3, 4.3, 0.75); kit.lamps[kit.lamps.length - 1].halo = 0.5;
     { const [sx, sz] = kit.world(o, 0.2, 3.3); kit.steam.push({ x: sx, y: o.h + 4.7, z: sz }); }
     // the peel, leaning in the corner beside it, and a clock that somebody actually looks at
-    tube(o, PALEW, [[4.75, 0.95, 0.03], [4.75, 0.3, 5.2]], 0.045, 6, true); wood(o, PALEW, G3.bev(-0.5, 0.5, -0.025, 0.025, -0.1, 1.35, 0.02), { rx: 0.125, at: [4.75, 0.3, 5.2] });
-    kit.model('wall_clock', o, 4.75, 0.08, 8.6, 0, { hang: true });
+    tube(o, PALEW, [[5.42, 1.0, 0.03], [5.42, 0.35, 5.2]], 0.045, 6, true); wood(o, PALEW, G3.bev(-0.5, 0.5, -0.025, 0.025, -0.1, 1.35, 0.02), { rx: 0.125, at: [5.42, 0.35, 5.2] });
+    kit.model('wall_clock', o, 5.42, 0.08, 8.3, 0, { hang: true });
   }
 
   // ---- the right wall: the slate by the queue, then the bench, then the mixer ----------------------------------
   const r = at(W, 0, 0, 'left');                               // x = d (toward the back); +y out from the right wall
-  X.slateBoard(r, CD, 6.6, 4.3, 4.7, TODAY, { cw: 560, ch: 610 });
-  { // the bench: Doris alone at the near end, the work further along
-    const x0 = D * 0.5, x1 = x0 + 8.4, z = 3.0, u = v => x0 + v;
-    r.box(PALEW, x0, x1, 0.05, 2.45, z - 0.2, z, G); for (const x of [x0 + 0.15, x1 - 0.15]) for (const y of [0.2, 2.3]) r.box(STEEL, x - 0.07, x + 0.07, y - 0.07, y + 0.07, 0, z - 0.2);
-    r.box(STEEL, x0 + 0.1, x1 - 0.1, 0.15, 2.35, 0.8, 0.86); r.block(x0, x1, 0, 2.45, 0, z);
+  X.slateBoard(r, CD, 6.45, 4.3, 4.7, TODAY, { cw: 560, ch: 610 });
+  { // the settle under it: one long seat against the boarding, somewhere to eat the thing you just bought
+    const x0 = CD - 3.6, x1 = CD + 3.6;
+    r.box(BLUSH, x0 + 0.1, x1 - 0.1, 0.24, 1.5, 0.3, 1.38, G); r.box('c#2c2520/0.6', x0 + 0.16, x1 - 0.16, 0.3, 1.42, 0.004, 0.3);
+    r.box(OAK, x0, x1, 0.22, 1.66, 1.38, 1.5, G); for (const x of [x0, x1]) r.box(OAK, x - 0.07, x + 0.07, 0.22, 1.66, 0.004, 2.35, G);
+    r.soft('linen#e2c9bb', x0 + 0.12, x1 - 0.12, 0.3, 1.62, 1.5, 1.66, 0.06);
+    for (const x of [CD - 2.3, CD, CD + 2.3]) kit.seat(r, x, 1.0, 1.66, 'sit');
+    r.block(x0 - 0.07, x1 + 0.07, 0, 1.66, 0, 1.7);
+  }
+  { // the bench: an island down the middle of the bakehouse; Doris alone at the near end, the work further along
+    const r = at(8.1, 0, 0, 'left');                            // (shadowing r: x = d as before; +y toward the left wall)
+    const x0 = 23.6, x1 = x0 + 8.4, z = 3.0, u = v => x0 + v;
+    r.box(PALEW, x0, x1, -0.2, 2.7, z - 0.2, z, G); for (const x of [x0 + 0.15, x1 - 0.15]) for (const y of [-0.05, 2.55]) r.box(STEEL, x - 0.07, x + 0.07, y - 0.07, y + 0.07, 0, z - 0.2);
+    r.box(STEEL, x0 + 0.1, x1 - 0.1, -0.1, 2.6, 0.8, 0.86); r.block(x0, x1, -0.2, 2.7, 0, z);
     for (const [v, col] of [[2.9, WHITE], [4.5, WHITE], [6.1, 'c#c9a77a/0.8']]) { ves(r, 'c#f4f1ea/0.45', u(v), 1.25, 0.86, [[0, 0], [0.5, 0], [0.6, 1.2], [0.56, 1.2], [0.47, 0.05], [0, 0.05]], 16); ves(r, col, u(v), 1.25, 0.9, [[0, 0], [0.56, 0.9], [0.3, 1.0], [0, 1.04]], 12); }
     // flour on the wood, dough resting under cloths, one out and being shaped
     for (const [v, y, rr, t] of [[4.4, 1.3, 0.85, 0.004], [5.3, 1.5, 0.6, 0.006], [3.6, 1.0, 0.55, 0.008]]) ves(r, WHITE, u(v), y, z, [[0, 0], [rr, 0], [rr * 0.9, t], [0, t]], 14);
@@ -211,24 +241,29 @@ export default function bakery(kit, lot) {
     // Doris, and her feeding log on the wall above her
     { const dx = u(0.9), dy = 1.5;
       jar(r, dx, dy, z, 0.26, 0.66, 'c#efe2bc/0.8', 0.66, null); r.cyl(LINEN, dx, dy, z + 0.64, z + 0.7, 0.29, 0.27, 14); r.cyl('c#8a1c1c/0.8', dx, dy, z + 0.6, z + 0.63, 0.275, 0.275, 14); r.cyl('c#2a63b8/0.8', dx, dy, z + 0.25, z + 0.265, 0.265, 0.265, 14);
-      kit.sign(r, dx, dy + 0.268, z + 0.43, 0.36, 0.2, (g, w, h) => { paper(g, w, h, '#fbf7ea'); T(g, 'DORIS', w / 2, h * 0.36, h * 0.46, RED, { f: F.abril }); T(g, 'do not tap the jar', w / 2, h * 0.78, h * 0.28, INK, { f: F.caveat, w: 700, max: w * 0.92 }); }, { cw: 130, ch: 72 });
-      r.box('c#6a4a2a/0.8', dx - 0.68, dx + 0.68, 0.02, 0.05, 4.45, 6.35); r.box(STEEL, dx - 0.15, dx + 0.15, 0.05, 0.09, 6.2, 6.33); kit.sign(r, dx, 0.06, 5.36, 1.26, 1.72, FEEDLOG, { cw: 360, ch: 490 }); }
-    X.pendant(r, u(3.6), 1.5, { kind: 'dome', drop: 4.9, colour: 'c#e8e2d4/0.45', power: 0.95 });
+      kit.sign(at(8.1 - dy, dx, 0, 'street'), 0, 0.268, z + 0.43, 0.36, 0.2, (g, w, h) => { paper(g, w, h, '#fbf7ea'); T(g, 'DORIS', w / 2, h * 0.36, h * 0.46, RED, { f: F.abril }); T(g, 'do not tap the jar', w / 2, h * 0.78, h * 0.28, INK, { f: F.caveat, w: 700, max: w * 0.92 }); }, { cw: 130, ch: 72 });
+      const w = at((HA1 + DA0) / 2, P.back, 0, 'back');          // the pier of the partition between the hatch and the doorway
+      w.box('c#6a4a2a/0.8', -0.68, 0.68, 0.02, 0.05, 4.45, 6.35); w.box(STEEL, -0.15, 0.15, 0.05, 0.09, 6.2, 6.33); kit.sign(w, 0, 0.06, 5.36, 1.26, 1.72, FEEDLOG, { cw: 360, ch: 490 }); }
+    for (const v of [2.0, 6.8]) X.pendant(r, u(v), 1.25, { kind: 'dome', drop: 4.9, colour: 'c#e8e2d4/0.45', power: 0.95 });
   }
   { // the spiral mixer, between the bench and the oven
-    const x = D - 8.3; r.soft('c#e8e2d4/0.45', x - 0.68, x + 0.68, 0.1, 2.0, 0, 0.5, 0.06); r.soft('c#e8e2d4/0.45', x - 0.5, x + 0.5, 0.1, 0.75, 0.5, 3.7, 0.08); r.soft('c#e8e2d4/0.45', x - 0.45, x + 0.45, 0.1, 1.7, 3.0, 3.7, 0.1);
+    const x = 22.7; r.soft('c#e8e2d4/0.45', x - 0.68, x + 0.68, 0.1, 2.0, 0, 0.5, 0.06); r.soft('c#e8e2d4/0.45', x - 0.5, x + 0.5, 0.1, 0.75, 0.5, 3.7, 0.08); r.soft('c#e8e2d4/0.45', x - 0.45, x + 0.45, 0.1, 1.7, 3.0, 3.7, 0.1);
     ves(r, STEEL, x, 1.3, 0.5, [[0, 0], [0.5, 0], [0.62, 0.12], [0.64, 1.0], [0.6, 1.0], [0.58, 0.16], [0, 0.1]], 22); ves(r, DOUGH, x, 1.3, 0.62, [[0, 0], [0.57, 0], [0.5, 0.4], [0.25, 0.52], [0, 0.5]], 14);
     tube(r, STEEL, [[x, 1.3, 3.0], [x, 1.3, 2.0], [x + 0.2, 1.35, 1.6], [x - 0.1, 1.2, 1.25], [x + 0.15, 1.3, 1.0]], 0.045, 6, true); r.cyl(STEEL, x, 1.3, 1.52, 1.56, 0.68, 0.68, 22);
     r.cyl('c#8a1c1c/0.45', x + 0.2, 0.78, 2.4, 2.52, 0.07, 0.07, 10); r.cyl('c#5d8a3a/0.45', x - 0.2, 0.78, 2.4, 2.52, 0.07, 0.07, 10);
     r.block(x - 0.7, x + 0.7, 0, 2.0, 0, 3.7);
   }
 
-  // ---- the left wall of the bakehouse: sacks from the mill, the rack trolley -----------------------------------
-  { const s = at(0, D * 0.47, 0, 'right');
+  // two long peels hung flat on the wall above the tile, head to tail
+  for (const [z, x0, sg] of [[6.5, 24.4, 1], [7.5, 31.0, -1]]) { tube(r, PALEW, [[x0, 0.13, z], [x0 + sg * 5.2, 0.13, z]], 0.045, 6, true); r.soft(PALEW, Math.min(x0 + sg * 5.2, x0 + sg * 6.5), Math.max(x0 + sg * 5.2, x0 + sg * 6.5), 0.1, 0.16, z - 0.5, z + 0.5, 0.02);
+    for (const k of [0.6, 4.4]) tube(r, IRON, [[x0 + sg * k, 0.004, z - 0.1], [x0 + sg * k, 0.2, z - 0.1], [x0 + sg * k, 0.24, z - 0.02]], 0.022, 5, true); }
+
+  // ---- further down the right wall: sacks from the mill, the rack trolley by the oven ---------------------------
+  { const s = at(W, 26.8, 0, 'left');
     [[-1.1, 1.2, 0, 'STRONG WHITE', 'T65 · protein 12.5%'], [-0.95, 1.35, 0.52, 'HIGH EXTRACTION', 'T85 · ash 0.85%'], [-1.15, 1.1, 1.04, 'WHOLE RYE', 'T170 · coarse']].forEach(([a, b2, z, kind, sub]) => { s.soft(SACK, a, b2, 0.1, 1.6, z, z + 0.52, 0.14); kit.sign(s, (a + b2) / 2, 1.61, z + 0.26, 1.7, 0.36, SACKLABEL(kind, sub), { cw: 330, ch: 70, rough: 0.95 }); });
     s.block(-1.15, 1.35, 0, 1.6, 0, 1.6);
   }
-  { const t = at(0, D * 0.66, 0, 'right'), x0 = -0.85, x1 = 0.85, y0 = 0.2, y1 = 2.3;
+  { const t = at(W, 32.6, 0, 'left'), x0 = -0.85, x1 = 0.85, y0 = 0.2, y1 = 2.3;
     for (const x of [x0, x1]) for (const y of [y0, y1]) { t.box(STEEL, x - 0.04, x + 0.04, y - 0.04, y + 0.04, 0.25, 6.0); t.cyl(IRON, x, y, 0, 0.25, 0.12, 0.12, 8); }
     for (const z of [0.25, 6.0]) { t.box(STEEL, x0, x1, y0 - 0.04, y0 + 0.04, z, z + 0.07); t.box(STEEL, x0, x1, y1 - 0.04, y1 + 0.04, z, z + 0.07); t.box(STEEL, x0 - 0.04, x0 + 0.04, y0, y1, z, z + 0.07); t.box(STEEL, x1 - 0.04, x1 + 0.04, y0, y1, z, z + 0.07); }
     for (let k = 0; k < 9; k++) { const z = 0.75 + k * 0.58; t.box('c#9a9590/0.45/1', x0 + 0.05, x1 - 0.05, y0 + 0.05, y1 - 0.05, z, z + 0.03);
@@ -236,6 +271,44 @@ export default function bakery(kit, lot) {
       for (let i = 0; i < 6; i++) { const x = x0 + 0.42 + (i % 2) * 0.86, y = y0 + 0.4 + Math.floor(i / 2) * 0.64; set(t, k % 3 === 0 ? LOAF.bun(0.2) : k % 3 === 1 ? LOAF.boule(0.26, CR1, 'slash') : LOAF.batard(0.3, 0.17, CR2, 1), x, y, z + 0.03, i * 0.7); } }
     t.block(x0, x1, 0, y1, 0, 6);
   }
+
+  // ---- the hatch: this morning's country loaves cooling on the sill, and the board the slices are cut on ----------
+  { const z = HZ + 0.02;
+    for (let i = 0; i < 4; i++) set(R, LOAF.boule(0.33, i % 2 ? CR2 : CR1, 'cross'), 4.5 + i * 0.95, PD, z, i * 0.9);
+    R.soft(PALEW, 1.9, 3.3, PD - 0.3, PD + 0.3, z, z + 0.07, 0.02); set(R, LOAF.batard(0.36, 0.2, CR2, 1), 2.45, PD, z + 0.07, 0.2);
+  }
+
+  // ---- the left wall of the bakehouse: open shelves on the tile, then the proving cupboard ----------------------
+  { const l = at(0, 26, 0, 'right'), [z1, z2, z3, z4] = X.shelving(l, -5, 5, [1.7, 3.5, 5.1, 6.7], { d: 1.25, mat: PALEW, back: false, bay: 3.34 });
+    for (const x of [-3.33, 0, 3.33]) { l.soft('c#e8e2d4/0.45', x - 1.3, x + 1.3, 0.14, 1.12, 0.03, 1.2, 0.07); l.soft('c#d9d2c2/0.45', x - 1.34, x + 1.34, 0.1, 1.16, 1.2, 1.3, 0.04); }   // flour bins
+    for (const [x, n] of [[3.6, 3], [2.3, 2]]) for (let i = 0; i < n; i++) K.bowl(l, x, 0.66, z1 + i * 0.13, 0.56 - i * 0.02, 0.5, STEEL, 20);                                    // mixing bowls
+    for (let i = 0; i < 5; i++) l.box(i % 2 ? 'c#4a4640/0.5/1' : 'c#3a3632/0.5/1', -3.9 + (i % 2) * 0.03, -2.9 + (i % 2) * 0.03, 0.2, 1.05, z1 + i * 0.2 + 0.004, z1 + i * 0.2 + 0.19);  // loaf tins
+    [['c#c9b98a/0.8', 0.8], ['c#7a5a3a/0.8', 0.6], ['c#e6dcc0/0.8', 0.75], ['c#3a3028/0.8', 0.5]].forEach(([c2, lv], i) => jar(l, 0.95 - i * 0.66, 0.62, z2, 0.27, 0.8, c2, lv));       // sunflower, flax, sesame, poppy
+    for (let i = 0; i < 5; i++) basket(l, -3.5, 0.66, z2 + i * 0.11, 0.4, 0.32);
+    for (let i = 0; i < 4; i++) l.soft(i % 2 ? LINEN : 'linen#d9c9a8', 2.5, 4.3, 0.2, 1.1, z3 + i * 0.13 + 0.004, z3 + i * 0.13 + 0.125, 0.04);                                   // couches, folded
+    for (const [x, hh] of [[-0.9, 0.85], [-0.2, 0.7], [0.45, 0.55]]) { l.cyl('c#efe6d4/0.4', x, 0.66, z3, z3 + hh, 0.27, 0.27, 16); l.cyl('c#d8b7a6/0.4', x, 0.66, z3 + hh, z3 + hh + 0.05, 0.285, 0.285, 16); }
+    for (const x of [-3.3, 3.3]) basket(l, x, 0.66, z4, 0.52, 0.62, 1.25);
+  }
+  { // the prover: a tall cream cupboard with glazed doors, trays of rounds rising inside it
+    const l = at(0, 33.9, 0, 'right'), x0 = -1.5, x1 = 1.5, y1 = 2.0, zt = 7.0;
+    l.box(CREAM, x0, x1, 0.1, y1, 0.02, 0.62, G); l.box(CREAM, x0, x1, 0.1, 0.16, 0.62, zt, G); l.box(CREAM, x0 - 0.05, x1 + 0.05, 0.1, y1 + 0.06, zt, zt + 0.12, G);
+    for (const x of [x0, x1 - 0.08]) l.box(CREAM, x, x + 0.08, 0.16, y1, 0.62, zt, G);
+    l.box('c#e9d2ac/0.9', x0 + 0.08, x1 - 0.08, 0.16, 0.17, 0.62, zt);                                            // a warm back
+    for (let k = 0; k < 5; k++) { const z = 1.2 + k * 1.12; l.box('c#9a9590/0.45/1', x0 + 0.08, x1 - 0.08, 0.2, y1 - 0.12, z, z + 0.03); for (let i = 0; i < 6; i++) K.put(l, L(dome(0.3, 0.2 + k * 0.03), 1, 1, 10), DOUGH, -0.86 + (i % 3) * 0.86, 0.62 + Math.floor(i / 3) * 0.72, z + 0.03); }
+    for (const [a, b2] of [[x0 + 0.08, -0.04], [0.04, x1 - 0.08]]) { l.box(CREAM, a, a + 0.14, y1 - 0.07, y1, 0.66, zt - 0.04, G); l.box(CREAM, b2 - 0.14, b2, y1 - 0.07, y1, 0.66, zt - 0.04, G); l.box(CREAM, a + 0.14, b2 - 0.14, y1 - 0.07, y1, 0.66, 0.9, G); l.box(CREAM, a + 0.14, b2 - 0.14, y1 - 0.07, y1, zt - 0.26, zt - 0.04, G); l.box('glass', a + 0.14, b2 - 0.14, y1 - 0.04, y1 - 0.03, 0.9, zt - 0.26); }
+    for (const x of [-0.16, 0.16]) l.box(BRASS, x - 0.025, x + 0.025, y1, y1 + 0.07, 3.5, 4.1);
+    l.block(x0, x1, 0, y1, 0, 7);
+  }
+  { // the back wall: the yard door (the one you can knock at from the lane; town.js cuts the doorway, 3.1 wide and 6.95 high, and
+    // hangs the real door), its casing, two aprons on pegs beside it
+    const a0 = DRA - 1.55, a1 = DRA + 1.55, y = D, T2 = A.TRIM;
+    for (const [p, q] of [[a0 - 0.36, a0], [a1, a1 + 0.36]]) R.box(T2, p, q, y - 0.1, y - 0.004, 0.004, 7.5, G); R.box(T2, a0 - 0.42, a1 + 0.42, y - 0.12, y - 0.004, 7.5, 7.62, G); R.box(T2, a0, a1, y - 0.1, y - 0.004, 6.95, 7.5, G);
+    R.box('c#6f5d48/0.95', a0 + 0.2, a1 - 0.2, y - 2.3, y - 0.5, 0.004, 0.035);                                   // the mat
+    const l = at(0, 39.2, 0, 'right'); l.box(OAK, -1.5, 1.5, 0.004, 0.06, 5.9, 6.12, G);
+    for (const x of [-1.1, 0, 1.1]) tube(l, BRASS, [[x, 0.05, 6.0], [x, 0.26, 6.05]], 0.03, 6, true);
+    for (const [x, c2, zb] of [[1.1, 'linen#f4f1ea', 2.5], [0, 'linen#d8b7a6', 2.8]]) { l.soft(c2, x - 0.5, x + 0.5, 0.11, 0.2, zb, 5.2, 0.04); tube(l, c2, [[x - 0.3, 0.16, 5.2], [x - 0.1, 0.2, 5.9], [x, 0.22, 6.03], [x + 0.1, 0.2, 5.9], [x + 0.3, 0.16, 5.2]], 0.022, 5); }
+  }
+  X.pendant(R, OA, 36.9, { kind: 'dome', drop: 4.4, colour: 'c#e8e2d4/0.45', power: 0.9 });
 
   // ---- the window, left of the door: a tower of loaves, baguettes, a wheat sheaf, the card ----------------------
   { const z = 2.02, WX = lot.doorA - 3.05;                       // the display stops well short of the door
@@ -256,8 +329,8 @@ export default function bakery(kit, lot) {
   const SA = CA - 4.0;                                         // the staff aisle, between the counter and the bread wall
   kit.clerks.push({
     id: 'crumb', name: 'Crumb', lot: 'bakery', look: { shape: 'squat', colour: '#c79a6b', belly: '#f4ecdc', trim: '#e8b9a6', hat: 'toque', apron: '#f4f1ea', eye: '#ffe2b0', ring: 0xffc890, blush: true, tool: 'ladle', hover: 4.7 },
-    home: lot.world(SA, CD), faces: lot.world(W - 4, CD - 3), posts: [lot.world(SA, CD - 4), lot.world(SA, CD + 4.5), lot.world(SA, CD)],
-    serve: { machine: lot.world(SA, CD + 4.5), pickup: lot.pickup, food: {
+    home: lot.world(SA, CD), faces: lot.world(W - 4, CD - 3), posts: [lot.world(SA, CD - 4), lot.world(SA, PD - 1.4), lot.world(SA, CD)],
+    serve: { machine: lot.world(SA, PD - 1.4), pickup: lot.pickup, food: {
       'cardamom knot': { build: EAT.knot, bites: 3, note: 'You finish the cardamom knot. Still warm.' },
       'slice of country loaf': { build: EAT.slice, bites: 3, note: 'You finish the slice. Butter to the very edges.' } } },
     lines: {

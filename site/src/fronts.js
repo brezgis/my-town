@@ -125,9 +125,10 @@ export function dressFronts(K, town) {
     }
     // -- the number by the door ----------------------------------------------------------------------------
     {
-      const num = String((s > 0 ? 1 : 2) + 2 * LOTS.filter(l => l.side === s).indexOf(lot) + 10 * (s > 0 ? 1 : 1));
-      const v = lot.doorV + 2.5, f = kit.fr(s * (FRONT - 0.09), v, 0, s > 0 ? 1 : 3);
-      kit.sign(f, 0, 0, FL + 6.2, 0.62, 0.5, (g, w, h) => { fill(g, w, h, '#1d1b18'); T(g, num, w / 2, h * 0.55, h * 0.7, '#d9b96a', { f: F.dm }); }, { cw: 96, ch: 80 });
+      // the building's real number (town.js, src), in gilt on a dark tablet in the light over the door
+      const num = (/\d+/.exec(lot.src ?? '') ?? ['1'])[0];
+      const f = kit.fr(s * (FRONT + 0.27), lot.doorV, 0, s > 0 ? 1 : 3);
+      kit.sign(f, 0, 0, FL + 9.45, 1.1, 0.62, (g, w, h) => { fill(g, w, h, '#1d1b18'); g.strokeStyle = '#d9b96a'; g.lineWidth = 2; g.strokeRect(4, 4, w - 8, h - 8); T(g, num, w / 2, h * 0.55, h * 0.62, '#d9b96a', { f: F.dm }); }, { cw: 140, ch: 80 });
     }
   }
   // -- ghost signs: old painted advertisements on the bare brick end walls --------------------------------

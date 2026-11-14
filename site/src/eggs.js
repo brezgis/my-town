@@ -2,7 +2,7 @@
 // pavement. There are seven, a long way apart, one to a corner of the island:
 //
 //   a kite in the pine, north of the Landing          the 10 mm socket, behind Frond (the bike shop is looking for it)
-//   a sock up the maple behind the records            the first robot, under the copper beech by the churchyard wall
+//   a sock up the maple behind the records            a swing on the copper beech by the churchyard wall
 //   (the notice board in the Yard is asking)          a fairy ring in the meadow past the Overlook
 //   a very good stick, behind the Yard (likewise)     a message in a bottle, at the north rim
 //
@@ -113,30 +113,18 @@ export function hideEggs(K, town) {
     say(x, 0.15, z, 'pick up the 10 mm socket', 'The 10 mm. So this is where they go. You put it back where it was.', { reach: 7, size: 1.3 });
   }
 
-  // ---- 6. Unit 0, the first robot, sat down against the copper beech to watch the sun set ----------------------
-  // (Just outside the churchyard wall. If the chapel's yard ever reaches this tree, it sits under the pine in the meadow instead.)
+  // ---- 6. A swing on the copper beech by the churchyard wall, facing the sunset --------------------------------
+  // (Unit 0, the first robot, used to sit slumped against this tree with a nest on its head. Anna: "a bit morbid".
+  // If the chapel's yard ever reaches this tree, the swing hangs from the pine in the meadow instead.)
   {
-    const spot = [[-38, -226], [-44, -262]].map(([tx, tz]) => { const t = tree(tx, tz), R = 1.9 * (t.height / 48), zb = t.z - R - 0.1; return { t, x: t.x, zb, zf: zb - 1.1 }; }).find(s => clearOf(s.x - 1.3, s.x + 1.3, s.zf - 2.4, s.zb));
+    const spot = [[-38, -226], [-44, -262]].map(([tx, tz]) => { const t = tree(tx, tz), R = 1.9 * (t.height / 48); return { t, x: t.x + 0.4, z: t.z - R - 4.2 }; }).find(s => clearOf(s.x - 2, s.x + 2, s.z - 3, s.z + 3));
     if (spot) {
-      const { x, zb, zf } = spot, RUST = 'c#8a4a2a/1', RUST2 = 'c#9c5d34/1', RUSTD = 'c#5e3320/1';
-      K.box(RUSTD, x - 0.7, x + 0.7, 0.05, 0.6, zf - 0.1, zb); K.box(RUST, x - 0.78, x + 0.78, 0.6, 2.3, zf, zb, { rot: [0.06, 0, 0] });
-      K.box('c#6f8f8a/0.9', x - 0.5, x + 0.5, 1.25, 2.0, zf - 0.03, zf + 0.02, { rot: [0.06, 0, 0] }); K.box(PAINT.moss, x - 0.8, x + 0.3, 2.3, 2.36, zf + 0.1, zb);
-      for (const s of [-1, 1]) {
-        put(RUST2, new THREE.CylinderGeometry(0.2, 0.22, 2.0, 9).rotateX(Math.PI / 2), x + s * 0.42, 0.3, zf - 1.0, s * 0.12);                // legs, stretched out
-        K.box(RUSTD, x + s * 0.55 - 0.2, x + s * 0.55 + 0.2, 0.05, 0.75, zf - 2.25, zf - 1.95, { rot: [0, s * 0.12, 0] });
-        K.tube(RUST2, [x + s * 0.92, 2.0, zf + 0.5], [x + s * 1.12, 0.3, zf - 0.25], 0.14, 7); K.sphere(RUSTD, x + s * 1.12, 0.26, zf - 0.3, 0.22, 0.8, 1); K.sphere(RUSTD, x + s * 0.92, 2.02, zf + 0.5, 0.2, 1, 1);
-        put(RUSTD, new THREE.CylinderGeometry(0.12, 0.12, 0.1, 8).rotateZ(Math.PI / 2), x + s * 0.64, 3.0, zf + 0.5);                         // ears
-      }
-      K.cyl(RUSTD, x, 2.3, 2.5, zf + 0.5, 0.2, 0.2, 8); K.sphere(RUST2, x, 3.02, zf + 0.5, 0.62, 0.92, 2);
-      for (const s of [-1, 1]) put('c#17140f/0.4', new THREE.CylinderGeometry(0.13, 0.13, 0.05, 12).rotateX(Math.PI / 2), x + s * 0.24, 3.08, zf - 0.07, s * -0.38);
-      K.B.mesh('e#ffe2b4/1.7', new THREE.SphereGeometry(0.055, 8, 6).translate(x + 0.235, 3.08, zf - 0.1)); K.glowDots.push([x + 0.235, 3.08, zf - 0.14, 0.8]);      // one eye, still on
-      K.tube(RUSTD, [x + 0.2, 3.55, zf + 0.6], [x + 0.36, 4.2, zf + 0.6], 0.025, 4); K.tube(RUSTD, [x + 0.36, 4.2, zf + 0.6], [x + 0.72, 4.3, zf + 0.5], 0.025, 4); K.sphere(RUST, x + 0.74, 4.3, zf + 0.5, 0.08, 1, 1);
-      put(PAINT.straw, new THREE.TorusGeometry(0.26, 0.09, 5, 12).rotateX(Math.PI / 2), x - 0.12, 3.62, zf + 0.55);                            // a nest on its head, and in it
-      for (const [dx, dz] of [[-0.2, 0.5], [-0.05, 0.63], [-0.1, 0.46]]) K.sphere('c#bcd6d8/0.5', x + dx, 3.66, zf + dz, 0.075, 1.25, 1);
-      face(x, 1.62, zf - 0.07, WEST, 0.6, 0.3, (g, w, h) => { fill(g, w, h, '#c9b98a'); grain(g, w, h, 0.25, 4); T(g, 'UNIT 0', w / 2, h * 0.55, h * 0.6, '#3a2a1c', { f: F.bebas, ls: 3 }); }, { cw: 96, ch: 48 });
-      K.F.add('fern', x - 0.9, zb - 0.1, 0.6);                                                                                              // it has been here a while
-      K.collide(x - 0.8, x + 0.8, zf - 0.2, zb, 3);
-      say(x, 3.0, zf, 'say good evening to Unit 0', 'A fan turns, once. That is "good evening".', { reach: 8, size: 1.6, snd: 'old' });
+      const { t, x, z } = spot, TOP = 15.5, SEAT = 1.7, BARK = 'c#4a3a30/1';
+      K.tube(BARK, [t.x, TOP - 1.2, t.z], [x, TOP, z - 1.5], 0.42, 7);                                   // the limb it hangs from, out over the grass
+      for (const s of [-1, 1]) { K.tube(ROPE, [x + s * 0.95, TOP, z], [x + s * 0.95, SEAT, z], 0.035, 5); K.tube(ROPE, [x + s * 0.95, TOP + 0.5, z - 0.05], [x + s * 0.95, TOP - 0.5, z + 0.05], 0.06, 5); }
+      K.box(WOOD, x - 1.15, x + 1.15, SEAT - 0.06, SEAT + 0.06, z - 0.42, z + 0.42);
+      K.G.blob('soil', x, z, 1.5, 0.9, { y: 0.05, wobble: 0.3, seed: 6 });                                // worn bare by feet
+      K.seat(x, SEAT, z, 0, 'sit on the swing');
     }
   }
 
