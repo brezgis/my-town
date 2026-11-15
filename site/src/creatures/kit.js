@@ -10,6 +10,8 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// (the animals load on a manager of their own: the threshold, main.js, waits on the default one, and should not wait for them)
+const AWAY = new THREE.LoadingManager();
 import { ISLAND, islandEdge } from '../street.js';      // (street.js imports the animals in turn; these are only used once the street is laid)
 
 export const FT = 3.28084, TAU = Math.PI * 2;
@@ -21,7 +23,7 @@ export const ease = u => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u));
 export function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 
 export function creatureKit(ctx, K) {
-  const { scene, animated, day } = ctx, cam = ctx.camera.position, loader = new GLTFLoader();
+  const { scene, animated, day } = ctx, cam = ctx.camera.position, loader = new GLTFLoader(AWAY);
   const files = new Map(), meshes = new Map(), crew = [];
   const tag = m => { m.castShadow = false; m.receiveShadow = true; m.userData.creature = true; m.userData.cat = 'creatures'; m.name ||= 'creature'; return m; };
   // a prepared animal (glb, metres, facing +z, feet at y = 0), fetched once

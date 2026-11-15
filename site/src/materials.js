@@ -2,6 +2,7 @@
 // (see assets/CREDITS.md). `size` is how many feet one texture tile covers.
 
 import * as THREE from 'three';
+import { decodedImage } from './engine/load.js';
 
 // Each photo is loaded once and shared: materials that use the same photo at different
 // scales get clones, which share one copy in GPU memory. On the lower quality tiers some
@@ -20,8 +21,9 @@ export function sharedTexture(file) {
   let e = shared.get(url);
   if (!e) {
     e = { clones: [], loaded: false, full: wantFull ? `assets/tex/${file}.jpg` : null };
-    e.base = new THREE.TextureLoader().load(url, () => { e.loaded = true; for (const c of e.clones) c.needsUpdate = true; },
-      undefined, () => { if (e.full) { const f = e.full; e.full = null; new THREE.ImageLoader().load(f, img => { e.base.image = img; e.loaded = true; e.base.needsUpdate = true; for (const c of e.clones) c.needsUpdate = true; }); } });      // (no half-size copy of this one: take the full one)
+    e.base = new THREE.Texture();
+    decodedImage(url, img => { e.base.image = img; e.base.needsUpdate = true; e.loaded = true; for (const c of e.clones) c.needsUpdate = true; },
+      () => { if (e.full) { const f = e.full; e.full = null; decodedImage(f, img => { e.base.image = img; e.loaded = true; e.base.needsUpdate = true; for (const c of e.clones) c.needsUpdate = true; }); } });      // (no half-size copy of this one: take the full one)
     shared.set(url, e);
   }
   // (a clone is born "needing an update"; until the photo has arrived that only made the renderer
@@ -29,6 +31,8 @@ export function sharedTexture(file) {
   const t = e.base.clone(); if (e.loaded) t.needsUpdate = true; else t.version = 0; e.clones.push(t);
   return t;
 }
+// (the gate the threshold and the streaming share: engine/load.js)
+export { dressed, markDressed } from './engine/load.js';
 // Fetch the full-size photos, one after another, and swap each in. (The textures are let go of first: a texture's
 // size cannot change once it is on the GPU.)
 export function sharpenTextures(gap = 220) {
@@ -36,10 +40,10 @@ export function sharpenTextures(gap = 220) {
   const next = () => {
     const e = todo.shift(); if (!e) return;
     const url = e.full; e.full = null;
-    new THREE.ImageLoader().load(url, img => {
+    decodedImage(url, img => {
       if (e.loaded) { for (const t of [e.base, ...e.clones]) t.dispose(); e.base.image = img; e.base.needsUpdate = true; for (const c of e.clones) c.needsUpdate = true; }
       setTimeout(next, gap);
-    }, undefined, () => setTimeout(next, gap));
+    }, () => setTimeout(next, gap));
   };
   next();
 }
