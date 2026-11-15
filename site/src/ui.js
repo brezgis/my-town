@@ -40,7 +40,7 @@ const loading = $('loading'), glass = $('glassFill'), ruleFill = $('ruleFill'), 
 let shown = 0, opened = false;
 function setProgress(p, done, total) {
   shown = Math.max(shown, Math.min(1, p));
-  const h = 20 * shown;                                             // the lantern's glass fills from the bottom
+  const h = 20 * shown;                                             // the mark's window fills from the bottom (each mark keeps its glass between y 23 and 43)
   glass.setAttribute('y', 43 - h); glass.setAttribute('height', h);
   ruleFill.style.strokeDashoffset = 100 - shown * 100;
   if (total) count.textContent = `${done} of ${total} things brought in`;
@@ -279,7 +279,7 @@ if (touch) (function knob() {                                         // the pad
 // ---- The picture for shared links ------------------------------------------------------------
 if (Q.has('card')) {
   html.classList.add('ui-card');
-  body.append(el('div', { id: 'social', 'aria-hidden': 'true' }, `<div><svg class="mark"><use href="#lantern"/></svg><h2>Anna's House</h2>
+  body.append(el('div', { id: 'social', 'aria-hidden': 'true' }, `<div><svg class="mark"><use href="#shopfront"/></svg><h2>Anna's House</h2>
     <svg class="rule"><use href="#cloudlift"/></svg><p>An Arts-and-Crafts bungalow on a floating island. Come in.</p></div>`));
 }
 

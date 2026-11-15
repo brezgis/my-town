@@ -60,19 +60,22 @@ kbd + kbd { margin-left: 3px; }
 kbd, #prompt b { font-variant-numeric: lining-nums; }
 
 /* ---- The threshold (loading) ---------------------------------------------------- */
-#loading { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 24px;
-  background: radial-gradient(ellipse at 50% 42%, #2e2117 0%, var(--night) 62%); transition: opacity .9s ease; }
+/* The frame is the house's; the mark and the one colour are this place's own. */
+#loading { --glow: #ee906c; --glow-rgb: 238, 144, 108; --unlit: #3d262b;
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 24px;
+  background: #2a1a20; transition: opacity .9s ease; }
 #loading.gone { opacity: 0; pointer-events: none; }
 .threshold { display: flex; flex-direction: column; align-items: center; text-align: center; width: min(420px, 100%); }
-.threshold .lamp { width: 62px; height: 87px; color: #c9b291; filter: drop-shadow(0 0 0 rgba(226, 166, 71, 0)); transition: filter .6s ease; }
-#loading.lit .lamp { filter: drop-shadow(0 0 18px rgba(226, 166, 71, .55)); }
-#glassFill { transition: y .5s ease, height .5s ease; animation: flicker 3.2s ease-in-out infinite; }
+.threshold .lamp { width: 62px; height: 87px; color: #d3b6a4; filter: drop-shadow(0 0 0 rgba(var(--glow-rgb), 0)); transition: filter .6s ease; }
+#loading.lit .lamp { filter: drop-shadow(0 0 18px rgba(var(--glow-rgb), .55)); }
+.threshold .lamp .unlit { fill: var(--unlit); }
+#glassFill { fill: var(--glow); transition: y .5s ease, height .5s ease; animation: flicker 3.2s ease-in-out infinite; }
 @keyframes flicker { 0%, 100% { opacity: 1; } 40% { opacity: .82; } 55% { opacity: .95; } 70% { opacity: .86; } }
 .threshold .name { margin: 22px 0 14px; font-size: clamp(28px, 6vw, 38px); letter-spacing: .02em; color: var(--paper); }
 .threshold .rule { width: 220px; height: 11px; overflow: visible; }
 .threshold .rule path { fill: none; stroke-width: 1.2; }
 .threshold .rule .track { stroke: rgba(240, 229, 207, .14); }
-.threshold .rule .fill { stroke: var(--amber); stroke-width: 1.8; stroke-dasharray: 100 100; stroke-dashoffset: 100; transition: stroke-dashoffset .6s ease; }
+.threshold .rule .fill { stroke: var(--glow); stroke-width: 1.8; stroke-dasharray: 100 100; stroke-dashoffset: 100; transition: stroke-dashoffset .6s ease; }
 .threshold .lines { position: relative; height: 3.2em; width: 100%; margin-top: 22px; font-style: italic; font-size: 17px; line-height: 1.45; color: rgba(240, 229, 207, .82); }
 .threshold .lines span { position: absolute; inset: 0; opacity: 0; animation: line 30s linear infinite; animation-delay: calc(var(--i) * 5s - .2s); }
 @keyframes line { 0% { opacity: 0; } 2.5% { opacity: 1; } 14% { opacity: 1; } 16.6% { opacity: 0; } 100% { opacity: 0; } }
