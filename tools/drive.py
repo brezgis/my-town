@@ -7,7 +7,10 @@ import sys, json, time, os
 from playwright.sync_api import sync_playwright
 q = sys.argv[1] if len(sys.argv) > 1 else ''
 js = sys.argv[2] if len(sys.argv) > 2 else '(() => { const h = window.__house, r = h.renderer.info; return { stages: h.stages, firstFrameMs: h.firstFrameMs, calls: h.lastCalls, tris: h.lastTris, textures: r.memory.textures, geometries: r.memory.geometries, programs: r.programs.length }; })()'
-url = os.environ.get('TOWN_URL', 'http://100.107.252.39:5188') + '/?' + q
+# this machine's test server comes from tools/local.env (not in git): TOWN_URL=http://<host>:5188
+here = os.path.dirname(os.path.abspath(__file__))
+env = dict(l.strip().split('=', 1) for l in open(os.path.join(here, 'local.env')) if '=' in l and not l.startswith('#')) if os.path.exists(os.path.join(here, 'local.env')) else {}
+url = os.environ.get('TOWN_URL', env.get('TOWN_URL', 'http://localhost:5188')) + '/?' + q
 args = ['--no-sandbox', '--use-gl=angle', '--use-angle=' + os.environ.get('ANGLE', 'gl-egl'), '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--password-store=basic']
 with sync_playwright() as p:
     b = p.chromium.launch(channel='chrome', headless=True, args=args)

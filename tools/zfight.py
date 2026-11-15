@@ -7,7 +7,8 @@ import sys, json, time, os, re, collections
 from playwright.sync_api import sync_playwright
 here = os.path.dirname(os.path.abspath(__file__))
 out = sys.argv[1]; q = sys.argv[2] if len(sys.argv) > 2 else ''
-base = os.environ.get('TOWN_URL', 'http://100.107.252.39:5188')
+env = dict(l.strip().split('=', 1) for l in open(os.path.join(here, 'local.env')) if '=' in l and not l.startswith('#')) if os.path.exists(os.path.join(here, 'local.env')) else {}      # (tools/local.env, not in git: this machine's TOWN_URL)
+base = os.environ.get('TOWN_URL', env.get('TOWN_URL', 'http://localhost:5188'))
 url = base + '/?shot&time=13&cull=0&' + q
 src = open(os.path.join(here, '..', 'site', 'src', 'builder.js')).read()
 tag = """{ const st = new Error().stack.split('\\n').slice(2).map(l => (/src\\/([\\w\\/.]+\\.js):(\\d+)/.exec(l) || [])).filter(m => m[1] && m[1] !== 'builder.js').map(m => m[1] + ':' + m[2]); g.userData.src = st.slice(0, 5).join(' < '); }

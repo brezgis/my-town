@@ -106,6 +106,9 @@ export function buildSky(scene, renderer, centre) {
   // evening are not washed out by an eye opened wide for the lamplit street)
   const gain = { value: 0.55 }, domeGain = { value: 0.4 }, nightSky = { value: new THREE.Color(0, 0, 0) };
   const dome = makeDome(domeGain, nightSky); dome.userData.cat = 'sky:dome'; scene.add(dome);
+  // Drawn after everything solid: it sits at the far plane (Sky's shader puts it there), so it only fills what nothing nearer
+  // has covered. Drawn first, as the nearest thing by its centre, it shaded every pixel of the screen only to be painted over.
+  dome.renderOrder = 2;
   // A second dome in a scene of its own, from which room reflections and soft sky light are taken.
   const envScene = new THREE.Scene(), envDome = makeDome(gain, nightSky); envScene.add(envDome);
   // Below the horizon the reflections see garden, not more sky; without this, ceilings glow.
@@ -203,7 +206,9 @@ export function buildSky(scene, renderer, centre) {
     const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4; moon.material.map = tex;
   }
 
-  const state = { hour: 12, light: 1, night: 0, sunDir: new THREE.Vector3(0, 1, 0), low: 1, moonDir: new THREE.Vector3(0, 1, 0), moonUp: false };
+  // (skyCol, sunCol, sunK: the colour of the open sky's light at this hour, the sun's colour and how strong it is,
+  // 0 to 1; lighting.js tints the shops' daylight with them)
+  const state = { hour: 12, light: 1, night: 0, sunDir: new THREE.Vector3(0, 1, 0), low: 1, moonDir: new THREE.Vector3(0, 1, 0), moonUp: false, skyCol: new THREE.Color(1, 1, 1), sunCol: new THREE.Color(1, 1, 1), sunK: 1 };
   const T = [1, 1, 1], now = new Date();
   const doy = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 864e5);
 
@@ -238,6 +243,7 @@ export function buildSky(scene, renderer, centre) {
     const dark = smoothstep(state.night, 0.4, 1);
     hemi.color.lerp(new THREE.Color(0x6f84b0), dark); hemi.groundColor.set(0x8a7a5c).lerp(new THREE.Color(0x2c2a2a), dark);
     hemi.intensity += 0.55 * dark;
+    state.skyCol.copy(hemi.color); state.sunCol.copy(sun.color); state.sunK = up ? clamp(sun.intensity / 4.6, 0, 1) : 0;
     nightSky.value.setRGB(0.010, 0.018, 0.040).multiplyScalar(dark);
     uLitCol.value.copy(sun.color).multiplyScalar(up ? 0.8 + 1.9 * state.light : 0.16).lerp(uShadeCol.value, up ? 0 : 0.5);
     stars.material.opacity = smoothstep(state.night, 0.55, 1);

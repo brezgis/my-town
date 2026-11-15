@@ -12,10 +12,14 @@
 // visit had to drop to the lowest resolution to keep up, the next visit starts a tier
 // lower (remembered in localStorage; ?quality=auto clears it).
 
+// ratio is the drawing resolution a visit starts at (never more than the screen's own), maxRatio the most it is raised to when
+// frames are quick; aniso is the texture filtering's anisotropy, which keeps walls, pavement and signs seen at a slant sharp.
+// A MacBook Air (medium) starts at 1.5, not 1.25 (on its retina screen 1.25 was soft), is raised toward 2 while it keeps up, and
+// is never lowered below 1 (main.js).
 export const TIERS = {
-  high: { name: 'high', ratio: 1.5, antialias: true, shadow: 4096, softShadow: true, tex: 'full', reach: 1, lamps: 4, reachFull: 95, reachBig: 260 },
-  medium: { name: 'medium', ratio: 1.25, antialias: true, shadow: 2048, softShadow: false, tex: 'detail', reach: 0.85, lamps: 4, reachFull: 80, reachBig: 210 },
-  low: { name: 'low', ratio: 1, antialias: false, shadow: 2048, softShadow: false, tex: 'half', reach: 0.7, lamps: 3, reachFull: 60, reachBig: 150 },
+  high: { name: 'high', ratio: 1.5, maxRatio: 2, antialias: true, shadow: 4096, softShadow: true, tex: 'full', aniso: 16, reach: 1, lamps: 4, reachFull: 95, reachBig: 260 },
+  medium: { name: 'medium', ratio: 1.5, maxRatio: 2, antialias: true, shadow: 2048, softShadow: false, tex: 'detail', aniso: 16, reach: 0.85, lamps: 4, reachFull: 80, reachBig: 210 },
+  low: { name: 'low', ratio: 1, maxRatio: 1.25, antialias: false, shadow: 2048, softShadow: false, tex: 'half', aniso: 4, reach: 0.7, lamps: 3, reachFull: 60, reachBig: 150 },
 };
 const ORDER = ['low', 'medium', 'high'];
 

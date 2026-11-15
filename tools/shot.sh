@@ -4,10 +4,12 @@
 #   tools/shot.sh <out.png> "<query string>" [width height]
 #   view=x,feetY,z,yaw,pitch   stand at world x,z (z = -Y along the street), yaw 0 looks west down the street
 #   time=17.9 or time=dusk (the street follows the clock otherwise)   shot   the view from above   fps   draw calls and triangles
-BASE=${TOWN_URL:-http://100.107.252.39:5188}
+# this machine's test server and render-lock folder come from tools/local.env (not in git): TOWN_URL=..., TOWN_LOCKS=...
+LENV="$(dirname "$0")/local.env"; lv() { [ -f "$LENV" ] && grep -m1 "^$1=" "$LENV" | cut -d= -f2-; }
+BASE=${TOWN_URL:-$(lv TOWN_URL)}; BASE=${BASE:-http://localhost:5188}
 OUT=$1; W=${3:-1280}; H=${4:-760}
 URL="$BASE/?$2"
-LOCKDIR=/tmp/claude-1002/my_house_shot_locks; mkdir -p "$LOCKDIR"
+LOCKDIR=${TOWN_LOCKS:-$(lv TOWN_LOCKS)}; LOCKDIR=${LOCKDIR:-/tmp/shot_locks}; mkdir -p "$LOCKDIR"      # at most two headless renders at once, shared with the other sites
 while :; do
   for n in 1 2; do exec 9>"$LOCKDIR/slot$n"; if flock -n 9; then break 2; fi; done
   sleep $((3 + RANDOM % 5))

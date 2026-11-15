@@ -103,6 +103,9 @@ export class CardSet {
       mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
       mesh.computeBoundingSphere();
       mesh.castShadow = shadow; mesh.receiveShadow = true; mesh.customDepthMaterial = mats.depth;
+      // Cut-out cards are drawn after everything solid: a leaf behind a wall is then turned away by the depth test before it is
+      // shaded, rather than shaded and then cut out (what an alpha test costs, on a tiled GPU such as a Mac's most of all).
+      if (mats.material.alphaTest > 0) mesh.renderOrder = 1;
       scene.add(mesh); meshes.push(mesh);
     }
     return meshes;

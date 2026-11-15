@@ -121,7 +121,7 @@ export default function noodles(kit, lot) {
     for (let i = 0; i < 4; i++) { const tc = B0 + (i + 0.5) * BAY;
       R.box(OAK, 0.26, 3.1, tc - 1.0, tc + 1.0, 2.44, 2.54, G); R.box(IRON, 1.55, 1.8, tc - 0.12, tc + 0.12, 0.05, 2.44); R.box(IRON, 1.1, 2.25, tc - 0.4, tc + 0.4, 0, 0.05);
       R.cyl(LACQ, 0.62, tc - 0.28, 2.54, 2.94, 0.11, 0.13, 10); jar(R, 0.62, tc + 0.28, 2.54, 0.09, 0.2, 'c#b8361f/0.2', 0.7, 'c#17140f/0.45');
-      X.pendant(R, 1.7, tc, { kind: 'paper', drop: 5.6, light: false }); }
+      X.pendant(R, 1.7, tc, { kind: 'paper', drop: 5.6, power: 0.45, halo: 0.6 }); kit.lamps[kit.lamps.length - 1].pilot = true; }      // (each lights its table: ../lighting.js lights every lamp of the room after dark; pilot: not under ?light=old)
     R.block(0, BW + 0.06, B0 - 0.15, B0 + 4 * BAY + 0.15, 0, BH); }
 
   // ---- THE COUNTER: down the room; stools to the left of it, the kitchen to the right ----------------------------
@@ -145,8 +145,7 @@ export default function noodles(kit, lot) {
   for (const [x, n, col] of [[M - 0.9, 6, LACQ], [M - 0.1, 4, PORC]]) for (let i = 0; i < n; i++) bowl(c, x, -1.5, TOP + i * 0.075, 0.33, 0.24, col, 14);
   // the till, at the street end
   { const x = C0 + 1.3, y = -1.1, z = TOP;
-    c.soft(LACQ, x - 0.5, x + 0.5, y - 0.5, y + 0.4, z, z + 0.42, 0.05); c.soft(LACQ, x - 0.45, x + 0.45, y - 0.08, y + 0.4, z + 0.42, z + 0.86, 0.06);      // keys toward the kitchen (-y)
-    for (let i = 0; i < 12; i++) c.cyl(i === 11 ? 'c#b8361f/0.45' : 'c#e8e2d4/0.45', x - 0.3 + (i % 4) * 0.2, y - 0.18 - Math.floor(i / 4) * 0.09, z + 0.42, z + 0.47, 0.05, 0.05, 8); }
+    X.till(c, x, y, z, { body: 'c#17140f/0.2', trim: 'c#b08d4a/0.35/1', ledge: 'c#8a1c1c/0.45', accent: 'c#b8361f/0.45', keys: ['c#e8e2d4/0.45', 'c#e8e2d4/0.45'] }); }      // keys toward the kitchen (-y)
 
   // ---- THE KITCHEN: along the right wall, between the counter's two ends; the tile runs on to the pot's corner ----
   const k = at(W, 0, 0, 'left');                                 // x = d, y = feet out from the right wall

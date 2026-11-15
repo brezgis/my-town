@@ -24,7 +24,7 @@ export function makeWarmer({ renderer, scene, camera, range = 60, budget = 2.5 }
       let box = null;
       for (const m of [].concat(o.material ?? [])) for (const k of MAPS) {
         const t = m[k];
-        if (!t || !t.isTexture || t.isRenderTargetTexture || waiting.has(t)) continue;
+        if (!t || !t.isTexture || t.isRenderTargetTexture || t.userData.streamed || waiting.has(t)) continue;      // (the street's sheets are sent for by life.js, when wanted)
         box ??= o.userData.box ?? new THREE.Box3().setFromObject(o);
         waiting.set(t, { box, reach: Math.max(range, box.min.distanceTo(box.max) * 45) });      // big things are drawn from further off (life.js), so are made ready from further off
       }

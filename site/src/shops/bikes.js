@@ -332,9 +332,7 @@ export default function bikes(kit, lot) {
     [BRASS, CHROME, REDP].forEach((col, i) => { const x = -2.7 + i * 0.32; ves(c, col, x, -1.15, z, [[0, 0], [0.05, 0], [0.05, 0.03], [0.11, 0.04], [0.11, 0.08], [0.08, 0.14], [0, 0.16]], 12); }); }
   { // the till at the left end, the bell, the bowl of valve caps
     const x = 4.1, y = -1.2, z = TOP, bx = 0.2, vx = 2.4;
-    c.soft('c#2b2724/0.45', x - 0.6, x + 0.6, y - 0.55, y + 0.5, z, z + 0.45, 0.05); c.soft('c#2b2724/0.45', x - 0.55, x + 0.55, y - 0.1, y + 0.5, z + 0.45, z + 1.0, 0.07);      // keys toward the hatch (-y), its back to the customer
-    for (let i = 0; i < 12; i++) c.cyl(i % 4 === 3 ? YEL : 'c#f4f1ea/0.45', x - 0.36 + (i % 4) * 0.24, y - 0.21 - Math.floor(i / 4) * 0.1, z + 0.45, z + 0.5, 0.055, 0.055, 8);
-    hcyl(c, CHROME, 'x', x - 0.68, y + 0.15, z + 0.7, 0.14, 0.03); ball(c, YEL, x - 0.78, y + 0.15, z + 0.64, 0.06, 8);
+    X.till(c, x, y, z, { body: 'c#2b2724/0.45', trim: 'c#c9ccd0/0.45/1', accent: YEL, crank: -1, knob: YEL });
     c.box(IRON, bx - 0.08, bx + 0.08, -0.56, -0.4, z, z + 0.05); ves(c, BRASS, bx, -0.48, z + 0.05, [[0, 0], [0.06, 0], [0.06, 0.03], [0.16, 0.04], [0.16, 0.1], [0.12, 0.17], [0, 0.2]], 16); c.box(IRON, bx + 0.14, bx + 0.24, -0.5, -0.46, z + 0.07, z + 0.1);
     uses.push({ xz: kit.world(c, bx, -0.48), y: c.h + z + 0.2, label: 'ring the bell', reach: 5.5, size: 0.5, act: ctx => { ctx.sound.note(91, 0, 1.6, 0.1); ctx.sound.note(96, 0.02, 1.4, 0.05); ctx.sound.note(91, 0.22, 1.8, 0.09); ctx.flash('Dring-dring. From behind the hatch: "In a minute."'); } });
     bowl(c, vx, -0.75, z, 0.3, 0.15, PORC); for (let i = 0; i < 22; i++) { const a = i * 2.4, r = 0.03 + (i % 5) * 0.035; c.cyl([BLK, REDP, YEL, BLUE, 'c#f4f1ea/0.45', 'c#5d8a3a/0.45'][i % 6], vx + Math.cos(a) * r, -0.75 + Math.sin(a) * r, z + 0.04 + (i % 3) * 0.02, z + 0.09 + (i % 3) * 0.02, 0.022, 0.018, 6); }

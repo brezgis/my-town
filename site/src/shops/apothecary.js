@@ -218,9 +218,8 @@ export default function apothecary(kit, lot) {
   const c = at(5.8, dCounter, 0, 'street');                       // +x toward smaller a; +y is the customers' side
   const TOP = X.counter(c, -5.5, 5.5, -2.0, 0, 3.4, { front: NAVYP, top: WALNUT });
   { const x = -3.2, y = -1.05, z = TOP;                            // the brass till
-    c.soft('c#b08d4a/0.35/1', x - 0.55, x + 0.55, y - 0.5, y + 0.45, z, z + 0.5, 0.05); c.soft('c#b08d4a/0.35/1', x - 0.5, x + 0.5, y - 0.15, y + 0.45, z + 0.5, z + 1.0, 0.08);      // keys toward the staff side (-y); the customer gets the back and its THANK YOU
-    for (let i = 0; i < 12; i++) c.cyl('c#efe9da/0.3', x - 0.36 + (i % 4) * 0.24, y - 0.25 - Math.floor(i / 4) * 0.08, z + 0.5 + (2 - Math.floor(i / 4)) * 0.05, z + 0.56 + (2 - Math.floor(i / 4)) * 0.05, 0.05, 0.05, 8);
-    kit.sign(c, x, y + 0.46, z + 0.78, 0.7, 0.3, (g, w, h) => { fill(g, w, h, '#17140f'); T(g, 'THANK YOU', w / 2, h / 2, h * 0.5, '#e9c46a', { f: F.bebas, ls: 3, max: w * 0.9 }); }, { cw: 128, ch: 56 }); }
+    X.till(c, x, y, z, { back: (g, w, h) => { fill(g, w, h, '#17140f'); T(g, 'THANK YOU', w / 2, h / 2, h * 0.5, '#e9c46a', { f: F.bebas, ls: 3, max: w * 0.9 }); }, cw: 160, ch: 52 }); }
+  X.stool(c, -1.6, -2.45, 2.5, { mat: WALNUT, label: 'perch behind the counter' }); kit.seats[kit.seats.length - 1].staff = true;      // Ember's stool, tucked in behind the counter by the bell
   { const x = -1.8, y = -0.55; c.cyl('c#2b2724/0.45', x, y, TOP, TOP + 0.04, 0.2, 0.2, 14); ves(c, BRASS, x, y, TOP + 0.04, [[0.17, 0], [0.16, 0.06], [0.1, 0.13], [0.03, 0.16], [0.03, 0.2], [0, 0.2]], 16); }   // the bell
   kit.candle(c, -0.8, -1.2, TOP, 0.75);
   // wrapping: a few sheets of tissue, the kraft roll on its cradle, twine, one parcel waiting

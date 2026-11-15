@@ -1,61 +1,59 @@
-// Measuring. A fixed set of test viewpoints covering every room on both floors,
-// the porch, terrace, street, pond, kitchen garden, island rim and the air, and
-// a stats dump that visits each of them in turn and writes what one frame there
-// costs (draw calls, triangles, textures and geometry in memory, lights, the CPU
-// time of the visibility code) as JSON into <pre id="statsdump">.
+// Measuring. A fixed set of test viewpoints covering the street (arrival, both ways down it, the Yard, the
+// alley, the picture garden, the Overlook, the airship stop), every shop you can walk into (just inside the door,
+// and in the back room looking back toward the street, which is the costliest way to look: the back room, the
+// front room through the partition's openings and the street through the window), the chapel and the air, and
+// a stats dump that visits each of them in turn and writes what one frame there costs (draw calls,
+// triangles, textures and geometry in memory, lights, the CPU time of the visibility code) as JSON into
+// <pre id="statsdump">.
 //
-//   ?at=kitchen                 stand at a named viewpoint (for tools/shot.sh)
+//   ?at=coffee_front            stand at a named viewpoint (for tools/shot.sh)
 //   ?statsdump                  visit every viewpoint by day and at night
-//   ?statsdump=hall,kitchen     only these
+//   ?statsdump=arrival,chapel   only these
 //   ?statsdump&hours=13         only this hour
-// tools/stats.sh runs it in headless Chrome and prints the JSON.
+// (These were the house's rooms when the engine was forked from Anna's House, and measured nothing here.)
 
-const F1 = 1.6, F2 = 10.8, PI = Math.PI;
+import { LOTS, FL, FRONT } from './town.js';
+import { CHAPEL } from './chapel.js';
 
-// walk: [x, feetY, z, yaw, pitch]   (yaw 0 looks toward -z, the back of the house; PI/2 looks -x, south)
+const PI = Math.PI, CURB = 0.5;
+// The direction (dx, dz) as a walker's yaw: yaw 0 looks toward -z (west, down the street into the sunset),
+// PI/2 toward -x (south).
+const yawOf = (dx, dz) => Math.atan2(-dx, -dz);
+
+// walk: [x, feetY, z, yaw, pitch]
 // orbit: [camX, camY, camZ, targetX, targetY, targetZ]
 export const VIEWS = {
-  // ---- ground floor
-  hall: { walk: [0.13, F1, -3.2, 0, -0.05] },
-  hall_to_door: { walk: [-0.6, F1, -15, PI, -0.05] },
-  living: { walk: [-4.5, F1, -4.5, PI / 4, -0.1] },
-  living_fire: { walk: [-15, F1, -6, 0.1, -0.05] },
-  dining: { walk: [8, F1, -3, -PI / 4, -0.1] },
-  coffee_bar: { walk: [7.5, F1, -19.5, -PI / 2, -0.1] },
-  kitchen: { walk: [10.5, F1, -24.5, -PI / 4, -0.12] },
-  back_hall: { walk: [0, F1, -19, -0.3, -0.05] },
-  office: { walk: [0, F1, -25, -0.4, -0.1] },
-  screened_porch: { walk: [15, 1.5, -37, 0.3, -0.05] },
-  // ---- doorways, both ways (popping checks)
-  door_hall_living: { walk: [-1.2, F1, -10, PI / 2, -0.05] },
-  door_living_hall: { walk: [-5.5, F1, -10, -PI / 2, -0.05] },
-  door_hall_dining: { walk: [3.5, F1, -3.0, -PI / 2, -0.05] },
-  door_dining_hall: { walk: [9, F1, -3.0, PI / 2, -0.05] },
-  door_kitchen_porch: { walk: [15, F1, -32, 0, -0.05] },
-  // ---- upstairs
-  stair_top: { walk: [4, F2, -18.5, PI, -0.15] },
-  upstairs_hall: { walk: [6, F2, -9, PI / 2, -0.05] },
-  our_bedroom: { walk: [-5, F2, -3, PI / 4, -0.1] },
-  library: { walk: [-5, F2, -20, PI / 4, -0.1] },
-  guest_room: { walk: [8, F2, -2, -PI / 4, -0.1] },
-  little_bedroom: { walk: [8, F2, -22.5, -PI / 4, -0.1] },
-  bath: { walk: [0, F2, -22, -0.3, -0.1] },
-  dressing_room: { walk: [20.5, F2, -34.8, 2.3, -0.1] },
-  sleeping_porch: { walk: [0, F2, -31.5, -0.6, -0.05] },
-  // ---- outdoors
-  porch_out: { walk: [2, 1.45, 9, PI, 0] },
-  porch_in: { walk: [2, 1.45, 10, 0, -0.03] },
-  terrace: { walk: [-34.5, 1.2, 2, 1.5, -0.1] },
-  terrace_house: { walk: [-32.5, 1.2, -4, -1.2, -0.03] },
-  street: { walk: [2, 0, 75, 0, 0.02] },
-  pond: { walk: [-55, 0, 22, 0.62, -0.08] },
-  potager: { walk: [46, 0, -52, 0, -0.08] },
-  back_lawn: { walk: [10, 0, -75, PI, 0.02] },
-  meadow: { walk: [-62, 0, -95, PI * 0.8, 0] },
-  rim: { walk: [180, 0, 40, 1.2, 0] },
-  aerial: { orbit: [-34, 12, 58, 0, 11, -14] },
-  aerial_high: { orbit: [190, 210, 230, 0, 0, -30] },
+  arrival: { walk: [3, CURB, 26, 0, 0] },                         // where a visitor is set down (town.js spawn)
+  airship_stop: { walk: [6, CURB, 50, yawOf(1, -0.3), 0] },        // the post and the bench, the street behind
+  street_west: { walk: [-3, 0, -70, 0, 0.02] },                   // halfway down, into the sunset
+  street_east: { walk: [3, 0, -130, PI, 0.02] },                  // halfway down, back toward the Landing
+  yard: { walk: [-44, CURB, -98, yawOf(1, 0.2), -0.04] },         // the dumpling cart, the oak, the fire
+  alley: { walk: [30, CURB, -116, yawOf(1, 0), 0] },              // Pickle Alley, toward the picture garden
+  cinema_yard: { walk: [58, CURB, -100, yawOf(-1, 0), 0.05] },    // the picture garden, facing the screen
+  overlook: { walk: [0, CURB, -224, 0, -0.03] },                  // the rail and the whole sky
+  overlook_back: { walk: [0, CURB, -228, PI, 0.02] },             // the street from its west end, all of it in view
+  aerial: { orbit: [-250, 165, 150, 0, 12, -70] },                // the overview you arrive to (main.js ABOVE)
+  aerial_low: { orbit: [-90, 60, 40, 0, 10, -100] },
 };
+// Every shop you can walk into: just inside its door looking in, and at the back looking out toward the street
+{
+  const WALL = 0.8, SIDE = 0.5;
+  // how deep the shop's back room is: where its partition stands (shops/*.js), and stand halfway between that and the back wall
+  const PART = { coffee: 27.5, records: 27.5, museum: 26.6, bakery: 19.8, grocery: 32.2, plants: 29.2, apothecary: 31.0, yoga: 33.5, noodles: 35.4, books: 30, bikes: 28.5 };
+  for (const lot of LOTS) {
+    if (!lot.enter) continue;
+    const s = lot.side, ui = FRONT + WALL, D = FRONT + lot.depth - SIDE - ui, W = lot.y1 - lot.y0 - 2 * SIDE;
+    const at = (a, d) => [s * (ui + d), -(s > 0 ? (lot.y1 - SIDE) - a : (lot.y0 + SIDE) + a)];
+    const door = W * (s > 0 ? 1 - lot.door : lot.door);
+    const [fx, fz] = at(door, 4), [bx, bz] = at(W * 0.35, ((PART[lot.id] ?? 28) + D) / 2), [cx, cz] = at(W * 0.6, 0);
+    VIEWS[lot.id + '_front'] = { walk: [fx, FL, fz, yawOf(s, 0), -0.06] };
+    VIEWS[lot.id + '_back'] = { walk: [bx, FL, bz, yawOf(cx - bx, cz - bz), -0.04] };
+  }
+  // the chapel: just inside its west door, looking up the nave to the table
+  const I = CHAPEL.inside, ix = I.x1 - 5, iz = (I.z0 + I.z1) / 2;
+  VIEWS.chapel = { walk: [ix, CHAPEL.floor, iz, yawOf(-1, 0), 0.04] };
+  VIEWS.chapel_door = { walk: [I.x0 + 6, CHAPEL.floor, iz, yawOf(1, 0), 0] };      // from the table back to the door and the street
+}
 
 // For ?at=name: [x, feetY, z, yaw, pitch] or null
 export function namedView(name) { return VIEWS[name] ?? null; }
@@ -131,8 +129,9 @@ function memory(H) {
   const KEYS = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap', 'alphaMap', 'bumpMap', 'clearcoatMap', 'clearcoatNormalMap', 'clearcoatRoughnessMap', 'sheenColorMap', 'sheenRoughnessMap', 'transmissionMap', 'thicknessMap', 'specularIntensityMap', 'specularColorMap', 'iridescenceMap', 'lightMap', 'displacementMap', 'anisotropyMap'];
   H.scene.traverse(o => {
     if (o.geometry && !geos.has(o.geometry)) { geos.add(o.geometry); for (const a of Object.values(o.geometry.attributes)) geo += a.array?.byteLength ?? 0; if (o.geometry.index) geo += o.geometry.index.array.byteLength; }
-    for (const m of [].concat(o.material ?? [])) for (const k of KEYS) {
-      const t = m[k]; const id = t && (t.source?.uuid ?? t.uuid); if (!t || seen.has(id)) continue; seen.add(id);
+    // (a streamed sheet's copies, life.js, are counted whether or not the one in use: any of them may be on the card)
+    for (const t of [...[].concat(o.material ?? []).flatMap(m => KEYS.map(k => m[k])), ...(o.userData.textures ?? [])]) {
+      const id = t && (t.source?.uuid ?? t.uuid); if (!t || seen.has(id)) continue; seen.add(id);
       const src = t.source?.data ?? t.image; if (!src) continue;
       if (!props.get(t).__webglTexture) continue;
       const w = src.width ?? 0, h = src.height ?? 0;

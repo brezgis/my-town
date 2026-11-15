@@ -36,7 +36,8 @@ export function layGrounds(K, town) {
   // the brick paving that meets grass, gravel or the road now has it, and so has the road's east end.
   {
     const P = K.P2, E = 0.7, edge = (X0, X1, Y0, Y1) => P('concrete', X0, X1, Y0, Y1, -0.6, CURB);
-    edge(-11.7, 11.7, -40.7, -40);                                              // across the road's east end, where the apron begins
+    edge(-11.7, 11.7, -40.72, -39.98);                                          // across the road's east end, where the apron begins (a hair past the apron's
+    // own end and the road's, whose end faces it would otherwise share and flicker against)
     for (const s of [1, -1]) {
       const first = s > 0 ? 3.8 : 1;                                            // where the first building on this side begins
       edge(s * 24, s * (24 + E), -58.7, first - 0.02);                          // the apron's and the pavement's outer edge, up to the first building

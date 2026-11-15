@@ -119,13 +119,24 @@ const PB = {
       }
     }
   },
+  shed(g, w, h, r) {                                                // the inside of the allotment shed: boards, a shelf, the tools on nails
+    for (let x = 0; x < w; x += 16) { rect(g, x, 0, 15, h, pickOf(r, ['#6e5a42', '#735e45', '#68553e'])); rect(g, x + 15, 0, 1, h, 'rgba(0,0,0,.35)'); }
+    rect(g, 0, 62, w, 4, '#4a3a2a');                                 // a rail across the studs
+    rect(g, 10, 84, 92, 4, '#8a7050');                               // a shelf: tins, a jar of string, seed packets
+    for (const [x, ww, hh, c] of [[14, 10, 14, '#7a8288'], [27, 12, 10, '#a8603c'], [42, 9, 16, '#c9c2ae'], [56, 14, 8, '#5a6a50'], [74, 8, 12, '#b8452e'], [86, 11, 15, '#7a8288']]) rect(g, x, 84 - hh, ww, hh, c);
+    line(g, [[128, 64], [124, 150]], '#8a6a48', 3); rect(g, 116, 150, 16, 18, '#7a8288');      // a hoe hung up on the rail
+    line(g, [[150, 64], [152, 140]], '#8a6a48', 3); for (let i = 0; i < 7; i++) line(g, [[143 + i * 2.5, 140], [143 + i * 2.5, 150]], '#6a7074', 1.4);      // a rake, its teeth down
+    g.beginPath(); g.ellipse(176, 90, 9, 12, 0, 0, TAU); g.strokeStyle = '#b8a070'; g.lineWidth = 3; g.stroke();     // a coil of twine on a nail
+    rect(g, 30, 118, 60, 3, '#4a3a2a'); poly(g, [[34, 121], [86, 121], [80, 168], [40, 168]], 'rgba(0,0,0,.18)');      // the potting bench, in its own shadow
+    for (const x of [44, 58, 72]) potAt(g, x, 118, 11, 9);
+  },
 };
 // name: [painter, wall colour, seed, options]. The wall colour is also what the side walls are painted.
 const BACKS = {
   bareA: ['bare', '#b9a48e', 3], bareB: ['bare', '#8a9a8c', 4], bareC: ['bare', '#a8a08a', 5], bareD: ['bare', '#7d8a94', 6],
   plainA: ['plain', '#9aa48e', 5, { k: 1 }], plainB: ['plain', '#3f5560', 6, { k: 2, door: '#2f3f48' }], plainC: ['plain', '#b88a6a', 7, { k: 3 }],
   pics1: ['pics', '#7a3f34', 11, { k: 0 }], pics2: ['pics', '#33454a', 12, { k: 1 }], pics3: ['pics', '#a8935c', 13, { k: 2 }],
-  books: ['books', '#3d4a44', 32, { wood: '#2a2a22' }], kitchen: ['kitchen', '#a8a08a', 21],
+  books: ['books', '#3d4a44', 32, { wood: '#2a2a22' }], kitchen: ['kitchen', '#a8a08a', 21], shed: ['shed', '#6e5a42', 41],
 };
 const BACK_NAMES = Object.keys(BACKS);
 
@@ -152,7 +163,6 @@ function drape(g, col, tied) {
 }
 const rod = g => { rect(g, 0, 3, 80, 2.4, '#3a3028'); };
 const closed = col => g => { folds(g, 3, 4, 74, 124, col, 8); rod(g); };
-const roller = (to, col = '#d6cdb4') => g => { rect(g, 4, 3, 72, to - 3, col); rect(g, 4, to - 3, 72, 3, 'rgba(0,0,0,.14)'); line(g, [[40, to], [40, to + 9]], '#8a8478', 1); disc(g, 40, to + 11, 2.2, null, '#8a8478', 1.2); };
 const PC = {
   drapes1(g) { drape(g, '#a8503a'); g.save(); g.translate(80, 0); g.scale(-1, 1); drape(g, '#a8503a'); g.restore(); rod(g); },
   drapes2(g) { drape(g, '#7f9077'); g.save(); g.translate(80, 0); g.scale(-1, 1); drape(g, '#7f9077'); g.restore(); rod(g); },
@@ -160,13 +170,29 @@ const PC = {
   tied(g) { drape(g, '#b87a6a', true); rod(g); },
   sheer(g) { folds(g, 3, 5, 74, 123, '#dcd8cc', 9, 0.4); rod(g); },
   cafe(g) { rect(g, 4, 63, 72, 2, '#b08d4a'); rect(g, 5, 66, 70, 62, '#d8d0bc'); for (let x = 5; x < 75; x += 7) rect(g, x, 66, 3.5, 62, 'rgba(184,69,46,.5)'); for (let y = 66; y < 128; y += 7) rect(g, 5, y, 70, 3.5, 'rgba(184,69,46,.5)'); for (let x = 5; x < 75; x += 14) { const gr = g.createLinearGradient(x, 0, x + 14, 0); gr.addColorStop(0, 'rgba(0,0,0,.2)'); gr.addColorStop(0.5, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.2)'); g.fillStyle = gr; g.fillRect(x, 66, 14, 62); } },
-  roller: roller(63), rollerLow: roller(92, '#cfc4a6'), rollerDown: roller(121), rollerGrey: roller(121, '#a9aca2'),
   venetian(g) { for (let y = 5; y < 96; y += 5) { rect(g, 4, y, 72, 2.7, '#cfc8b8'); rect(g, 4, y + 2.7, 72, 0.7, 'rgba(0,0,0,.35)'); } for (const x of [18, 62]) rect(g, x, 3, 0.8, 94, '#8a8478'); rect(g, 4, 96, 72, 3, '#b8b0a0'); },
   closedA: closed('#d6c096'), closedB: closed('#a8604a'), closedC: closed('#7f9077'), closedD: closed('#5e6f80'),
   shutters(g) { for (const x of [3, 61]) { rrect(g, x, 4, 16, 122, 1, '#6f8068'); for (let y = 8; y < 122; y += 4.5) { rect(g, x + 2, y, 12, 2.6, '#8a9a80'); rect(g, x + 2, y + 2.6, 12, 0.8, 'rgba(0,0,0,.3)'); } rect(g, x + 7.4, 4, 1.2, 122, '#5a6a54'); } },
 };
 const CUR_NAMES = Object.keys(PC);
-const HIDES = new Set(['rollerDown', 'rollerGrey', 'closedA', 'closedB', 'closedC', 'closedD']);      // nothing of the room shows past these
+const HIDES = new Set(['closedA', 'closedB', 'closedC', 'closedD']);      // nothing of the room shows past these
+
+// ---- roller blinds: not painted but drawn in the shader, a real panel that rolls up and down -------------------
+// A blind is a cloth on a roller just behind the glass, with a wooden bar along its foot and a cord with a ring
+// to pull it by. Where it is is one number a window (how far down, 0 to 1), kept here and eased from one place
+// to the next at about the speed a hand pulls a blind, so nothing snaps. name: [cloth, how far down by day]
+// (the names are the ones the curtains list draws, so the street's habits stay as they were)
+const BLINDS = { roller: ['#d6cdb4', 0.42], rollerLow: ['#cfc4a6', 0.68], rollerDown: ['#d6cdb4', 0.96], rollerGrey: ['#a9aca2', 0.96] };
+const CLOTHS = ['#d6cdb4', '#cfc4a6', '#b59a6a', '#c8b89a', '#9aa88e', '#d8d2c4'];      // linen, oatmeal, a brown holland, a faded green
+// What a blind is doing at this hour. Somebody home lets it down a little after the lamp goes on and runs it up
+// when they get up; the afternoon sun on the south-facing fronts brings some of them half down; an empty room's
+// blind stays where it was left.
+function blindWants(p, hour, lamps) {
+  const b = p.bl; let to = b.day;
+  if (b.sun && hour > b.sun[0] && hour < b.sun[1]) to = Math.max(to, 0.66);
+  if (p.th < 9 && (hour >= 12 ? lamps > Math.min(0.96, p.th + b.lag) : hour < p.wake)) to = b.eve;
+  return to;
+}
 
 // ---- ceilings: 128 x 104 px is 8 x 6.5 ft, the window wall at the top ---------------------------------------------------
 const CEILS = [
@@ -179,7 +205,7 @@ const CEILS = [
 function paintAtlas() {
   const c = document.createElement('canvas'); c.width = AW; c.height = AH; const g = c.getContext('2d');
   const cell = (x, y, w, h, draw) => { g.save(); g.translate(x, y); g.beginPath(); g.rect(0, 0, w, h); g.clip(); try { draw(); } catch (e) { console.warn('flats: a painting failed', e); } g.restore(); };
-  BACK_NAMES.forEach((n, i) => { const [kind, wall, seed, o = {}] = BACKS[n]; cell((i % 10) * BW, Math.floor(i / 10) * BH, BW, BH, () => { wallBase(g, BW, BH, wall, kind !== 'books'); PB[kind](g, BW, BH, rnd(seed * 131 + 7), o); }); });
+  BACK_NAMES.forEach((n, i) => { const [kind, wall, seed, o = {}] = BACKS[n]; cell((i % 10) * BW, Math.floor(i / 10) * BH, BW, BH, () => { wallBase(g, BW, BH, wall, kind !== 'books' && kind !== 'shed'); PB[kind](g, BW, BH, rnd(seed * 131 + 7), o); }); });
   MID_NAMES.forEach((n, i) => cell((i % 16) * MW, MID_Y + Math.floor(i / 16) * MW, MW, MW, () => PM[n](g, rnd(i * 53 + 11))));
   CUR_NAMES.forEach((n, i) => cell(i * CW, CUR_Y, CW, CH, () => PC[n](g, rnd(i * 17 + 3))));
   CEILS.forEach((f, i) => cell(CEIL_X, i * CEIL_H, 128, CEIL_H, () => f(g, 128, CEIL_H)));
@@ -263,7 +289,40 @@ function plan(town) {
       p.waves = up && !HIDES.has(p.cur);
     }
   }
+  // The roller blinds come out of the curtains list as names; here each becomes a blind with its own habits
+  // (its own numbers, so the street's other choices above are drawn exactly as they were).
+  const rb = rnd(5150);
+  for (const p of list) {
+    const k = BLINDS[p.cur]; if (!k) continue;
+    const day = Math.min(0.97, Math.max(0.12, k[1] + (rb() - 0.5) * 0.2)), home = p.th < 9;
+    p.bl = { col: rb() < 0.6 ? k[0] : pickOf(rb, CLOTHS), day, eve: home && rb() < 0.75 ? 0.86 + rb() * 0.12 : day, lag: 0.06 + rb() * 0.2,
+      sun: p.w.side > 0 && rb() < 0.35 ? [12.8 + rb() * 1.5, 16.6 + rb() * 1.2] : null };
+    p.cur = null;
+  }
   list.town = town; PLAN = list; return list;
+}
+
+// ---- the backs of the buildings (backs.js lists their windows in K.backs.wins) ----------------------------------------------
+// The same rooms behind the glass, chosen from the letter backs.js gives each window: d nobody in (dark), b a blind and
+// sometimes somebody behind it, c curtains drawn and a lamp on, k the kitchen, f the light over a back door, shed the
+// allotment shed. The ground-floor ones are in reach: each has a blind, rolled up where the room is dark.
+function planBacks(wins, n0) {
+  const r = rnd(808), out = [];
+  wins.forEach((w, i) => {
+    const p = { id: n0 + i, w, o: {}, mid: null, open: 0, off: (r() - 0.5) * 2.4, flip: r() < 0.5 ? -1 : 1, phase: r() * 6.28, ceil: Math.floor(r() * 3), isBack: true,
+      back: pickOf(r, QUIET_BACKS), cur: null, lamp: pickOf(r, QUIET_LAMPS), temp: pickOf(r, TEMPS), th: 9, wake: 5.7 + r() * 1.6, bed: 0 };
+    const lit = (th, late = 0) => { p.th = th; p.bed = 22.2 + r() * 2.8 + late; };
+    const blind = (day, eve) => { p.bl = { col: r() < 0.55 ? '#d6cdb4' : pickOf(r, CLOTHS), day, eve: eve ?? day, lag: 0.06 + r() * 0.2, sun: null }; };
+    if (w.kind === 'b') { if (r() < 0.6) lit(0.08 + r() * 0.4); blind(0.25 + r() * 0.3, 0.84 + r() * 0.12); }
+    else if (w.kind === 'c') { lit(0.05 + r() * 0.4); p.cur = pickOf(r, ['closedA', 'closedB', 'closedC', 'closedD']); }
+    else if (w.kind === 'k') { lit(0.03 + r() * 0.15, -0.6); p.back = 'kitchen'; p.lamp = 'shade'; p.cur = r() < 0.5 ? 'cafe' : null; }
+    else if (w.kind === 'f') { p.back = pickOf(r, ['plainA', 'plainC', 'bareA']); p.lamp = 'bulb'; p.off *= 0.3; if (r() < 0.55) lit(0.1 + r() * 0.4, 1); }
+    else if (w.kind === 'shed') { p.back = 'shed'; p.lamp = 'bulb'; p.off = 0; }
+    else if (!w.reach) { if (r() < 0.3) p.cur = 'sheer'; else if (r() < 0.45) blind(0.3 + r() * 0.35); }
+    if (w.reach && !p.bl) blind(0.1 + r() * 0.06, p.th < 9 ? 0.9 : undefined);
+    out.push(p);
+  });
+  return out;
 }
 
 // ---- outside the glass ------------------------------------------------------------------------------------------------------
@@ -311,15 +370,17 @@ export function buildFlats(K, town) {
 // =====================================================================================================================
 const VERT_HEAD = /* glsl */`
 attribute vec4 aCell; attribute vec4 aTint; attribute vec4 aLampP; attribute vec4 aLampR; attribute vec4 aLamp; attribute vec4 aTime; attribute vec4 aMisc;
+attribute vec4 aSash; attribute vec4 aSashC; attribute vec4 aBlind;
 uniform vec4 uClock; uniform vec4 uWave;
 varying vec3 vfDir; varying vec2 vfP; varying vec4 vfCell; varying vec4 vfTint; varying vec4 vfLampP; varying vec4 vfLampR; varying vec4 vfLamp; varying vec4 vfState; varying float vfId; varying float vfHH;
+varying float vfHW; varying vec4 vfSash; varying vec4 vfSashC; varying vec4 vfBlind;
 `;
 const VERT_BODY = /* glsl */`
 {
   vec3 flW = (modelMatrix * vec4(position, 1.0)).xyz - cameraPosition;
   float flS = -normal.x;
   vfDir = vec3(flS * flW.z, flW.y, flS * flW.x);
-  vfP = uv; vfHH = aMisc.y;                                          // uv is the corner in feet from the middle of the pane
+  vfP = uv; vfHH = aMisc.y; vfHW = aMisc.w; vfSash = aSash; vfSashC = aSashC; vfBlind = aBlind;                                          // uv is the corner in feet from the middle of the pane
   // is anybody up?  aTime: switching-on point, bedtime, waking hour, the window's number
   float flH = uClock.w < 12.0 ? uClock.w + 24.0 : uClock.w;
   float flUp = max(step(flH, aTime.y), uClock.w < 12.0 ? step(aTime.z, uClock.w) : 0.0);
@@ -336,6 +397,30 @@ const VERT_BODY = /* glsl */`
 const FRAG_HEAD = /* glsl */`
 uniform sampler2D uAtlas; uniform vec4 uClock;
 varying vec3 vfDir; varying vec2 vfP; varying vec4 vfCell; varying vec4 vfTint; varying vec4 vfLampP; varying vec4 vfLampR; varying vec4 vfLamp; varying vec4 vfState; varying float vfId; varying float vfHH;
+varying float vfHW; varying vec4 vfSash; varying vec4 vfSashC; varying vec4 vfBlind;
+// how much of a pixel a bar covers: d the distance from its middle, w half its width, a the pixel's size
+float flBar(float d, float w, float a) { return 1.0 - smoothstep(w - a, w + a, abs(d)); }
+// a sash window's timber, at p on the plane of one sash (the upper: up > 0, the lower: up < 0; 0: a fixed light):
+// the box frame round it, the sash's stiles and rails, and the glazing bars of the pattern k
+// (1 one over one, 2 two over two, 6 six over six, 4 four lights (the shed), 3 three lights over a door)
+float flSashWood(vec2 p, float hw, float hh, float k, float up, float a) {
+  float e = min(hw - abs(p.x), min(hh - p.y, p.y + hh));
+  float c = 1.0 - smoothstep(0.1 - a, 0.1 + a, e);                                    // the box frame
+  if (k > 3.5 && k < 4.5) {                                                           // a casement of four lights
+    c = max(c, 1.0 - smoothstep(0.22 - a, 0.22 + a, e)); c = max(c, max(flBar(p.x, 0.035, a), flBar(p.y, 0.035, a)));
+  } else if (k > 2.5 && k < 3.5) {
+    c = max(c, max(flBar(p.x - hw / 3.0, 0.035, a), flBar(p.x + hw / 3.0, 0.035, a)));
+  } else if (up != 0.0) {                                                             // one sash of a pair, meeting in the middle
+    float iw = hw - 0.24;
+    c = max(c, 1.0 - smoothstep(0.24 - a, 0.24 + a, hw - abs(p.x)));                  // stiles
+    float g0, g1;
+    if (up > 0.0) { c = max(c, 1.0 - smoothstep(0.25 - a, 0.25 + a, hh - p.y)); c = max(c, 1.0 - smoothstep(0.06 - a, 0.06 + a, p.y)); g0 = 0.06; g1 = hh - 0.25; }
+    else { c = max(c, 1.0 - smoothstep(0.32 - a, 0.32 + a, p.y + hh)); c = max(c, 1.0 - smoothstep(0.07 - a, 0.07 + a, -p.y)); g0 = -hh + 0.32; g1 = -0.07; }
+    if (k > 1.5) c = max(c, k > 5.5 ? max(flBar(p.x - iw / 3.0, 0.03, a), flBar(p.x + iw / 3.0, 0.03, a)) : flBar(p.x, 0.03, a));
+    if (k > 5.5) c = max(c, flBar(p.y - (g0 + g1) * 0.5, 0.03, a));
+  }
+  return c;
+}
 vec4 flTex(vec2 o, vec2 sz, vec2 uv, float lod) {
   vec2 p = clamp(o + uv * sz, o + 0.75, o + sz - 0.75);
   vec4 t = textureLod(uAtlas, vec2(p.x / FL_AW, 1.0 - p.y / FL_AH), lod);
@@ -357,17 +442,41 @@ vec3 flSheet(float through) {
 }
 `;
 const FRAG_BODY = /* glsl */`
-float flGlass = 1.0;
+float flGlass = 1.0; vec3 flDiff = vec3(0.0);
 {
   vec3 d = normalize(vfDir); d.z = max(d.z, 0.03); d = normalize(d);
-  vec2 P = vfP; vec3 O = vec3(P, 0.0); vec4 cell = floor(vfCell + 0.5);
+  vec2 P = vfP; float hw = vfHW, hh = vfHH, ap = max(fwidth(vfP.x), fwidth(vfP.y)) * 0.75;
+  // A back window is let into the wall (the quad lies on the wall's face): the ray meets the brick of the reveal, or the
+  // sash at the back of it, before the glass. The fronts' sashes are real timber (town.js); these are drawn here, which
+  // costs nothing a window and shows the same from any side.
+  float wood = 0.0, rev = 0.0; vec3 revAlb = vec3(0.0);
+  if (vfSash.x > 0.0) {
+    vec2 qs = P + d.xy / d.z * vfSash.x;
+    if (abs(qs.x) > hw || abs(qs.y) > hh) {
+      float txr = abs(d.x) < 1e-5 ? 1e9 : (sign(d.x) * hw - P.x) / d.x, tyr = abs(d.y) < 1e-5 ? 1e9 : (sign(d.y) * hh - P.y) / d.y;
+      vec3 rp = vec3(P, 0.0) + d * min(txr, tyr);
+      if (vfSashC.w > 0.5) revAlb = vfSashC.rgb * 0.7;                                  // lined with boards (the shed)
+      else if (txr < tyr) {                                                              // a jamb: courses of brick, in the shade of the opening
+        float c = floor(rp.y / 0.25), m = fract(rp.y / 0.25);
+        revAlb = mix(vec3(0.34, 0.31, 0.27), vec3(0.25, 0.13, 0.09) * (0.8 + 0.4 * fract(sin(c * 17.3 + vfId) * 437.5)), smoothstep(0.0, 0.12, m) * (1.0 - smoothstep(0.86, 0.98, m))) * 0.7;
+      } else revAlb = d.y < 0.0 ? vec3(0.36, 0.34, 0.3) : vec3(0.06, 0.04, 0.03);       // the stone sill running in; the soffit under the lintel
+      rev = 1.0;
+    } else P = qs;
+  }
+  if (vfSash.y > 0.5 && rev < 0.5) {
+    float k = vfSash.y;
+    if (k > 2.5 && k < 4.5) wood = flSashWood(P, hw, hh, k, 0.0, ap);
+    else if (P.y >= 0.0) wood = flSashWood(P, hw, hh, k, 1.0, ap);                    // the upper sash, on the outer track
+    else { vec2 p2 = P + d.xy / d.z * 0.07; wood = flSashWood(p2, hw, hh, k, -1.0, ap); P = p2; }      // the lower, an inch behind it
+  }
+  vec3 O = vec3(P, 0.0); vec4 cell = floor(vfCell + 0.5);
   float off = vfTint.w, x0 = off - FL_RW * 0.5, x1 = off + FL_RW * 0.5;
   float tz = FL_RD / d.z;
   float tx = abs(d.x) < 1e-5 ? 1e9 : ((d.x > 0.0 ? x1 : x0) - P.x) / d.x;
   float ty = abs(d.y) < 1e-5 ? 1e9 : ((d.y > 0.0 ? FL_Y1 : FL_Y0) - P.y) / d.y;
   float t = min(tz, min(tx, ty));
   vec3 q = O + d * t;
-  float ftpp = max(fwidth(P.x), fwidth(P.y)) * 1.2, L = vfState.x * vfState.w;
+  float ftpp = max(fwidth(vfP.x), fwidth(vfP.y)) * 1.2, L = vfState.x * vfState.w;
   float lodB = clamp(log2(ftpp * 24.0), 0.0, 3.0);
   vec3 alb; float screen = 0.0;
   if (t == tz) {
@@ -414,8 +523,29 @@ float flGlass = 1.0;
     uv = vec2(rel.x / 1.7 + 0.5, 1.0 - (rel.y / 1.7 + 0.094)); vec4 ar = flTex(FL_ARM.xy, FL_ARM.zw, uv, 0.0); ar.a *= flIn(uv) * step(-vfHH, qw.y);
     col = mix(col, ar.rgb * tint * wl, ar.a);
   }
+  if (vfBlind.x >= 0.0) {                                          // the roller blind, an inch or two behind the glass
+    vec2 qb = P + d.xy / d.z * 0.14; float a = ftpp * 0.6, bw = hw - 0.05, top = hh + 0.04, rh = 0.15;
+    float yb = top - rh - vfBlind.x * (2.0 * hh - rh - 0.02);                     // the foot of the cloth
+    float inX = 1.0 - smoothstep(bw - a, bw + a, abs(qb.x));
+    float roll = inX * smoothstep(top - rh - a, top - rh + a, qb.y);
+    float cl = inX * smoothstep(yb - a, yb + a, qb.y) * (1.0 - smoothstep(top - rh - a, top - rh + a, qb.y));
+    float bar = (1.0 - smoothstep(bw + 0.02 - a, bw + 0.02 + a, abs(qb.x))) * smoothstep(yb - 0.07 - a, yb - 0.07 + a, qb.y) * (1.0 - smoothstep(yb - a, yb + a, qb.y));
+    float cy = yb - 0.07, cw = max(0.012, a);
+    float cord = clamp(0.012 / cw, 0.0, 1.0) * flBar(qb.x, cw, a) * step(cy - 0.5, qb.y) * step(qb.y, cy);
+    float acorn = 1.0 - smoothstep(0.045 - a, 0.045 + a, length((qb - vec2(0.0, cy - 0.55)) * vec2(1.0, 0.7)));
+    vec3 cloth = vfBlind.yzw * (1.0 + 0.06 * clamp(1.0 - ftpp * 25.0, 0.0, 1.0) * sin(qb.y * 160.0 + sin(qb.x * 9.0)))
+      * (1.0 - 0.2 * smoothstep(0.3, 0.0, qb.y - yb)) * (1.0 - 0.25 * smoothstep(bw - 0.12, bw, abs(qb.x)));
+    col = mix(col, cloth * flSheet(0.75), cl);                        // the lamp behind comes through the cloth
+    col = mix(col, vfBlind.yzw * 0.7 * flSheet(0.1) * (0.7 + 0.3 * smoothstep(top, top - rh, qb.y)), roll);
+    col = mix(col, vec3(0.3, 0.2, 0.12) * flSheet(0.05), max(bar, max(cord, acorn)));
+  }
   // the glass: none where the sash is pushed up, two panes of it where the sashes overlap
   flGlass = P.y < vfState.y ? 0.0 : (P.y < 0.0 && vfState.y > -3.0 ? 1.5 : 1.0);
+  // the timber and the brick are lit as the wall is, by the street's own lights; only a little of the room's lamp on them
+  float solid = max(wood, rev);
+  col = mix(col, vfSashC.rgb * vfLamp.rgb * L * 0.05, solid);
+  flDiff = (rev > 0.5 ? revAlb : vfSashC.rgb) * solid;
+  flGlass *= 1.0 - solid;
   totalEmissiveRadiance = col * FL_GAIN * (1.0 - 0.1 * flGlass);
 }
 `;
@@ -424,7 +554,8 @@ float flGlass = 1.0;
 // =====================================================================================================================
 export function flatsLife(ctx, K) {
   const { scene, animated, day, camera } = ctx, town = K.town, P = plan(town), N = P.length;
-  if (!N) return;
+  const ALL = [...P, ...planBacks(K.backs?.wins ?? [], N)], NA = ALL.length;      // the fronts (P) and then the backs, in one mesh
+  if (!NA) return;
   const lampsOn = () => 1 - THREE.MathUtils.smoothstep(day.light, 0.42, 0.97);
   const uClock = { value: new THREE.Vector4(0, lampsOn(), day.light, day.hour ?? 18) }, uWave = { value: new THREE.Vector4(-9, 0, 0, 0) }, uT = { value: 0 };
 
@@ -435,12 +566,13 @@ export function flatsLife(ctx, K) {
 
   // ---- the panes: one quad a window ---------------------------------------------------------------------------
   const Y1 = PANE_H / 2 + CEIL_UP, Y0 = -PANE_H / 2 - SILL_DOWN;      // the room is the same height behind every pane, tall or short
-  const A = { position: [new Float32Array(N * 12), 3], normal: [new Float32Array(N * 12), 3], uv: [new Float32Array(N * 8), 2] };
-  for (const n of ['aCell', 'aTint', 'aLampP', 'aLampR', 'aLamp', 'aTime', 'aMisc']) A[n] = [new Float32Array(N * 16), 4];
-  const idx = new Uint16Array(N * 6), put4 = (n, i, a, b, c, d) => { const arr = A[n][0]; for (let k = 0; k < 4; k++) { const o = (i * 4 + k) * 4; arr[o] = a; arr[o + 1] = b; arr[o + 2] = c; arr[o + 3] = d; } };
-  P.forEach((p, i) => {
-    const w = p.w, s = w.side, CORN = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
-    CORN.forEach(([cx, cy], k) => { const v = i * 4 + k; A.position[0].set([w.x, w.y + cy * w.h / 2, w.z + s * cx * w.w / 2], v * 3); A.normal[0].set([-s, 0, 0], v * 3); A.uv[0].set([cx * w.w / 2, cy * w.h / 2], v * 2); });
+  const A = { position: [new Float32Array(NA * 12), 3], normal: [new Float32Array(NA * 12), 3], uv: [new Float32Array(NA * 8), 2] };
+  for (const n of ['aCell', 'aTint', 'aLampP', 'aLampR', 'aLamp', 'aTime', 'aMisc', 'aSash', 'aSashC', 'aBlind']) A[n] = [new Float32Array(NA * 16), 4];
+  const idx = new Uint16Array(NA * 6), put4 = (n, i, a, b, c, d) => { const arr = A[n][0]; for (let k = 0; k < 4; k++) { const o = (i * 4 + k) * 4; arr[o] = a; arr[o + 1] = b; arr[o + 2] = c; arr[o + 3] = d; } };
+  ALL.forEach((p, i) => {
+    // nx: which way the glass faces (a front looks onto the street, a back away from it)
+    const w = p.w, nx = w.nx ?? -w.side, CORN = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+    CORN.forEach(([cx, cy], k) => { const v = i * 4 + k; A.position[0].set([w.x, w.y + cy * w.h / 2, w.z - nx * cx * w.w / 2], v * 3); A.normal[0].set([nx, 0, 0], v * 3); A.uv[0].set([cx * w.w / 2, cy * w.h / 2], v * 2); });
     idx.set([i * 4, i * 4 + 1, i * 4 + 2, i * 4, i * 4 + 2, i * 4 + 3], i * 6);
     const lamp = LAMPS[p.lamp] ?? LAMPS.globe, back = BACKS[p.back] ?? BACKS.bareA, tint = hexLin(back[1]), glow = p.lamp === 'tv' ? lamp[8] : p.temp ?? lamp[8];
     const lx = p.lamp === 'read' ? p.flip * lamp[0] : p.off + lamp[0];
@@ -450,7 +582,11 @@ export function flatsLife(ctx, K) {
     put4('aLampR', i, p.lamp === 'tv' ? 0 : lamp[4], lamp[5], lamp[6], lamp[7]);
     put4('aLamp', i, glow[0], glow[1], glow[2], lamp[9]);
     put4('aTime', i, p.th, p.bed, p.wake, p.id);
-    put4('aMisc', i, p.open ? -w.h / 2 + p.open : -9, w.h / 2, p.lamp === 'tv' ? 1 : 0, 0);
+    put4('aMisc', i, p.open ? -w.h / 2 + p.open : -9, w.h / 2, p.lamp === 'tv' ? 1 : 0, w.w / 2);
+    const fc = hexLin(w.frame ?? '#e0d8c4');
+    put4('aSash', i, w.reveal ?? 0, w.bars ?? 0, 0, 0); put4('aSashC', i, fc[0], fc[1], fc[2], w.lined ? 1 : 0);
+    if (p.bl) { const c = hexLin(p.bl.col); p.bl.rgb = c; p.bl.cur = p.bl.to = blindWants(p, day.hour ?? 18, lampsOn()); p.bl.i = i; put4('aBlind', i, p.bl.cur, c[0], c[1], c[2]); }
+    else put4('aBlind', i, -1, 0, 0, 0);
   });
   const geo = new THREE.BufferGeometry();
   for (const [n, [arr, size]] of Object.entries(A)) geo.setAttribute(n, new THREE.BufferAttribute(arr, size));
@@ -463,10 +599,37 @@ export function flatsLife(ctx, K) {
     sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\n' + defs + VERT_HEAD).replace('#include <begin_vertex>', '#include <begin_vertex>\n' + VERT_BODY);
     sh.fragmentShader = sh.fragmentShader.replace('#define HOUSE_LIGHT', '').replace('#include <common>', '#include <common>\n' + defs + FRAG_HEAD)
       .replace('#include <emissivemap_fragment>', FRAG_BODY)
-      .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\nfloat flK = mix(0.14, 1.0, smoothstep(0.0, 0.55, uClock.z)); material.diffuseColor = vec3(0.0); material.specularColor = vec3(0.13) * flK * min(flGlass, 1.0) * (0.7 + 0.3 * flGlass); material.specularF90 = flK * min(flGlass, 1.0);\n');
+      .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\nfloat flK = mix(0.14, 1.0, smoothstep(0.0, 0.55, uClock.z)); material.diffuseColor = flDiff; material.specularColor = vec3(0.13) * flK * min(flGlass, 1.0) * (0.7 + 0.3 * flGlass); material.specularF90 = flK * min(flGlass, 1.0);\n');
   };
   mat.customProgramCacheKey = () => 'flats-panes';
-  const panes = new THREE.Mesh(geo, mat); panes.name = 'flats'; panes.userData.cat = 'flats'; scene.add(panes);
+  const panes = new THREE.Mesh(geo, mat); panes.name = 'flats'; panes.userData.cat = 'flats'; panes.receiveShadow = true; scene.add(panes);
+
+  // ---- the blinds: where each wants to be at this hour, and getting there at the pace of a hand on the cord -------------
+  // A pull at one in reach holds until that window's own next change of mind (its lamp, its morning).
+  const BL = ALL.filter(p => p.bl), aBlind = geo.attributes.aBlind;
+  aBlind.setUsage(THREE.DynamicDrawUsage);
+  const setDrop = (b, v) => { b.cur = v; for (let k = 0; k < 4; k++) aBlind.array[(b.i * 4 + k) * 4] = v; };
+  const pull = (p, to, now, lag = 0) => { const b = p.bl; b.from = b.cur; b.to = to; b.t0 = now + lag; b.dur = 0.5 + Math.abs(to - b.cur) * p.w.h / 1.1; };
+  let clockT = 0;
+  const pulls = [];
+  for (const p of BL) if (p.w.reach) {
+    const b = p.bl, w = p.w;
+    pulls.push({ p, x: w.x + w.nx * 0.6, y: w.y, z: w.z });
+    ctx.interact?.push(pulls[pulls.length - 1].it = { x: w.x + w.nx * 0.6, y: w.y, z: w.z, reach: 6.5, size: Math.max(w.w, w.h) * 0.5, label: () => ((b.hold ?? b.to) > 0.5 ? 'raise the blind' : 'let the blind down'),
+      act: () => { b.hold = (b.hold ?? b.to) > 0.5 ? 0.06 : 0.94; b.holdFor = blindWants(p, day.hour ?? 18, lampsOn()); pull(p, b.hold, clockT); } });
+  }
+  if (typeof window !== 'undefined') window.__blinds = { list: BL, pulls };      // (for looking at them from tools/drive.py)
+  animated.push(t => {
+    clockT = t; let moved = false;
+    const hour = day.hour ?? 18, lamps = lampsOn();
+    for (const p of BL) {
+      const b = p.bl; let want = blindWants(p, hour, lamps);
+      if (b.hold !== undefined && b.hold !== null) { if (want === b.holdFor) want = b.hold; else b.hold = null; }
+      if (Math.abs(want - b.to) > 1e-4) pull(p, want, t, b.hold === null || b.hold === undefined ? Math.random() * 2.5 : 0);      // windows do not all move at once
+      if (b.cur !== b.to) { const k = Math.min(1, Math.max(0, (t - b.t0) / b.dur)); setDrop(b, k >= 1 ? b.to : b.from + (b.to - b.from) * k * k * (3 - 2 * k)); moved = true; }
+    }
+    if (moved) aBlind.needsUpdate = true;
+  });
 
   // ---- cloth: a curtain breathing out: one mesh, swayed in the vertex shader ---------------
   if (CLOTH.idx.length) {
@@ -503,7 +666,7 @@ export function flatsLife(ctx, K) {
     camera.getWorldDirection(dir); if (dir.y < 0.08) { held = 0; return; }
     let best = -1, bd = 0.972;
     for (let i = 0; i < N; i++) {
-      const p = P[i]; if (!p.waves) continue;
+      const p = P[i]; if (!p.waves || (p.bl && p.bl.cur > 0.7)) continue;
       const w = p.w, dx = w.x - cp.x, dy = w.y - cp.y, dz = w.z - cp.z;
       if (dx * w.side < 2 || dx * dx + dz * dz > 2500) continue;
       const dot = (dx * dir.x + dy * dir.y + dz * dir.z) / Math.sqrt(dx * dx + dy * dy + dz * dz);

@@ -1,0 +1,245 @@
+{
+ "asset": {
+  "version": "2.0"
+ },
+ "scene": 0,
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    0,
+    1
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "mesh": 0,
+   "name": "CashRegister_01_body",
+   "translation": [
+    -0.07506328076124191,
+    -0.002179764211177826,
+    -0.04685230553150177
+   ]
+  },
+  {
+   "mesh": 1,
+   "name": "CashRegister_011_drawer",
+   "translation": [
+    -0.07506328076124191,
+    -0.002179764211177826,
+    -0.04685230553150177
+   ]
+  }
+ ],
+ "materials": [
+  {
+   "doubleSided": true,
+   "name": "CashRegister_01",
+   "normalTexture": {
+    "index": 0
+   },
+   "pbrMetallicRoughness": {
+    "baseColorTexture": {
+     "index": 1
+    },
+    "metallicRoughnessTexture": {
+     "index": 2
+    }
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Cash_register",
+   "primitives": [
+    {
+     "material": 0,
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "indices": 3
+    }
+   ]
+  },
+  {
+   "name": "Cash_register.001",
+   "primitives": [
+    {
+     "material": 0,
+     "attributes": {
+      "POSITION": 4,
+      "NORMAL": 5,
+      "TEXCOORD_0": 6
+     },
+     "indices": 7
+    }
+   ]
+  }
+ ],
+ "textures": [
+  {
+   "sampler": 0,
+   "source": 0
+  },
+  {
+   "sampler": 0,
+   "source": 1
+  },
+  {
+   "sampler": 0,
+   "source": 2
+  }
+ ],
+ "images": [
+  {
+   "mimeType": "image/jpeg",
+   "name": "CashRegister_01_nor_gl",
+   "uri": "textures/CashRegister_01_nor_gl.jpg"
+  },
+  {
+   "mimeType": "image/jpeg",
+   "name": "CashRegister_01_diff",
+   "uri": "textures/CashRegister_01_diff.jpg"
+  },
+  {
+   "mimeType": "image/jpeg",
+   "name": "CashRegister_01_metallic-CashRegister_01_roughness",
+   "uri": "textures/CashRegister_01_arm.jpg"
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 5627,
+   "type": "VEC3",
+   "min": [
+    -0.22518207132816315,
+    0.002179764211177826,
+    -0.17349055409431458
+   ],
+   "max": [
+    0.375308632850647,
+    0.6234318614006042,
+    0.2625770568847656
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 5627,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5126,
+   "count": 5627,
+   "type": "VEC2"
+  },
+  {
+   "bufferView": 3,
+   "componentType": 5123,
+   "count": 20229,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 4,
+   "componentType": 5126,
+   "count": 943,
+   "type": "VEC3",
+   "min": [
+    -0.19286872446537018,
+    0.0222043227404356,
+    -0.060094937682151794
+   ],
+   "max": [
+    0.2278974950313568,
+    0.12854301929473877,
+    0.2671951651573181
+   ]
+  },
+  {
+   "bufferView": 5,
+   "componentType": 5126,
+   "count": 943,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 6,
+   "componentType": 5126,
+   "count": 943,
+   "type": "VEC2"
+  },
+  {
+   "bufferView": 7,
+   "componentType": 5123,
+   "count": 2265,
+   "type": "SCALAR"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 67524,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 67524,
+   "byteLength": 67524,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 135048,
+   "byteLength": 45016,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 180064,
+   "byteLength": 40458,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 220524,
+   "byteLength": 11316,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 231840,
+   "byteLength": 11316,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 243156,
+   "byteLength": 7544,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 250700,
+   "byteLength": 4530,
+   "target": 34963
+  }
+ ],
+ "samplers": [
+  {
+   "magFilter": 9729,
+   "minFilter": 9987
+  }
+ ],
+ "buffers": [
+  {
+   "uri": "CashRegister_01.bin",
+   "byteLength": 255230
+  }
+ ]
+}

@@ -66,7 +66,11 @@ export function makeTalk(H, headless) {
     const far = !v.present || v.f !== r.f || Math.hypot(v.x - r.x, v.z - r.z) > 12;
     if (far) { r.line('walkedOff', { toGuest: false }); close(); return; }
     if (S.pending && H.now - S.lastE > PICK_AFTER) { S.pending = false; choose(S.idx); return; }
-    if (H.now - S.since > 20) { close(); return; }
+    // left open, it closes itself only once she has turned away from the robot for a while (not while she stands
+    // there looking at it, making up her mind: that is still a conversation, and the robot waits on it)
+    const fl = Math.hypot(v.fx ?? 0, v.fz ?? 0), dx = r.x - v.x, dz = r.z - v.z, dl = Math.hypot(dx, dz);
+    if (fl > 1e-3 && dl > 1e-3 && ((v.fx * dx + v.fz * dz) / (fl * dl) > 0.7 || dl < 3)) S.looked = H.now;
+    if (H.now - Math.max(S.since, S.looked ?? 0) > 20) { close(); return; }
     render();
   }
   return { press, choose, open, close, update, get robot() { return S.robot; }, get options() { return S.opts; } };

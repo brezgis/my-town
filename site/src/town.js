@@ -87,6 +87,9 @@ export function buildTown(B) {
   for (const lot of LOTS) {
     const s = lot.side, { y0, y1 } = lot, depth = lot.depth, back = FRONT + depth;
     const top = SHOPTOP + lot.up * 11.5 + (lot.dh ?? 0);              // the eaves (or the flat roof)
+    // the building next door on this side at v (y0 or y1), if any, and whether it is the same height (and roof) as this one
+    const topOf = o => SHOPTOP + o.up * 11.5 + (o.dh ?? 0), nbr = v => LOTS.find(o => o !== lot && o.side === s && (Math.abs(o.y1 - v) < 0.01 || Math.abs(o.y0 - v) < 0.01));
+    const level = v => { const o = nbr(v); return !!o && Math.abs(topOf(o) - top) < 0.01; }, levelRidge = v => level(v) && nbr(v).roof === lot.roof && nbr(v).depth === lot.depth;
     const INT = lot.inside, EXT = lot.face, PAINT = lot.paint, TRIM = lot.trim;
     // Everything below is given as (u, v): u out from the centre line, v along the street.
     const L = (mat, u0, u1, v0, v1, h0, h1, o) => { if (Math.abs(u1 - u0) > 0.004 && Math.abs(v1 - v0) > 0.004 && h1 - h0 > 0.004) B.pbox(mat, s * u0, s * u1, v0, v1, h0, h1, o); };
@@ -127,9 +130,18 @@ export function buildTown(B) {
       const run = Math.min(15, depth / 2), rise = run * 0.62, ang = Math.atan2(rise, run), len = Math.hypot(run, rise);
       for (const [uc, sgn] of [[FRONT + run / 2, 1], [FRONT + run * 1.5, -1]]) {
         B.wbox('roof', s * uc - len / 2 - 0.3, s * uc + len / 2 + 0.3, top + rise / 2 - 0.12, top + rise / 2 + 0.12, wz(y1 - 0.5), wz(y0 + 0.5), { rot: [0, 0, s * sgn * ang] });
-        for (const v of [y0, y1 - 0.5]) B.wbox('brick#8a6a5c', s * uc - len / 2 - 0.4, s * uc + len / 2 + 0.4, top + rise / 2 - 0.5, top + rise / 2 + 0.75, wz(v + 0.5), wz(v), { rot: [0, 0, s * sgn * ang] });
+        // (the coping stands a hair proud of the party wall either side, as copings do: flush, its faces shared the planes of the
+        // wall, the parapet and the next building's wall, and flickered against them; one slope's a hair more than the other's)
+        // (where the next building is the same, the two copings meet face to face at the party line instead, as one)
+        const pr = sgn > 0 ? 0.02 : 0.035, p0 = levelRidge(y0) ? 0 : pr, p1 = levelRidge(y1) ? 0 : pr;
+        B.wbox('brick#8a6a5c', s * uc - len / 2 - 0.4, s * uc + len / 2 + 0.4, top + rise / 2 - 0.5, top + rise / 2 + 0.75, wz(y0 + 0.5 + pr), wz(y0 - p0), { rot: [0, 0, s * sgn * ang] });
+        B.wbox('brick#8a6a5c', s * uc - len / 2 - 0.4, s * uc + len / 2 + 0.4, top + rise / 2 - 0.5, top + rise / 2 + 0.75, wz(y1 + p1), wz(y1 - 0.5 - pr), { rot: [0, 0, s * sgn * ang] });
       }
       for (const v of [y0, y1 - 0.5]) L('brick#8a6a5c', FRONT + WALL / 2, FRONT + 2 * run, v, v + 0.5, top, top + 0.3);
+      // The gable: the party wall carried up to the copings, where the next building is lower or has another roof. (It stopped at the
+      // eaves, so from the Landing or over a lower neighbour the gable was an open triangle onto the dark under the roof.) Kept a hair
+      // inside the wall's planes, behind the parapet it rises from.
+      for (const v of [y0, y1 - 0.5]) if (!levelRidge(v === y0 ? y0 : y1)) B.prism('brick#8a6a5c', [[s * FRONT, top], [s * (FRONT + run), top + rise], [s * (FRONT + 2 * run), top]], -(v + 0.48), -(v + 0.02));
       if (lot.id === 'apothecary') { L('brick#8a6a5c', FRONT + run - 1.2, FRONT + run + 1.2, y1 - 2.6, y1 - 0.2, top, top + rise + 3.4); L('c#3a342e/0.9', FRONT + run - 1.4, FRONT + run + 1.4, y1 - 2.8, y1, top + rise + 3.4, top + rise + 3.7); }
     }
     surfaces.push({ x0: Math.min(s * (FRONT - 0.2), s * ub), x1: Math.max(s * (FRONT - 0.2), s * ub), z0: wz(y1 - SIDE), z1: wz(y0 + SIDE), h: FL });
@@ -138,7 +150,7 @@ export function buildTown(B) {
       const BM = lot.beam ?? 'painted_wood#efe8d8';
       for (let u = ui + 3.2; u < ub - 1.5; u += 5.2) L(BM, u - 0.3, u + 0.3, y0 + SIDE, y1 - SIDE, CEIL - 0.7, CEIL + 0.01, { grain: 'long' });
       for (const [v, sg] of [[y0 + SIDE, 1], [y1 - SIDE, -1]]) L(BM, ui, ub, v, v + sg * 0.22, CEIL - 0.42, CEIL + 0.01, G);
-      L(BM, ub - 0.22, ub, y0 + SIDE, y1 - SIDE, CEIL - 0.42, CEIL + 0.01, G);
+      L(BM, ub - 0.22, ub, y0 + SIDE, y1 - SIDE, CEIL - 0.44, CEIL + 0.01, G);      // (a hair deeper than the side runs, whose undersides it met in the corners)
     }
     // skirting and a picture rail inside the real shops
     if (lot.enter && !INT.startsWith('tile')) for (const [v, sg] of [[y0 + SIDE, 1], [y1 - SIDE, -1]]) { L('painted_wood#efe8d8', ui, ub, v, v + sg * 0.06, FL, FL + 0.6, G); }
@@ -152,7 +164,7 @@ export function buildTown(B) {
     const SILL = FL + 1.9, HEAD = FL + 9.1, TRAN = FL + 10.7, DOORH = FL + 7.9, FASC = SHOPTOP - 0.7;
     const uo = FRONT, um = FRONT + WALL / 2;
     for (const [va, vb] of [[y0, a0], [a1, y1]]) {                     // piers, the full height of the shopfront
-      L(PIERM, uo, um, va, vb, 0, SHOPTOP, C); L(INT, um, ui, va + (va === y0 ? SIDE : 0), vb - (vb === y1 ? SIDE : 0), FL, CEIL);
+      L(PIERM, uo, um, va, vb, 0, FASC + 0.48, C); L(INT, um, ui, va + (va === y0 ? SIDE : 0), vb - (vb === y1 ? SIDE : 0), FL, CEIL);
       if (lot.piers === 'stone' || lot.piers === 'plaster') { L(PIERM, uo - 0.14, uo, va, vb, FL + 10.2, FL + 10.9); L(PIERM, uo - 0.08, uo, va + 0.1, vb - 0.1, 0.9, FL + 10.2); }      // a capital and a shallow shaft
       L(TRIM, uo - 0.12, uo, va - (va === y0 ? 0 : 0.06), vb + (vb === y1 ? 0 : 0.06), 0, 0.9);                // plinth
     }
@@ -160,7 +172,10 @@ export function buildTown(B) {
     L(PAINT, uo - 0.05, um, a0, a1, TRAN, FASC + 0.01, G); L(INT, um, ui, a0, a1, TRAN, CEIL);
     L(PAINT, uo - 0.22, uo - 0.05, a0 - 0.1, a1 + 0.1, TRAN + 0.1, TRAN + 0.3, G);
     L(PAINT, uo - 0.3, uo - 0.05, a0 - 0.2, a1 + 0.2, FASC - 0.25, FASC, G);
-    L(TRIM, uo - 0.5, um, y0 + 0.05, y1 - 0.05, FASC, FASC + 0.3); L(TRIM, uo - 0.7, um, y0 - 0.05, y1 + 0.05, FASC + 0.3, FASC + 0.48); L(EXT, uo, um, y0, y1, FASC + 0.48, SHOPTOP + 0.4);
+    // (the piers stop under the brick band, which they used to run up behind, face to face with it; the cornice stops a hair short of
+    // the wall's back face, where it met the piers' backs; and the cornice returns only at the ends of a row: every shopfront's is at
+    // the same height, and the two used to run into each other)
+    L(TRIM, uo - 0.5, um - 0.02, y0 + 0.05, y1 - 0.05, FASC, FASC + 0.3); L(TRIM, uo - 0.7, um - 0.02, y0 - (nbr(y0) ? 0 : 0.05), y1 + (nbr(y1) ? 0 : 0.05), FASC + 0.3, FASC + 0.48); L(EXT, uo, um, y0, y1, FASC + 0.48, SHOPTOP + 0.4);
     B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), a0, a1, TRAN, SHOPTOP);
     lot.fascia = { v0: a0 + 0.3, v1: a1 - 0.3, h0: TRAN + 0.42, h1: FASC - 0.32, u: uo - 0.07 };
 
@@ -173,22 +188,22 @@ export function buildTown(B) {
       // raised panels on the riser
       for (let i = 0; i < n; i++) L(PAINT, uo - 0.1, uo - 0.06, va + i * w + 0.35, va + (i + 1) * w - 0.35, FL + 0.35, SILL - 0.5, G);
       for (let i = 0; i <= n; i++) { const v = va + i * w, t = i === 0 || i === n ? 0.16 : 0.09; L(PAINT, uo + 0.12, uo + 0.5, v - t, v + t, SILL, TRAN, G); }
-      L(PAINT, uo + 0.12, uo + 0.5, va, vb, HEAD, HEAD + 0.24, G);                                                // transom bar
+      L(PAINT, uo + 0.1, uo + 0.52, va, vb, HEAD, HEAD + 0.24, G);                                                // transom bar (a hair proud of the mullions it crosses)
       if (lot.piers === 'iron') for (let i = 0; i <= n; i++) { const v = va + i * w; B.pcyl(PAINT, s * (uo - 0.16), v, 0.5, TRAN - 0.3, 0.2, 0.15, 10); L(PAINT, uo - 0.42, uo + 0.1, v - 0.3, v + 0.3, TRAN - 0.3, TRAN + 0.05); L(PAINT, uo - 0.4, uo + 0.08, v - 0.27, v + 0.27, 0.5, 0.95); }      // cast-iron columns, cap and base
-      L('glass', uo + 0.3, uo + 0.33, va + 0.1, vb - 0.1, SILL, HEAD);
+      L('glass', uo + 0.3, uo + 0.33, va + 0.1, vb - 0.1, SILL - 0.02, HEAD + 0.02);      // (let into the sill and the bar: two-sided glass flickered on faces it shared with them)
       // the transom: small square lights
       const k = Math.max(2, Math.round((vb - va) / 1.5)), kw = (vb - va) / k;
       for (let i = 1; i < k; i++) L(PAINT, uo + 0.2, uo + 0.42, va + i * kw - 0.04, va + i * kw + 0.04, HEAD + 0.24, TRAN, G);
-      L('glass', uo + 0.3, uo + 0.33, va + 0.1, vb - 0.1, HEAD + 0.24, TRAN);
+      L('glass', uo + 0.3, uo + 0.33, va + 0.1, vb - 0.1, HEAD + 0.22, TRAN + 0.02);
       B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), va, vb, 0, TRAN);
       portals.push({ x0: Math.min(s * uo, s * ui), x1: Math.max(s * uo, s * ui), y0: SILL, y1: TRAN, z0: wz(vb), z1: wz(va), n: 'x', kind: 'win' });
       windows.push({ isX: false, c: s * uo, sg: s, u0: va, u1: vb, fl: FL, sill: SILL - FL, head: TRAN - FL, lot: lot.id });
     };
     bay(a0, d0); bay(d1, a1);
     // the door: jambs, a glazed leaf, a light over it
-    L(PAINT, uo - 0.06, ui, d0 - 0.02, d0 + 0.22, FL, TRAN, G); L(PAINT, uo - 0.06, ui, d1 - 0.22, d1 + 0.02, FL, TRAN, G);
+    L(PAINT, uo - 0.06, ui, d0, d0 + 0.22, FL, TRAN, G); L(PAINT, uo - 0.06, ui, d1 - 0.22, d1, FL, TRAN, G);      // (they ran 0.02 on into the bays, face to face with the risers)
     L(PAINT, uo - 0.06, ui, d0 + 0.22, d1 - 0.22, DOORH, DOORH + 0.3, G);
-    L('glass', uo + 0.3, uo + 0.33, d0 + 0.22, d1 - 0.22, DOORH + 0.3, TRAN);
+    L('glass', uo + 0.3, uo + 0.33, d0 + 0.2, d1 - 0.2, DOORH + 0.28, TRAN + 0.02);
     L('pavers', uo - 0.1, ui, d0 + 0.22, d1 - 0.22, FL - 0.5, FL + 0.016);                                       // the threshold
     B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), d0, d0 + 0.22, 0, TRAN); B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), d1 - 0.22, d1, 0, TRAN);
     B.block(Math.min(s * uo, s * ui), Math.max(s * uo, s * ui), d0, d1, DOORH, TRAN);
@@ -230,11 +245,15 @@ export function buildTown(B) {
         for (const v of [w.v0, w.v1]) L(TRIM, uo + 0.1, uo + 0.34, v - 0.1, v + 0.1, w.h0, w.h1);                // sash frame
         L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, (w.h0 + w.h1) / 2 - 0.07, (w.h0 + w.h1) / 2 + 0.07);            // meeting rail
         L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, w.h1 - 0.12, w.h1); L(TRIM, uo + 0.14, uo + 0.3, w.v0, w.v1, w.h0, w.h0 + 0.12);
-        L('c#1a1614/0.9', um, um + 0.1, w.v0 - 0.2, w.v1 + 0.2, w.h0 - 0.2, w.h1 + 0.2);                          // dark behind, should the pane fail
+        L('c#1a1614/0.9', um - 0.02, um + 0.08, w.v0 - 0.2, w.v1 + 0.2, w.h0 - 0.2, w.h1 + 0.2);                  // dark behind, should the pane fail (a hair in front of the roof slab, seen through some)
         upWindows.push({ x: s * (uo + 0.36), y: (w.h0 + w.h1) / 2, z: wz((w.v0 + w.v1) / 2), w: w.v1 - w.v0, h: w.h1 - w.h0, side: s, lot: lot.id });
       }
       // cornice and parapet coping
-      { const CT = lot.cornice === 'dentil' ? EXT : TRIM, k = lot.cornice === 'dentil' ? 0.55 : 1; L(CT, uo - 0.35 * k, uo + 0.05, y0, y1, top - 0.2, top + 0.25); L(CT, uo - 0.75 * k, uo + 0.05, y0 - 0.1, y1 + 0.1, top + 0.25, top + 0.6); L(CT, uo - 0.5 * k, uo + 0.05, y0 - 0.05, y1 + 0.05, top + 0.6, top + 0.8); }      // (let into the wall's face only: carried through, they flickered on the inside of the parapet)
+      // The cornice returns round an end only where the next building is not the same height: where the two are level, the two
+      // cornices meet end to end (they used to run on a tenth of a foot into each other, sharing their top and under faces). It is
+      // laid on the wall's face, not let into it: let in, its ends shared the end face of the wall at the end of the row.
+      { const CT = lot.cornice === 'dentil' ? EXT : TRIM, k = lot.cornice === 'dentil' ? 0.55 : 1, r0 = level(y0) ? 0 : 1, r1 = level(y1) ? 0 : 1;
+        L(CT, uo - 0.35 * k, uo, y0, y1, top - 0.2, top + 0.25); L(CT, uo - 0.75 * k, uo, y0 - 0.1 * r0, y1 + 0.1 * r1, top + 0.25, top + 0.6); L(CT, uo - 0.5 * k, uo, y0 - 0.05 * r0, y1 + 0.05 * r1, top + 0.6, top + 0.8); }
       if (lot.cornice === 'dentil') { for (let v = y0 + 0.35; v < y1 - 0.2; v += 0.72) L(EXT, uo - 0.26, uo, v - 0.17, v + 0.17, top - 0.42, top + 0.02); L(EXT, uo - 0.16, uo, y0, y1, top - 0.7, top - 0.42); }      // corbelled brick teeth
       else for (let v = y0 + 0.9; v < y1 - 0.5; v += 1.8) L(TRIM, uo - 0.6, uo, v - 0.22, v + 0.22, top - 0.35, top + 0.25);   // brackets under it
       L(TRIM, uo - 0.1, um + 0.15, y0, y1, wallTo, wallTo + 0.22);

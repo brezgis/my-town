@@ -150,7 +150,7 @@ export function dressFronts(K, town) {
 export function frontsLife(ctx, K) {
   const { scene, animated, day, renderer } = ctx, town = K.town;
   const on = () => 1 - THREE.MathUtils.smoothstep(day.light, 0.42, 0.97);
-  const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const aniso = Math.min(16, renderer.capabilities.getMaxAnisotropy());      // (the names are read at a slant, from down the pavement)
   // ---- the names: one sheet, one mesh, lit by their lamps after dark -------------------------------------
   {
     const PPF = 84, lots = LOTS.filter(l => NAMES[l.id]), rows = lots.map(l => ({ l, w: Math.round((l.fascia.v1 - l.fascia.v0) * PPF), h: Math.round((l.fascia.h1 - l.fascia.h0) * PPF) }));

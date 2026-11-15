@@ -13,7 +13,9 @@ export function setTextureTier(t) { texTier = t ?? 'full'; }
 // is dressed almost at once; those the quality tier wants at full size are then fetched one at a time once the
 // street is up (sharpenTextures, called from main.js) and swapped in, which nobody sees happen.
 export function sharedTexture(file) {
-  const wantFull = !(texTier === 'half' || (texTier === 'detail' && /_(rough|normal)$/.test(file)));
+  // (A roughness map is never fetched at full size: it is a soft, low-contrast map whose half-size copy cannot be told from the
+  // whole one on screen, and at full size the street's roughness maps were 70 MB of graphics memory.)
+  const wantFull = !(texTier === 'half' || /_rough$/.test(file) || (texTier === 'detail' && /_normal$/.test(file)));
   const url = `assets/tex/512/${file}.jpg`;
   let e = shared.get(url);
   if (!e) {
@@ -43,7 +45,7 @@ export function sharpenTextures(gap = 220) {
 }
 
 export function makeMaterials(renderer, quality = {}) {
-  const aniso = Math.min(quality.aniso ?? 8, renderer.capabilities.getMaxAnisotropy());
+  const aniso = Math.min(quality.aniso ?? 8, renderer.capabilities.getMaxAnisotropy());      // (the street is mostly seen at a slant: walls, pavement, signs)
 
   function tex(file, size, srgb) {
     const t = sharedTexture(file);

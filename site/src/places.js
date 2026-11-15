@@ -121,7 +121,8 @@ export function buildPlaces(K, town) {
     K.projector = { x: px - 1.8, y: 5.9, z: -py };
     const cx = bx + 6, cy = 110;
     K.box('c#b8452e/0.6', cx - 1.6, cx + 1.6, 0.6, 3.2, -(cy + 1.1), -(cy - 1.1), { collide: true }); for (const dx of [-1.2, 1.2]) K.put('c#1c1c1c/0.9', new THREE.TorusGeometry(0.75, 0.1, 6, 16).translate(cx + dx, 0.85, -(cy - 1.2)));
-    K.box('glass', cx - 1.5, cx + 1.5, 3.2, 5.6, -(cy + 1.0), -(cy - 1.0)); K.box('c#e9c46a/0.9', cx - 1.4, cx + 1.4, 3.2, 4.3, -(cy + 0.9), -(cy - 0.9)); K.box('c#b8452e/0.6', cx - 1.7, cx + 1.7, 5.6, 5.9, -(cy + 1.2), -(cy - 1.2));
+    K.box('glass', cx - 1.5, cx + 1.5, 3.19, 5.61, -(cy + 1.0), -(cy - 1.0));      // (let a hair into the cart and its roof: the glass is two-sided, and its ends flickered against them)
+    K.box('c#e9c46a/0.9', cx - 1.4, cx + 1.4, 3.2, 4.3, -(cy + 0.9), -(cy - 0.9)); K.box('c#b8452e/0.6', cx - 1.7, cx + 1.7, 5.6, 5.9, -(cy + 1.2), -(cy - 1.2));
     lantern(cx, cy, 5.3, 0.16, 'e#ffe2b4/1.7'); K.lamp(cx, 5.2, -cy + 2, 0.7);
     kit.clerks.push({
       id: 'gus', name: 'Gus', lot: 'garden', floor: 0, reach: 20, look: { shape: 'tall', colour: '#7a2f2f', belly: '#efe4cf', trim: '#c9a45c', hat: 'cap', hatColour: '#7a2f2f', bowtie: '#c9a45c', eye: '#ffe9c0', ring: 0xffd9a0, hover: 3.3 },
@@ -160,23 +161,120 @@ export function buildPlaces(K, town) {
     for (const a of [0.3, 1.9, 3.5, 5.1]) K.seat(ox + Math.cos(a) * 5.0, CURB + 1.55, -oy + Math.sin(a) * 5.0, Math.atan2(-Math.cos(a), -Math.sin(a)) + Math.PI, 'sit under the oak');
     K.collide(ox - 4.2, ox + 4.2, -oy - 4.2, -oy + 4.2, 1.6);
     for (const a of [0.9, 2.4, 4.3, 5.6]) lantern(ox + Math.cos(a) * 7, oy + Math.sin(a) * 7, CURB + 11 + Math.sin(a * 3), 0.28, 'e#ffb866/2.2');
-    // the cart: a little caravan with a hatch, an awning and a chimney
-    const cx = -38, cy = 86, CART = 'c#3f6a5a/0.5', CR = 'c#ece4d0/0.6';
-    K.box(CART, cx - 5, cx + 5, CURB + 1.6, CURB + 8.6, -(cy + 2.6), -(cy - 2.6)); K.put(CART, new THREE.CylinderGeometry(2.6, 2.6, 10, 16, 1, false, 0, Math.PI).rotateZ(Math.PI / 2).rotateX(-Math.PI / 2).scale(1, 0.4, 1).translate(cx, CURB + 8.6, -cy));
-    K.box(CR, cx - 5.05, cx + 5.05, CURB + 4.3, CURB + 4.5, -(cy + 2.65), -(cy - 2.65)); K.box('c#17140f/0.9', cx - 3.6, cx + 3.2, CURB + 4.5, CURB + 7.6, -(cy + 2.62), -(cy + 2.4));          // the hatch (faces +Y, into the yard)
-    K.box(WOOD, cx - 3.9, cx + 3.5, CURB + 4.3, CURB + 4.5, -(cy + 3.6), -(cy + 2.5));                                                                                      // its counter
-    for (let i = 0; i < 6; i++) K.box(i % 2 ? CR : 'c#c8402f/0.9', cx - 3.9 + i * 1.23, cx - 3.9 + (i + 1) * 1.23, CURB + 7.5, CURB + 7.56, -(cy + 5.2), -(cy + 2.6), { rot: [0.3, 0, 0] });
-    for (const dx of [-3.9, 3.5]) K.tube(IRON, [cx + dx, CURB + 7.0, -(cy + 5.1)], [cx + dx, CURB + 4.5, -(cy + 2.7)], 0.03, 4);
-    for (const dx of [-3.2, 3.2]) { K.put('c#1c1c1c/0.9', new THREE.TorusGeometry(1.0, 0.24, 8, 18).translate(cx + dx, CURB + 1.2, -(cy + 2.7))); K.put('c#1c1c1c/0.9', new THREE.TorusGeometry(1.0, 0.24, 8, 18).translate(cx + dx, CURB + 1.2, -(cy - 2.7))); }
-    K.cyl('c#2b2724/0.5', cx + 3.6, CURB + 9, CURB + 12, -(cy - 1.2), 0.3, 0.3, 10); K.cyl('c#2b2724/0.5', cx + 3.6, CURB + 12, CURB + 12.3, -(cy - 1.2), 0.45, 0.2, 10);
+    // the cart: a little caravan with a serving hatch, an awning and a chimney, parked with its tow hitch to the street.
+    // Its body is drawn in plan as a rounded oblong and stood up in slices, so the hatch can be a real opening into a
+    // lit kitchen (Bao serves from its sill, on the counter line he has always stood on). Heights are above the kerb.
+    const cx = -38, cy = 86, CART = 'c#3f6a5a/0.5', CR = 'c#ece4d0/0.6', SEAM = 'c#2e5244/0.5', CHROME = 'c#b9bcc0/0.3/1', BAMBOO = 'c#c9a56a/0.8', CANE = 'c#8a6a3a/0.8';
+    const hx0 = cx - 3.4, hx1 = cx + 2.7, hb = cy + 0.4, HALF = Math.PI;      // the hatch: its ends, and the kitchen's back wall
+    const plan = (hx, hy, rad, notch) => {      // a rounded oblong about the cart's middle; notch cuts the hatch into its +Y side
+      const s = new THREE.Shape(); s.moveTo(-hx + rad, -hy); s.lineTo(hx - rad, -hy); s.absarc(hx - rad, -hy + rad, rad, -HALF / 2, 0); s.lineTo(hx, hy - rad); s.absarc(hx - rad, hy - rad, rad, 0, HALF / 2);
+      if (notch) { s.lineTo(hx1 - cx, hy); s.lineTo(hx1 - cx, hb - cy); s.lineTo(hx0 - cx, hb - cy); s.lineTo(hx0 - cx, hy); }
+      s.lineTo(-hx + rad, hy); s.absarc(-hx + rad, hy - rad, rad, HALF / 2, HALF); s.lineTo(-hx, -hy + rad); s.absarc(-hx + rad, -hy + rad, rad, HALF, HALF * 1.5); return s;
+    };
+    const slab = (mat, shape, h0, h1, bevel) => { const g = new THREE.ExtrudeGeometry(shape, bevel ? { depth: 0.001, bevelEnabled: true, bevelThickness: bevel[0], bevelSize: bevel[1], bevelSegments: 5, curveSegments: 6 } : { depth: h1 - h0, bevelEnabled: false, curveSegments: 6 }); g.rotateX(-HALF / 2); g.translate(cx, CURB + h0, -cy); K.put(mat, g); };
+    slab(CART, plan(5, 2.6, 0.9), 2.0, 4.3); slab(CART, plan(5, 2.6, 0.9, true), 4.3, 7.6); slab(CART, plan(5, 2.6, 0.9), 7.6, 8.7);
+    slab(CR, plan(4.2, 1.8, 0.1), 8.7, 8.7, [0.7, 0.8]);                                         // the roof, cream, rounded over (its lower half is inside the body)
+    slab(CR, plan(5.04, 2.64, 0.94), 4.08, 4.28); slab(CHROME, plan(5.03, 2.63, 0.93), 2.86, 2.94);  // the cream belt under the sill, a rubbing strip lower down
+    for (const x of [cx - 2.6, cx + 2.0]) K.box(SEAM, x - 0.02, x + 0.02, CURB + 2.05, CURB + 4.05, -(cy + 2.63), -(cy + 2.57));   // panel seams
+    for (const x of [cx - 2.6, cx - 0.2]) K.box(SEAM, x - 0.02, x + 0.02, CURB + 2.05, CURB + 8.65, -(cy - 2.57), -(cy - 2.63));
+    // the kitchen: a worktop that runs out through the hatch as the counter, cream lining, a light under the hatch head
+    K.box(WOOD, hx0 + 0.02, hx1 - 0.02, CURB + 4.3, CURB + 4.5, -(cy + 3.6), -(hb + 0.02));
+    for (const x of [hx0 + 0.4, hx1 - 0.4]) K.beam(IRON, [x, CURB + 3.4, -(cy + 2.62)], [x, CURB + 4.28, -(cy + 3.45)], 0.07);
+    for (const [a, b] of [[hx0, hx0 + 0.04], [hx1 - 0.04, hx1]]) K.box(CR, a, b, CURB + 4.5, CURB + 7.58, -(cy + 2.55), -(hb + 0.02));
+    K.box(CR, hx0 - 0.15, hx1 + 0.15, CURB + 7.6, CURB + 7.78, -(cy + 2.68), -(cy + 2.58)); for (const [a, b] of [[hx0 - 0.15, hx0], [hx1, hx1 + 0.15]]) K.box(CR, a, b, CURB + 4.3, CURB + 7.6, -(cy + 2.68), -(cy + 2.58));   // the hatch's frame
+    K.box('e#ffd9a0/1.4', hx0 + 0.3, hx1 - 0.3, CURB + 7.5, CURB + 7.56, -(cy + 2.2), -(cy + 2.0)); K.lamp(cx - 0.3, CURB + 7.0, -(cy + 1.6), 0.8);
+    sign((hx0 + hx1) / 2, hb + 0.03, CURB + 6.04, 0, hx1 - hx0 - 0.1, 3.0, (g, w, h) => {      // its back wall: tiles, a shelf of jars, the ladles
+      fill(g, w, h, '#efe2c4'); g.strokeStyle = '#d8c6a0'; g.lineWidth = 2; for (let x = 0; x < w; x += 34) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); } for (let y = 0; y < h; y += 34) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+      g.fillStyle = '#6a4a30'; g.fillRect(0, h * 0.3, w, h * 0.035);
+      [['#c8402f', 0.12], ['#a8823a', 0.2], ['#5a7a4a', 0.27], ['#d9b26a', 0.6], ['#8a2a1c', 0.67], ['#c8402f', 0.86]].forEach(([c, x], i) => { g.fillStyle = c; g.fillRect(w * x - 9, h * 0.3 - 30 - (i % 2) * 8, 18, 30 + (i % 2) * 8); g.fillStyle = '#efe2c4'; g.fillRect(w * x - 9, h * 0.3 - 22, 18, 6); });
+      for (const [x, k] of [[0.4, 0], [0.46, 1], [0.52, 0]]) { line(g, [[w * x, h * 0.34], [w * x, h * 0.5]], '#5a5048', 3); disc(g, w * x, h * 0.53, k ? 9 : 12, k ? null : '#5a5048', k ? '#5a5048' : null, 3); }
+      g.save(); g.translate(w * 0.78, h * 0.47); g.rotate(-0.05); g.fillStyle = '#f8f1dc'; g.fillRect(-w * 0.09, -h * 0.06, w * 0.18, h * 0.12); g.restore(); T(g, '18 pleats. not 17.', w * 0.78, h * 0.47, h * 0.045, '#7a3a2a', { f: F.caveat, w: 600, rot: -0.05 });
+    }, { cw: 610, ch: 300, glow: 0.5 });
+    // bamboo steamers, stacked and steaming on the stove at the back; the stock pot
+    K.box('c#2b2724/0.5', cx - 3.3, cx - 1.1, CURB + 4.5, CURB + 4.7, -(cy + 1.7), -(cy + 0.6));
+    for (const [dx, n] of [[-2.7, 4], [-1.7, 3]]) {
+      for (let i = 0; i < n; i++) { const y = CURB + 4.7 + i * 0.32; K.cyl(BAMBOO, cx + dx, y, y + 0.26, -(cy + 1.15), 0.48, 0.48, 14); K.cyl(CANE, cx + dx, y + 0.26, y + 0.32, -(cy + 1.15), 0.5, 0.5, 14); }
+      const top = CURB + 4.7 + n * 0.32; K.cyl(BAMBOO, cx + dx, top, top + 0.14, -(cy + 1.15), 0.48, 0.3, 14); K.cyl(CANE, cx + dx, top + 0.14, top + 0.2, -(cy + 1.15), 0.08, 0.08, 8);
+    }
+    K.cyl('c#8a8f92/0.35/1', cx + 2.0, CURB + 4.5, CURB + 5.2, -(cy + 1.1), 0.42, 0.42, 16); K.cyl('c#8a8f92/0.35/1', cx + 2.0, CURB + 5.2, CURB + 5.26, -(cy + 1.1), 0.45, 0.4, 16);
+    K.steam = [[cx - 2.7, CURB + 6.2, -(cy + 1.15)], [cx - 1.7, CURB + 5.9, -(cy + 1.15)], [cx + 3.2, CURB + 12.0, -(cy - 1.2)]];
+    // on the counter: chopsticks in a cup and the tip tin at one end, sauces at the other, the bell; the middle kept clear for your plate
+    K.cyl(CR, cx - 3.05, CURB + 4.5, CURB + 4.8, -(cy + 3.2), 0.13, 0.12, 10);
+    for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; K.tube('c#d9b88a/0.8', [cx - 3.05 + Math.cos(a) * 0.05, CURB + 4.55, -(cy + 3.2 + Math.sin(a) * 0.05)], [cx - 3.05 + Math.cos(a) * 0.12 - 0.04, CURB + 5.15, -(cy + 3.2 + Math.sin(a) * 0.12)], 0.016, 4); }
+    K.cyl('c#9aa0a4/0.35/1', cx - 2.65, CURB + 4.5, CURB + 4.82, -(cy + 3.3), 0.16, 0.16, 14);
+    sign(cx - 2.65, cy + 3.49, CURB + 4.66, 0, 0.26, 0.17, (g, w, h) => { fill(g, w, h, '#f3ead2'); T(g, 'tips ♥', w / 2, h * 0.55, h * 0.6, '#c8402f', { f: F.caveat, w: 600 }); }, { cw: 72, ch: 46 });
+    K.lathe(PAINT.brass, cx - 2.25, CURB + 4.5, -(cy + 3.35), [[0.01, 0], [0.14, 0], [0.13, 0.05], [0.09, 0.14], [0.03, 0.18], [0.03, 0.22], [0.01, 0.23]], 12);
+    for (let i = 0; i < 4; i++) K.lathe(K.pick(['c#3a2214/0.3', 'c#8a1c1c/0.3', 'c#17140f/0.3']), cx + 1.8 + i * 0.25, CURB + 4.5, -(cy + 3.3), [[0.01, 0], [0.09, 0], [0.09, 0.3], [0.04, 0.4], [0.035, 0.46], [0.01, 0.47]], 10);
+    // the awning: striped canvas on a batten, a scalloped valance, two props, a string of bulbs along its edge
+    const aw0 = hx0 - 0.25, aw1 = hx1 + 0.25, NS = 8, sw = (aw1 - aw0) / NS;
+    K.box(WOODD, aw0 - 0.05, aw1 + 0.05, CURB + 8.22, CURB + 8.42, -(cy + 2.75), -(cy + 2.58));
+    for (let i = 0; i < NS; i++) {
+      const mat = i % 2 ? CR : 'c#c8402f/0.9', xc = aw0 + (i + 0.5) * sw;
+      K.beam(mat, [xc, CURB + 8.3, -(cy + 2.62)], [xc, CURB + 7.55, -(cy + 5.4)], sw, 0.05);
+      K.box(mat, xc - sw / 2, xc + sw / 2, CURB + 7.27, CURB + 7.57, -(cy + 5.44), -(cy + 5.4));
+      K.put(mat, new THREE.CylinderGeometry(sw / 2, sw / 2, 0.04, 10, 1, false, -HALF / 2, HALF).rotateX(HALF / 2).translate(xc, CURB + 7.27, -(cy + 5.42)));
+    }
+    for (const x of [aw0 + 0.08, aw1 - 0.08]) K.tube(IRON, [x, CURB + 7.5, -(cy + 5.36)], [x, CURB + 4.35, -(cy + 2.66)], 0.04, 6);
+    K.strand([aw0, CURB + 7.45, -(cy + 5.62)], [aw1, CURB + 7.45, -(cy + 5.62)], 0.3, 7);
+    K.lamp(cx, CURB + 6.6, -(cy + 4.2), 0.9);
+    // the menu, chalked on a framed slate beside the hatch
+    K.box(WOODD, cx + 3.05, cx + 4.1, CURB + 4.85, CURB + 7.15, -(cy + 2.66), -(cy + 2.58));
+    sign(cx + 3.575, cy + 2.69, CURB + 6.0, 0, 0.93, 2.18, (g, w, h) => {
+      slate(g, w, h); chalk(g, 'GOOD FOLD', w / 2, h * 0.07, h * 0.06, '#e9c46a'); chalk(g, 'six dumplings', w / 2, h * 0.17, h * 0.06, '#f1efe6');
+      ['pork & chive', 'mushroom', 'the spicy one'].forEach((s, i) => chalk(g, s, w / 2, h * (0.29 + i * 0.09), h * 0.052, '#f1efe6'));
+      chalk(g, '~', w / 2, h * 0.55, h * 0.06, '#9ab8a8'); chalk(g, 'soup', w / 2, h * 0.63, h * 0.06, '#f1efe6'); chalk(g, '(it is hot)', w / 2, h * 0.71, h * 0.045, '#c9c4b4');
+      chalk(g, 'six for a smile', w / 2, h * 0.86, h * 0.05, '#e8a8a0');
+    }, { cw: 200, ch: 470, rough: 0.95 });
+    // the name: a painted board up on the roof (both faces: the street sees its back), roundels on both ends, all lit at night
+    const nameBoard = (g, w, h) => {
+      fill(g, w, h, '#ece4d0'); g.strokeStyle = '#2f4a40'; g.lineWidth = 10; g.strokeRect(5, 5, w - 10, h - 10); g.strokeStyle = '#c8402f'; g.lineWidth = 3; g.strokeRect(18, 18, w - 36, h - 36);
+      T(g, 'Good Fold', w * 0.36, h * 0.47, h * 0.58, '#c8402f', { f: F.pacifico, shadow: 'rgba(47,74,64,0.35)' });
+      T(g, 'DUMPLINGS', w * 0.76, h * 0.4, h * 0.24, '#2f4a40', { f: F.archivo, ls: 6 }); T(g, 'steamed to order', w * 0.76, h * 0.68, h * 0.19, '#7a3a2a', { f: F.caveat, w: 600 });
+    };
+    K.box(WOODD, cx - 4.2, cx + 4.2, CURB + 9.75, CURB + 11.55, -(cy + 0.17), -(cy + 0.03)); K.box(CR, cx - 4.28, cx + 4.28, CURB + 11.55, CURB + 11.63, -(cy + 0.21), -(cy - 0.01));
+    for (const dx of [-3.2, 3.2]) K.tube(IRON, [cx + dx, CURB + 9.2, -(cy + 0.1)], [cx + dx, CURB + 9.8, -(cy + 0.1)], 0.07, 6);
+    sign(cx, cy + 0.2, CURB + 10.65, 0, 8.2, 1.7, nameBoard, { cw: 1170, ch: 243, glow: 0.9 }); sign(cx, cy, CURB + 10.65, 2, 8.2, 1.7, nameBoard, { cw: 1170, ch: 243, glow: 0.9 });
+    for (const dx of [-2.6, 2.6]) {      // two little goosenecks over its face
+      K.tube(IRON, [cx + dx, CURB + 11.6, -(cy + 0.1)], [cx + dx, CURB + 12.1, -(cy + 0.1)], 0.04, 5); K.tube(IRON, [cx + dx, CURB + 12.1, -(cy + 0.1)], [cx + dx, CURB + 12.1, -(cy + 0.9)], 0.04, 5);
+      K.cyl(IRON, cx + dx, CURB + 11.88, CURB + 12.12, -(cy + 0.95), 0.26, 0.07, 10); K.B.mesh('e#ffe2b4/1.8', new THREE.SphereGeometry(0.1, 8, 6).translate(cx + dx, CURB + 11.86, -(cy + 0.95))); K.glowDots.push([cx + dx, CURB + 11.86, -(cy + 0.95), 1.1]);
+    }
+    const roundel = (g, w, h) => {
+      fill(g, w, h, '#ece4d0'); disc(g, w / 2, h / 2, w * 0.47, null, '#2f4a40', w * 0.05); disc(g, w / 2, h / 2, w * 0.4, null, '#c8402f', w * 0.012);
+      T(g, 'Good', w / 2, h * 0.35, h * 0.23, '#c8402f', { f: F.pacifico }); T(g, 'Fold', w / 2, h * 0.57, h * 0.23, '#c8402f', { f: F.pacifico }); T(g, 'DUMPLINGS', w / 2, h * 0.77, h * 0.08, '#2f4a40', { f: F.archivo, ls: 3 });
+    };
+    for (const s of [1, -1]) {
+      sign(cx + s * 5.03, cy, CURB + 6.2, s > 0 ? 3 : 1, 3.0, 3.0, roundel, { cw: 300, ch: 300, round: true, glow: 0.6 });
+      K.tube(IRON, [cx + s * 5.0, CURB + 7.95, -cy], [cx + s * 5.45, CURB + 8.1, -cy], 0.04, 5); K.cyl(IRON, cx + s * 5.5, CURB + 7.95, CURB + 8.15, -cy, 0.2, 0.06, 10);
+      K.B.mesh('e#ffe2b4/1.8', new THREE.SphereGeometry(0.08, 8, 6).translate(cx + s * 5.5, CURB + 7.93, -cy)); K.glowDots.push([cx + s * 5.5, CURB + 7.93, -cy, 0.9]);
+    }
+    // the chimney, at the back
+    K.cyl('c#2b2724/0.5', cx + 3.2, CURB + 9.1, CURB + 11.6, -(cy - 1.2), 0.25, 0.25, 10); K.cyl('c#2b2724/0.5', cx + 3.2, CURB + 11.7, CURB + 11.95, -(cy - 1.2), 0.5, 0.12, 10); K.tube('c#2b2724/0.5', [cx + 3.2, CURB + 11.6, -(cy - 1.2)], [cx + 3.2, CURB + 11.72, -(cy - 1.2)], 0.05, 4);
+    // the door at the back, its step, a lit porthole
+    K.box(SEAM, cx + 1.4, cx + 3.4, CURB + 2.15, CURB + 7.7, -(cy - 2.57), -(cy - 2.66)); K.box('e#c98a4a/0.6', cx + 1.8, cx + 3.0, CURB + 5.9, CURB + 7.2, -(cy - 2.6), -(cy - 2.7));
+    K.box(CHROME, cx + 1.55, cx + 1.7, CURB + 4.5, CURB + 4.62, -(cy - 2.66), -(cy - 2.76)); K.box('c#8a8f92/0.5', cx + 1.6, cx + 3.2, CURB, CURB + 1.05, -(cy - 2.7), -(cy - 3.5)); K.collide(cx + 1.6, cx + 3.2, -(cy - 2.7), -(cy - 3.5), 1.05);
+    // running gear: chassis rails, one axle under the middle, wheels with hubs under arches, corner steadies wound down
+    for (const s of [1, -1]) K.box(IRON, cx - 4.5, cx + 4.6, CURB + 1.65, CURB + 1.98, -(cy + s * 1.7), -(cy + s * 1.45));
+    const ax = cx - 0.3; K.tube(IRON, [ax, CURB + 1.11, -(cy - 2.95)], [ax, CURB + 1.11, -(cy + 2.95)], 0.08, 6);
+    for (const s of [1, -1]) {
+      K.put('c#1c1c1c/0.9', new THREE.TorusGeometry(0.85, 0.26, 10, 24).translate(ax, CURB + 1.11, -(cy + s * 2.95)));
+      K.put(CR, new THREE.CylinderGeometry(0.6, 0.6, 0.26, 18).rotateX(HALF / 2).translate(ax, CURB + 1.11, -(cy + s * 2.95)));
+      K.put(CHROME, new THREE.CylinderGeometry(0.22, 0.22, 0.4, 12).rotateX(HALF / 2).translate(ax, CURB + 1.11, -(cy + s * 2.98)));
+      K.put(CART, new THREE.CylinderGeometry(1.3, 1.3, 0.68, 18, 1, true, HALF / 2, HALF).rotateX(HALF / 2).translate(ax, CURB + 1.11, -(cy + s * 2.95)));
+      for (const x of [cx - 4.2, cx + 4.2]) { K.tube(IRON, [x, CURB + 2.0, -(cy + s * 1.8)], [x, CURB + 0.1, -(cy + s * 2.05)], 0.06, 5); K.box(IRON, x - 0.2, x + 0.2, CURB, CURB + 0.08, -(cy + s * 2.05) - 0.2, -(cy + s * 2.05) + 0.2); }
+    }
+    // the A-frame to the street: hitch, jockey wheel, and the two gas bottles strapped on it
+    for (const s of [1, -1]) K.beam(IRON, [cx + 4.4, CURB + 1.8, -(cy + s * 1.58)], [cx + 7.4, CURB + 1.8, -cy], 0.16);
+    K.box(IRON, cx + 7.3, cx + 7.95, CURB + 1.65, CURB + 1.95, -(cy + 0.16), -(cy - 0.16)); K.sphere(IRON, cx + 7.95, CURB + 1.75, -cy, 0.2, 0.8); K.tube(IRON, [cx + 7.4, CURB + 1.95, -cy], [cx + 7.0, CURB + 2.3, -cy], 0.05, 5);
+    K.tube(IRON, [cx + 6.4, CURB + 0.6, -(cy + 0.53)], [cx + 6.4, CURB + 2.55, -(cy + 0.53)], 0.09, 8); K.tube(IRON, [cx + 6.4, CURB + 2.55, -(cy + 0.53)], [cx + 6.4, CURB + 2.6, -(cy + 0.9)], 0.04, 5);
+    K.box(IRON, cx + 6.35, cx + 6.45, CURB + 0.3, CURB + 0.7, -(cy + 0.66), -(cy + 0.4)); K.put('c#1c1c1c/0.9', new THREE.TorusGeometry(0.24, 0.09, 6, 16).translate(cx + 6.4, CURB + 0.33, -(cy + 0.53)));
+    K.box(IRON, cx + 4.95, cx + 6.0, CURB + 1.88, CURB + 1.96, -(cy + 0.95), -(cy - 0.95));
+    for (const [dy, mat] of [[0.45, 'c#b8452e/0.45'], [-0.45, 'c#9fb0b8/0.45']]) {
+      K.lathe(mat, cx + 5.45, CURB + 1.96, -(cy + dy), [[0.01, 0], [0.34, 0], [0.38, 0.06], [0.38, 1.25], [0.28, 1.5], [0.1, 1.56], [0.1, 1.7], [0.01, 1.71]], 14);
+      K.cyl(CHROME, cx + 5.45, CURB + 3.67, CURB + 3.72, -(cy + dy), 0.12, 0.12, 8);
+    }
+    K.tube('c#17140f/0.8', [cx + 5.45, CURB + 3.6, -(cy + 0.45)], [cx + 5.0, CURB + 3.1, -(cy + 0.7)], 0.03, 4);
+    K.collide(cx + 5.0, cx + 8.1, -(cy + 1.6), -(cy - 1.6), 3.8);
     K.collide(cx - 5.2, cx + 5.2, -(cy + 3.7), -(cy - 2.8), 9);
-    // bamboo steamers, stacked and steaming; bottles of sauce; a bell
-    for (const [dx, n] of [[-3.0, 3], [-1.7, 4], [2.6, 2]]) for (let i = 0; i < n; i++) { K.cyl('c#c9a56a/0.8', cx + dx, CURB + 4.5 + i * 0.36, CURB + 4.5 + i * 0.36 + 0.33, -(cy + 3.05), 0.52, 0.52, 14); K.cyl('c#8a6a3a/0.8', cx + dx, CURB + 4.5 + i * 0.36 + 0.3, CURB + 4.5 + i * 0.36 + 0.36, -(cy + 3.05), 0.54, 0.54, 14); }
-    K.steam = [[cx - 3.0, CURB + 5.7, -(cy + 3.05)], [cx - 1.7, CURB + 6.1, -(cy + 3.05)], [cx + 3.6, CURB + 12.4, -(cy - 1.2)]];
-    for (let i = 0; i < 4; i++) K.cyl(K.pick(['c#3a2214/0.3', 'c#8a1c1c/0.3', 'c#17140f/0.3']), cx + 0.6 + i * 0.36, CURB + 4.5, CURB + 5.1, -(cy + 3.3), 0.1, 0.07, 8);
-    lantern(cx - 4.4, cy + 5.0, CURB + 6.9, 0.36, 'e#ff7a5a/1.6'); lantern(cx + 4.0, cy + 5.0, CURB + 6.9, 0.36, 'e#ff7a5a/1.6'); K.lamp(cx, CURB + 6.6, -(cy + 4.2), 1.1);
-    sign(cx, cy + 2.62, CURB + 8.05, 0, 6.6, 0.85, (g, w, h) => { fill(g, w, h, '#ece4d0'); T(g, 'GOOD FOLD DUMPLINGS', w / 2, h * 0.54, h * 0.66, '#c8402f', { f: F.archivo, ls: 3 }); }, { cw: 660, ch: 86 });
-    sign(cx + 4.55, cy + 2.67, CURB + 5.3, 0, 0.9, 1.6, (g, w, h) => { slate(g, w, h); chalk(g, 'today', w / 2, h * 0.1, h * 0.11, '#e9c46a'); ['pork & chive', 'mushroom', 'the spicy one', 'soup (it is hot)', 'six for a smile'].forEach((s, i) => chalk(g, s, w / 2, h * (0.26 + i * 0.15), h * 0.085, i === 4 ? '#e8a8a0' : '#f1efe6')); }, { cw: 150, ch: 260, rough: 0.95 });
     kit.clerks.push({
       id: 'bao', name: 'Bao', lot: 'yard', floor: CURB, reach: 24, look: { shape: 'squat', colour: '#e9e2d2', belly: '#f6efe0', trim: '#c8402f', hat: 'toque', eye: '#ffd0a0', blush: true, ring: 0xffb07a, tool: 'ladle', hover: 5.75 },
       serve: { machine: [cx - 2.2, -(cy + 3.0)], pickup: { xz: [cx + 1.0, -(cy + 3.25)], y: CURB + 4.5 }, food: { 'six dumplings': { bites: 6, note: 'Six dumplings, gone. Eighteen pleats each. You counted none of them.', build: T3 => {

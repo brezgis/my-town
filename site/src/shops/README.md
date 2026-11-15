@@ -66,7 +66,7 @@ stands within about 6 ft of it is your window display and is seen from the stree
   yellowtail, archivo, goudy). Hand-lettered labels, tickets, posters and packaging are where the
   soul is: write real words on them, make them worth walking up to and reading.
 - Models: `../../assets/models/CATALOG.md` lists what exists; only the folders actually present in
-  `site/assets/models/` can be used (copy more from `/home/anna/projects/my_house/site/assets/models/`
+  `site/assets/models/` can be used (copy more from the my_house repo's `site/assets/models/`
   if you need one, they are CC0). Prefer building small goods from K's primitives over many models.
 
 ## The room itself

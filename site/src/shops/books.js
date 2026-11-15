@@ -121,12 +121,13 @@ export default function books(kit, lot) {
   const crest = (f, y, z, w, main, sub) => { f.box(DARKW, -w / 2 - 0.08, w / 2 + 0.08, y - 0.06, y, z, z + 0.84); kit.sign(f, 0, y + 0.012, z + 0.42, w, 0.72, SECTION(main, sub), { cw: Math.round(w * 128), ch: 92 }); };
 
   // ---- wall cases down both long walls, to the picture rail; four of them carry a board -----------------------
+  // (0.04 off the wall: the case's back then stands clear of the skirting's face, 0.06 out, instead of in it)
   const L0 = 7.4, L1 = D - 1.1, lw = (L1 - L0) / 5;           // the left wall: five cases from behind the window to the back
-  const leftF = [0, 1, 2, 3, 4].map(i => { const f = at(0.02, L0 + lw * (i + 0.5), 0, 'right'); kit.bookcase(f, lw - 0.03, 8.6, { wood: WOOD, fill: 0.94 }); return f; });
+  const leftF = [0, 1, 2, 3, 4].map(i => { const f = at(0.04, L0 + lw * (i + 0.5), 0, 'right'); kit.bookcase(f, lw - 0.03, 8.6, { wood: WOOD, fill: 0.94 }); return f; });
   crest(leftF[0], 0.96, 8.73, 5.6, 'FICTION'); crest(leftF[3], 0.96, 8.73, 5.6, 'POETRY');
   ticket(leftF[0], 0, 4, 'A to M', 1.0); ticket(leftF[1], 0, 4, 'N to Z', 1.0);
   const R0 = 18.6, R1 = D - 6.1, rw = (R1 - R0) / 3;         // the right wall: three cases between the blind dates and the chair
-  const rightF = [0, 1, 2].map(i => { const f = at(W - 0.02, R0 + rw * (i + 0.5), 0, 'left'); kit.bookcase(f, rw - 0.03, 8.6, { wood: WOOD, fill: 0.94 }); return f; });
+  const rightF = [0, 1, 2].map(i => { const f = at(W - 0.04, R0 + rw * (i + 0.5), 0, 'left'); kit.bookcase(f, rw - 0.03, 8.6, { wood: WOOD, fill: 0.94 }); return f; });
   crest(rightF[0], 0.96, 8.73, 5.6, 'LINGUISTICS & OTHER ARGUMENTS', 'descriptivists to the left. prescriptivists: also to the left.');
   { const L = rightF[0], x = rw / 4 - 0.02;
     ticket(L, -x, 4, 'syntax', 1.0); ticket(L, x, 4, 'semantics & pragmatics', 1.6); ticket(L, -x, 3, 'phonology /fəˈnɒlədʒi/', 1.6); ticket(L, x, 3, 'morphology: un-put-down-able', 1.8); }
@@ -135,10 +136,10 @@ export default function books(kit, lot) {
 
   // ---- the rolling ladder on the left wall ----------------------------------------------------------------
   {
-    const rail = at(0.02, (L0 + L1) / 2, 0, 'right'), half = (L1 - L0) / 2;
+    const rail = at(0.04, (L0 + L1) / 2, 0, 'right'), half = (L1 - L0) / 2;
     hcyl(rail, BRASS, 'x', 0, 1.13, 7.9, half * 2 - 0.2, 0.035, 0.035, 8);
     for (let i = 0; i <= 5; i++) { const x = -half + 0.1 + i * (half * 2 - 0.2) / 5; rail.box(BRASS, x - 0.03, x + 0.03, 0.98, 1.13, 7.87, 7.93); }
-    const l = at(0.02, L0 + lw * 3.5, 0, 'right'), foot = 3.0, top = 1.2, z0 = 0.24, z1 = 8.15;
+    const l = at(0.04, L0 + lw * 3.5, 0, 'right'), foot = 3.0, top = 1.2, z0 = 0.24, z1 = 8.15;
     for (const s of [-0.7, 0.7]) {
       tube(l, HONEY, [[s, foot, z0], [s, top, z1]], 0.08, 6, true);
       tube(l, BRASS, [[s, top, z1], [s, 1.1, 8.08], [s, 1.06, 7.9]], 0.03, 5);
@@ -179,8 +180,7 @@ export default function books(kit, lot) {
   {
     // the till: brass
     { const x = -1.7, y = 2.9, z = TOP;
-      c.soft(BRASS, x - 0.55, x + 0.55, y - 0.5, y + 0.45, z, z + 0.5, 0.05); c.soft(BRASS, x - 0.5, x + 0.5, y - 0.15, y + 0.45, z + 0.5, z + 1.0, 0.08);      // keys toward the wall side, where the clerk stands
-      for (let i = 0; i < 12; i++) c.cyl('c#efe9da/0.3', x - 0.36 + (i % 4) * 0.24, y - 0.25 - Math.floor(i / 4) * 0.08, z + 0.5 + (2 - Math.floor(i / 4)) * 0.05, z + 0.56 + (2 - Math.floor(i / 4)) * 0.05, 0.05, 0.05, 6); }
+      X.till(c, x, y, z); }
     // the bell
     ves(c, BRASS, -0.5, 3.2, TOP, [[0, 0], [0.17, 0], [0.17, 0.02], [0.14, 0.05], [0.12, 0.12], [0.06, 0.17], [0, 0.18]], 12); c.cyl(BLACK, -0.5, 3.2, TOP + 0.17, TOP + 0.22, 0.02, 0.02, 6);
     // the typewriter: its keys face the customer, who is expected to add a sentence

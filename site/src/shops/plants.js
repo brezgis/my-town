@@ -401,9 +401,7 @@ export default function plants(kit, lot) {
     const TOP = X.counter(c, -3.35, 3.35, -0.9, 0.9, 3.3, { front: SAGE, top: 'oak_light#b89466' });
     // the till
     { const x = 0.5, y = -0.3, z = TOP;
-      c.soft('c#2f5a6a/0.45', x - 0.55, x + 0.55, y - 0.5, y + 0.45, z, z + 0.45, 0.05); c.soft('c#2f5a6a/0.45', x - 0.5, x + 0.5, y - 0.1, y + 0.45, z + 0.45, z + 0.95, 0.08); c.box(BRASS, x - 0.56, x + 0.56, y - 0.51, y + 0.46, z + 0.02, z + 0.06);
-      for (let i = 0; i < 12; i++) c.cyl('c#efe9da/0.3', x - 0.36 + (i % 4) * 0.24, y - 0.2 - Math.floor(i / 4) * 0.08, z + 0.45 + (2 - Math.floor(i / 4)) * 0.05, z + 0.51 + (2 - Math.floor(i / 4)) * 0.05, 0.05, 0.05, 8);
-      c.box('c#17140f/0.3', x - 0.38, x + 0.38, y + 0.45, y + 0.462, z + 0.62, z + 0.86); }      // keys toward Moss (-y); the display faces the customer
+      X.till(c, x, y + 0.06, z, { body: 'c#2f5a6a/0.45' }); }      // keys toward Moss (-y); the flags face the customer
     // brown paper on its roll, twine, a mister, Audrey
     { const z = TOP; for (const x of [-2.75, -1.25]) c.box(DARKW, x - 0.04, x + 0.04, -0.7, -0.4, z, z + 0.75); hcyl(c, KRAFT, 'x', -2.0, -0.55, z + 0.55, 1.4, 0.24); hcyl(c, DARKW, 'x', -2.0, -0.55, z + 0.55, 1.6, 0.03);
       c.box(KRAFT, -2.68, -1.32, -0.32, -0.31, z + 0.02, z + 0.55); c.box(KRAFT, -2.68, -1.32, -0.32, 0.6, z + 0.004, z + 0.016);

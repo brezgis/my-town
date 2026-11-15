@@ -17,7 +17,7 @@ import { namedView, statsDump, VIEWS } from './perf.js';
 import { makeVisibility } from './visibility.js';
 import { chooseQuality, rememberSlow, QUALITY_OPTIONS, storedChoice, chooseTier } from './quality.js';
 import { setTextureTier, sharpenTextures } from './materials.js';
-import { HL, installHouseLight, setHourLight, makeLampPool, makeExposure, makeWindowGlow, makeVignette, makeHalos } from './lighting.js';
+import { HL, installHouseLight, setHourLight, makeLampPool, makeExposure, makeWindowGlow, makeVignette, makeHalos, lightShops } from './lighting.js';
 import { makeWarmer } from './warm.js';
 import { makeShade } from './shade.js';
 
@@ -41,8 +41,11 @@ const sound = makeSound();
 // and texture sizes; ?quality=low|medium|high forces one.
 const QUALITY = chooseQuality(Q);
 setTextureTier(QUALITY.tex);
-const MAX_RATIO = Math.min(devicePixelRatio, Number(Q.get('ratio') ?? QUALITY.ratio));
-let ratio = MAX_RATIO;
+// A visit starts at the tier's resolution and is sharpened, a step at a time, up to its maxRatio (or the screen's own, if less)
+// while frames come quickly; ?ratio= fixes it.
+const MAX_RATIO = Math.min(devicePixelRatio, Number(Q.get('ratio') ?? QUALITY.maxRatio ?? QUALITY.ratio));
+let ratio = Math.min(MAX_RATIO, Number(Q.get('ratio') ?? QUALITY.ratio));
+const FLOOR = Math.min(ratio, QUALITY.name === 'low' || devicePixelRatio < 1.5 ? 0.7 : 1);      // the least it is lowered to when frames are slow
 const renderer = new THREE.WebGLRenderer({ antialias: QUALITY.antialias, powerPreference: 'high-performance' });
 renderer.setPixelRatio(ratio);
 renderer.setSize(innerWidth, innerHeight);
@@ -84,6 +87,7 @@ builder.zone = null; builder.zoner = vis.zoner;          // furniture and garden
 for (const l of lamps) l.kind = l.fire ? 'fire' : (l.kind ?? 'fill');
 const items = furnish(builder, house); mark('furnish');
 lamps.push(...items.lamps); items.lamps = lamps;
+lightShops(house);                                        // each shop lowers its even light after dark and lets its lamps make pools (lighting.js)
 const garden = Q.get('street') === '0' ? null : layStreet(builder, items, house); mark('garden');
 const materials = makeMaterials(renderer, QUALITY);
 const zoned = builder.finalize(scene, materials); mark('finalize');
@@ -353,18 +357,23 @@ renderer.setAnimationLoop(() => {
     const fps = frames / since, mostlySlow = slowFrames > frames * 0.6; frames = 0; since = 0; slowFrames = 0; settled++;
     if (fpsBox) fpsBox.textContent = `${fps.toFixed(0)} fps · ×${ratio.toFixed(2)} · ${QUALITY.name} · ${renderer.info.render.calls} calls · ${(renderer.info.render.triangles / 1000).toFixed(0)}k tris · ${(renderer.info.memory.textures)} tex`;
     slowSecs = settled > 3 && mostlySlow && !life.pending() ? slowSecs + 1 : 0;      // not while the furniture is still arriving: that is the processor, not the picture
-    if (slowSecs >= 2 && ratio > 0.7 && !Q.has('ratio')) {
-      nextRatio = Math.max(0.7, ratio - 0.2); fast = 0; slowSecs = 0;
+    // (Nothing else is given up first: measured on the street, the floor shade, the sun's shadow detail and the farther clutter each
+    // cost a few per cent of a frame at most; resolution is nearly all of it. On a high-density screen it goes no lower than 1, as
+    // 0.7 there was plainly soft; a machine still slow at its lowest starts its next visit a tier lower.)
+    if (slowSecs >= 2 && ratio > FLOOR && !Q.has('ratio')) {
+      nextRatio = Math.max(FLOOR, ratio - 0.2); fast = 0; slowSecs = 0;
       // If this undoes a recent sharpening, that level is too much for this machine here: hold
       // below it for a while (longer each time), so the resolution does not pump up and down.
-      if (t - raisedAt < 20) { ceiling = nextRatio; holdUntil = t + hold; hold = Math.min(hold * 2, 600); }
+      // (Above the tier's own starting resolution, a failed sharpening is final for the visit: tried again every half minute or so,
+      // it cost a stutter each time on a machine that keeps up at the start but not above it.)
+      if (t - raisedAt < 20) { ceiling = nextRatio; holdUntil = nextRatio >= Math.min(MAX_RATIO, QUALITY.ratio) - 0.001 ? Infinity : t + hold; hold = Math.min(hold * 2, 600); }
     }
     // ...and sharpens again, slowly, when there is time to spare
     fast = fps > 58 ? fast + 1 : 0;
     const top = t < holdUntil ? Math.min(MAX_RATIO, ceiling) : MAX_RATIO;
     if (fast >= 4 && ratio < top - 0.001 && nextRatio === null && !Q.has('ratio')) { nextRatio = Math.min(top, ratio + 0.1); fast = 0; raisedAt = t; }
     // Still slow at the lowest resolution: the next visit starts at a lower quality tier
-    slow = ratio <= 0.7 && fps < 30 ? slow + 1 : 0;
+    slow = ratio <= FLOOR + 0.001 && fps < 30 ? slow + 1 : 0;
     if (slow === 8 && !QUALITY.forced) rememberSlow(QUALITY.name);
   }
 });

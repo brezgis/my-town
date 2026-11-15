@@ -6,9 +6,13 @@
 
 import { lathe, loft, sweep, bev, softBox, extrude, merge, xf, sheet, rng, TAU } from './geom.js';
 import { fab, woodOf, OAK, FIR, WALNUT, BRASS, OLD_BRASS, PAINT, PAINT_SAGE, PORCELAIN, ENAMEL, NICKEL, GLASS, MIRROR, IRON, shade } from './mats.js';
+import { makeChairs } from './chairs.js';
 
 export function makeWood(K) {
-  const { put } = K;
+  // put, but turned by TURN about the frame's origin first: a chair pulled up to a table at an angle (diningChair's
+  // o.turn) is built square in its own frame and turned as a whole.
+  let TURN = 0;
+  const put = (f, m, g, t) => { if (t) xf(g, t); if (TURN) xf(g, { rz: TURN }); return K.put(f, m, g); };
   const R = (f, ...k) => rng(f.X, f.Y, f.h, f.q, ...k);
   const bd = (f, m, x0, x1, y0, y1, z0, z1, e = 0.015, o) => put(f, m, bev(x0, x1, y0, y1, z0, z1, e, o));
 
@@ -83,38 +87,67 @@ export function makeWood(K) {
     for (const x of [-ux - 0.32, ux + 0.32]) bd(f, m, x - 0.04, x + 0.04, -0.17, 0.17, 0.78, 1.32, 0.012, { grain: 'z', taper: -0.15 });
     f.block(-w / 2, w / 2, -d / 2, d / 2, 0, top);
   }
-  // A dining chair at (x, y) facing its frame's front (dq quarter turns more). back: 'ladder' |
-  // 'spindle'. seat: a fabric or leather for the drop-in seat. arms: true for a carver.
+  // A dining chair at (x, y) facing its frame's front (dq quarter turns more; turn or deg: any angle more,
+  // counter-clockwise seen from above). back: 'ladder' | 'spindle' | 'splat' (a vase-shaped splat). seat: a fabric or leather for the
+  // drop-in seat, or pad: false for a plain board seat. arms: true for a carver. w: its width (1.6; 1.9
+  // with arms). seatH: the seat's top (1.55; 1.48 with pad: false). The back posts are
+  // straight to the seat and rake back above it, eased round, with pyramid caps.
   function diningChair(f, x, y, o = {}) {
-    const s = f.sub(x, y, 0, o.dq ?? 0), m = woodOf(o.wood ?? OAK), w = o.arms ? 1.9 : 1.6, d = 1.5, sz = 1.42, bh = o.backH ?? 3.25;
-    const fy = d / 2 - 0.07, by = -d / 2 + 0.07;
+    const turn = o.turn ?? (o.deg != null ? o.deg * Math.PI / 180 : 0);
+    if (turn && !TURN) { TURN = turn; try { diningChair(f, x, y, { ...o, turn: 0, deg: null, _turn: turn }); } finally { TURN = 0; } return; }
+    const s = f.sub(x, y, 0, o.dq ?? 0), m = woodOf(o.wood ?? OAK), w = o.w ?? (o.arms ? 1.9 : 1.6), d = 1.5, sz = o.seatH != null ? o.seatH - (o.pad === false ? 0.06 : 0.13) : 1.42, bh = o.backH ?? sz + 1.83;
+    const fy = d / 2 - 0.07, by = -d / 2 + 0.07, rake = 0.12;      // (0.12: a chair set with its back to a wall, 0.95 off it, stays clear)
+    const back = z => by - (z <= sz ? 0 : rake * ((z - sz) / (bh - sz)) ** 1.15);      // the posts' line, y at height z
+    const post = (px, r0, r1) => loft([0, 0.25, 0.5, 0.75, 1].flatMap(k => { const z = sz * k; return [{ a: r0, b: r0, x: px, y: by, z }]; }).slice(0, -1)
+      .concat([0, 0.2, 0.4, 0.6, 0.8, 1].map(k => { const z = sz + (bh - sz) * k; return { a: r0 + (r1 - r0) * k, b: r0 + (r1 - r0) * k, x: px, y: back(z), z }; })), { seg: 12, e: 3.2, th0: Math.PI / 4, th1: Math.PI / 4 + TAU, sv: 1 });
     for (const sx of [-1, 1]) {
-      leg(s, m, sx * (w / 2 - 0.07), fy, sz, 0.13, 0.12);
-      bd(s, m, sx * (w / 2 - 0.07) - 0.07, sx * (w / 2 - 0.07) + 0.07, by - 0.07, by + 0.07, 0, bh, 0.012, { grain: 'z' });
-      put(s, m, lathe([[0.1, 0], [0.1, 0.02], [0.05, 0.08], [0, 0.09]], { seg: 4, th0: Math.PI / 4, th1: Math.PI / 4 + TAU }), { at: [sx * (w / 2 - 0.07), by, bh] });
-      bd(s, m, sx * (w / 2 - 0.07) - 0.035, sx * (w / 2 - 0.07) + 0.035, by + 0.07, fy - 0.065, 0.45, 0.55, 0.008, { grain: 'y' });
-      bd(s, m, sx * (w / 2 - 0.07) - 0.04, sx * (w / 2 - 0.07) + 0.04, by + 0.07, fy - 0.065, sz - 0.25, sz - 0.02, 0.008, { grain: 'y' });
-      if (o.arms) { bd(s, m, sx * (w / 2 - 0.07) - 0.08, sx * (w / 2 - 0.07) + 0.08, by, fy + 0.1, 2.25, 2.33, 0.012, { grain: 'y' }); bd(s, m, sx * (w / 2 - 0.07) - 0.05, sx * (w / 2 - 0.07) + 0.05, fy - 0.05, fy + 0.05, sz, 2.25, 0.01, { grain: 'z' }); }
+      const px = sx * (w / 2 - 0.07);
+      leg(s, m, px, fy, sz, 0.13, 0.12);
+      put(s, m, post(px, 0.07, 0.06));
+      put(s, m, lathe([[0.075, 0], [0.075, 0.02], [0.04, 0.08], [0, 0.095]], { seg: 4, th0: Math.PI / 4, th1: Math.PI / 4 + TAU }), { at: [px, back(bh), bh] });
+      bd(s, m, px - 0.035, px + 0.035, by + 0.07, fy - 0.065, 0.45, 0.55, 0.008, { grain: 'y' });
+      bd(s, m, px - 0.04, px + 0.04, by + 0.07, fy - 0.065, sz - 0.25, sz - 0.02, 0.008, { grain: 'y' });
+      if (o.arms) {
+        // the arm runs from the front post back into the raked back post, sloping down a little to the front
+        const za = 2.3, yb = back(za);
+        put(s, m, sweep([[px, fy + 0.1, za - 0.03], [px, (fy + yb) / 2, za], [px, yb + 0.05, za + 0.03]], 1, { shape: [[-0.08, -0.04], [0.08, -0.04], [0.08, 0.04], [-0.08, 0.04]], up: [0, 0, 1] }));
+        put(s, m, turnedPost(px, fy, sz, za - 0.05));
+      }
     }
     bd(s, m, -w / 2 + 0.14, w / 2 - 0.14, fy - 0.04, fy + 0.03, sz - 0.25, sz - 0.02, 0.008, { grain: 'x' });
     bd(s, m, -w / 2 + 0.14, w / 2 - 0.14, by - 0.035, by + 0.035, sz - 0.25, sz - 0.02, 0.008, { grain: 'x' });
     bd(s, m, -w / 2 + 0.14, w / 2 - 0.14, fy - 0.035, fy + 0.035, 0.6, 0.7, 0.008, { grain: 'x' });
     bd(s, m, -w / 2 + 0.14, w / 2 - 0.14, by - 0.035, by + 0.035, 0.6, 0.7, 0.008, { grain: 'x' });
+    const rail = (z, hh, bow, t = 0.03) => { const p = []; for (let i = 0; i <= 6; i++) { const u = i / 6; p.push([-w / 2 + 0.14 + (w - 0.28) * u, back(z) - bow * Math.sin(u * Math.PI), z]); }
+      put(s, m, sweep(p, 1, { shape: [[-hh, -t], [hh, -t], [hh, t], [-hh, t]], up: [0, 0, 1] })); };
     if ((o.back ?? 'ladder') === 'ladder') {
-      for (const z of [bh - 0.42, bh - 0.95, bh - 1.45].slice(0, bh > 2.9 ? 3 : 2)) {
-        const p = []; for (let i = 0; i <= 6; i++) { const u = i / 6; p.push([-w / 2 + 0.14 + (w - 0.28) * u, by - 0.08 * Math.sin(u * Math.PI), z]); }
-        put(s, m, sweep(p, 1, { shape: [[-0.14, -0.03], [0.14, -0.03], [0.14, 0.03], [-0.14, 0.03]], up: [0, 0, 1] }));
-      }
+      for (const z of [bh - 0.42, bh - 0.95, bh - 1.45].slice(0, bh > 2.9 ? 3 : 2)) rail(z, 0.14, 0.08);
+    } else if (o.back === 'splat') {
+      // a top rail, a shoe rail over the seat, and between them one vase-shaped splat, leaning with the posts
+      rail(bh - 0.2, 0.15, 0.04, 0.04); rail(sz + 0.3, 0.06, 0.02, 0.035);
+      const z0 = sz + 0.35, L = bh - 0.35 - z0, half = t => 0.13 - 0.05 * Math.sin(Math.min(1, t / 0.15) * Math.PI / 2) + 0.09 * Math.sin(Math.max(0, Math.min(1, (t - 0.1) / 0.7)) * Math.PI) + (t > 0.8 ? 0.06 * (t - 0.8) / 0.2 : 0);
+      const R = []; for (let i = 0; i <= 12; i++) { const t = i / 12; R.push([half(t), t * L]); }
+      const outline = [...R, ...R.slice().reverse().map(([x, z]) => [-x, z])];
+      put(s, m, extrude(outline, -0.03, 0.03), { rx: Math.atan2(back(z0) - back(z0 + L), L), at: [0, back(z0) - 0.06 * 0.6, z0] });
     } else {
-      bd(s, m, -w / 2 + 0.14, w / 2 - 0.14, by - 0.04, by + 0.04, bh - 0.4, bh - 0.12, 0.01, { grain: 'x' });
-      for (let i = 0; i < 5; i++) { const xx = -0.42 + i * 0.21; bd(s, m, xx - 0.03, xx + 0.03, by - 0.025, by + 0.025, sz + 0.05, bh - 0.4, 0.006, { grain: 'z' }); }
-      bd(s, m, -w / 2 + 0.14, w / 2 - 0.14, by - 0.04, by + 0.04, sz + 0.02, sz + 0.12, 0.01, { grain: 'x' });
+      rail(bh - 0.26, 0.14, 0.03, 0.04); rail(sz + 0.07, 0.05, 0.015, 0.04);
+      // five spindles from the lower rail to the top one, following both rails' bow; a little swelled
+      for (let i = 0; i < 5; i++) {
+        const xx = (-0.42 + i * 0.21) * (w - 0.28) / 1.32, u = Math.sin((xx + w / 2 - 0.14) / (w - 0.28) * Math.PI);
+        put(s, m, sweep([[xx, back(sz + 0.12) - 0.015 * u, sz + 0.1], [xx, back(bh - 0.38) - 0.03 * u, bh - 0.38]], t => 0.03 - 0.006 * t + 0.004 * Math.sin(t * Math.PI), { seg: 6 }));
+      }
     }
-    const st = fab(o.seat ?? 'leather', 'leather');
-    put(s, st, softBox(-w / 2 + 0.1, w / 2 - 0.1, by + 0.03, fy + 0.05, sz - 0.04, sz + 0.13, 0.05, { n: [2, 2, 1], crown: 0.035, welt: 0.008, noBottom: true }));
-    if (o.sit !== false) K.seat(s, 0, 0.1, sz + 0.13, 'sit');
-    s.block(-w / 2, w / 2, -d / 2, d / 2, 0, sz + 0.1);
+    if (o.pad === false) put(s, m, bev(-w / 2 + 0.06, w / 2 - 0.06, by - 0.02, fy + 0.07, sz - 0.03, sz + 0.06, 0.03, { grain: 'x' }));
+    else {
+      const st = fab(o.seat ?? 'leather', 'leather');
+      put(s, st, softBox(-w / 2 + 0.1, w / 2 - 0.1, by + 0.03, fy + 0.05, sz - 0.04, sz + 0.13, 0.05, { n: [2, 2, 1], crown: 0.035, welt: 0.008, noBottom: true }));
+    }
+    const top = o.pad === false ? sz + 0.06 : sz + 0.13, rt = o._turn ?? 0;
+    if (o.sit !== false) { const c = Math.cos(rt), sn = Math.sin(rt); K.seat(s, -0.1 * sn, 0.1 * c, top, o.label ?? 'sit'); if (rt) K.seats[K.seats.length - 1].yaw += rt; }
+    if (o.block !== false) { const h = rt ? Math.max(w, d) / 2 + 0.05 : 0; if (h) s.block(-h, h, -h, h, 0, sz + 0.1); else s.block(-w / 2, w / 2, -d / 2, d / 2, 0, sz + 0.1); }
   }
+  // A short turned post standing at (x, y) from z0 to z1 (a carver's arm support).
+  const turnedPost = (x, y, z0, z1) => lathe([[0.045, z0], [0.05, z0 + 0.06], [0.04, z0 + 0.12], [0.055, z0 + (z1 - z0) * 0.45], [0.04, z0 + (z1 - z0) * 0.55], [0.035, z1 - 0.05], [0.045, z1]], { seg: 8, x, y });
   // A small table at (x, y): 'round' (turned pedestal on a cross foot), 'square' (a tabouret with
   // a shelf), 'drum' (round top, three legs, a shelf). Returns the top's height.
   function sideTable(f, x, y, o = {}) {
@@ -539,5 +572,6 @@ export function makeWood(K) {
     if (m === 'copper') for (let x = -w / 2 + 0.1; x < w / 2; x += 0.25) put(f, BRASS, lathe([[0, 0], [0.02, 0], [0, 0.015]], { seg: 6 }), { rx: -Math.PI / 2, at: [x, d + 0.002, z0 + 0.3] });
   }
 
-  return { knob, cupPull, bailPull, drawer, shakerDoor, leg, table, diningTable, diningChair, sideTable, plantStand, carcass, dresser, nightstand, desk, console: console_, sideboard, wardrobe, closetRail, bracket, shoeRow, shoeRack, bootTray, hallTree, coatRack, bookcase, cabinets, basin, tap, upperCabinets, openShelves, plateRack, potRail, rangeHood };
+  const chairs = makeChairs(K, { diningChair });
+  return { ...chairs, knob, cupPull, bailPull, drawer, shakerDoor, leg, table, diningTable, diningChair, sideTable, plantStand, carcass, dresser, nightstand, desk, console: console_, sideboard, wardrobe, closetRail, bracket, shoeRow, shoeRack, bootTray, hallTree, coatRack, bookcase, cabinets, basin, tap, upperCabinets, openShelves, plateRack, potRail, rangeHood };
 }

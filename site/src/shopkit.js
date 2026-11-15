@@ -239,7 +239,7 @@ export function fixtures(kit, K) {
     else if (kind === 'globe') { f.cyl(BRASS, x, y, z + 0.52, z + 0.64, 0.12, 0.08, 10); ball(f, 'e#fbf3e4/1.4', x, y, z - 0.08, o.r ?? 0.34, 14); }
     else if (kind === 'paper') { ves(f, 'shade', x, y, z - 0.5, [[0.08, 0], [0.3, 0.06], [0.48, 0.24], [0.56, 0.5], [0.56, 0.7], [0.48, 0.96], [0.3, 1.14], [0.08, 1.2]], 28); for (const k of [0.24, 0.5, 0.7, 0.96]) f.cyl('c#cdbb98/0.8', x, y, z - 0.5 + k - 0.006, z - 0.5 + k + 0.006, k === 0.5 || k === 0.7 ? 0.565 : 0.485, k === 0.5 || k === 0.7 ? 0.565 : 0.485, 28); }
     else { f.cyl(BRASS, x, y, z + 0.18, z + 0.34, 0.07, 0.07, 8); ves(f, 'e#ffd9a0/2.2', x, y, z - 0.12, [[0.01, 0], [0.12, 0.06], [0.16, 0.16], [0.1, 0.27], [0.06, 0.3], [0, 0.3]], 10); }
-    if (o.light !== false) { kit.lampAt(f, x, y, z - 0.1, o.power ?? 0.9); kit.lamps[kit.lamps.length - 1].halo = o.halo ?? 0.8; }
+    if (o.light !== false) { kit.lampAt(f, x, y, z - 0.1, o.power ?? 0.9); kit.lamps[kit.lamps.length - 1].halo = o.halo ?? 0.8; kit.lamps[kit.lamps.length - 1].cone = kind === 'dome' || kind === 'cone' ? 1 : 0; }      // (cone: a shade that throws its light down, lighting.js)
   }
   // A stool at (x, y) you can sit on, seat at h.
   function stool(f, x, y, h = 2.4, o = {}) {
@@ -269,5 +269,82 @@ export function fixtures(kit, K) {
   }
   // A small price ticket or shelf card standing at (x, y, z), w by tall, leaning back a little.
   const card = (f, x, y, z, w, tall, draw, o = {}) => kit.sign(f, x, y, z + tall / 2, w, tall, draw, { cw: o.cw ?? Math.max(64, Math.round(w * 260)), ch: o.ch ?? Math.max(48, Math.round(tall * 260)), tilt: o.tilt ?? 0.18, rough: 0.9 });
-  return { shelving, plinth, counter, glassCase, pendant, stool, crate, slateBoard, aBoard, card, WOOD, DARKW, IRONM };
+  // A cash register on a counter top at (x, y, z): the old National kind, after the nickel-plated one at the
+  // Museum of the Biecz Land (KW/3434; 51 cm high, 38 wide, 47 deep). From the bottom: a dark wooden plinth, the
+  // cash drawer, a marble change plate in front of the keyboard, the case (a stepped keyboard rising to a rounded
+  // hood), the reading box on top with the amount flags in its window, a cresting over it, and the crank on one
+  // side. Its keys face -y (the clerk); the customer at +y sees the back and the flags in the window.
+  // Built from the shared palette, so a till adds about 3,400 triangles and at most one draw call (a colour or the
+  // marble that the shop had not used yet); the window on the customer's side is a picture. o: { body, trim, keys: [a, b], accent, ledge, base, crank (+1 right, -1
+  // left), knob, back(g, w, h) for the customer's window, s (scale) }. A painted till takes body = its enamel.
+  function till(f, x, y, z, o = {}) {
+    const s = o.s ?? 1, body = o.body ?? 'c#b08d4a/0.45/1', trim = o.trim ?? BRASS, ground = o.ground ?? 'c#3a2214/0.8';
+    const ledge = o.ledge ?? 'marble', base = o.base ?? ground, keyA = o.keys?.[0] ?? 'c#f4f1ea/0.45', keyB = o.keys?.[1] ?? 'c#17140f/0.45', side = o.crank ?? 1;
+    const W = 1.15, hw = W / 2, sm = snapMat;
+    const bx = (m, x0, x1, y0, y1, z0, z1) => f.box(sm(m), x + x0 * s, x + x1 * s, y + y0 * s, y + y1 * s, z + z0 * s, z + z1 * s);
+    const sf = (m, x0, x1, y0, y1, z0, z1, r) => f.soft(sm(m), x + x0 * s, x + x1 * s, y + y0 * s, y + y1 * s, z + z0 * s, z + z1 * s, r * s);
+    const cy = (m, cx, cy_, z0, z1, r, seg) => f.cyl(sm(m), x + cx * s, y + cy_ * s, z + z0 * s, z + z1 * s, r * s, r * s, seg);
+    const hc = (m, ax, cx, cy_, cz, len, r0, r1, seg) => hcyl(f, m, ax, x + cx * s, y + cy_ * s, z + cz * s, len * s, r0 * s, r1 * s, seg);
+    const tb = (m, pts, r, seg = 5) => tube(f, m, pts.map(([a, b, c]) => [x + a * s, y + b * s, z + c * s]), r * s, seg);
+    // a shape drawn in the frame's (y, z) plane and pushed across x from x0 to x1
+    const across = (m, pts, x0, x1, curve) => {
+      const sh = new THREE.Shape(); sh.moveTo(...pts[0]);
+      for (const p of pts.slice(1)) p.length === 4 ? sh.quadraticCurveTo(...p) : sh.lineTo(...p);
+      const g = new THREE.ExtrudeGeometry(sh, { depth: x1 - x0, bevelEnabled: false, curveSegments: curve ?? 6 });
+      g.applyMatrix4(new THREE.Matrix4().set(0, 0, 1, x0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1)); g.scale(s, s, s); K.put(f, g, m, x, y, z);
+    };
+    // the plinth and the cash drawer, its front panelled, with a pull
+    bx(base, -hw - 0.03, hw + 0.03, -0.68, 0.68, 0, 0.06);
+    sf(body, -hw, hw, -0.65, 0.65, 0.06, 0.38, 0.02);
+    bx(ground, -hw + 0.07, hw - 0.07, -0.67, -0.65, 0.1, 0.34); bx(body, -hw + 0.1, hw - 0.1, -0.69, -0.668, 0.13, 0.31);
+    hc(trim, 'x', 0, -0.73, 0.22, 0.26, 0.016, 0.016, 6); for (const k of [-1, 1]) hc(trim, 'y', k * 0.13, -0.71, 0.22, 0.05, 0.018, 0.018, 6);
+    for (const k of [-1, 1]) hc(trim, 'y', k * 0.36, -0.698, 0.22, 0.016, 0.035, 0.035, 10);      // the drawer's two rosettes
+    // the marble change plate, and the case behind it: keyboard, hood, flat back
+    bx(ledge, -hw + 0.02, hw - 0.02, -0.66, -0.29, 0.38, 0.42);
+    const KB0 = [-0.28, 0.5], KB1 = [0.14, 0.98];
+    across(body, [[-0.28, 0.38], [-0.28, KB0[1]], KB1, [0.2, 1.1, 0.3, 1.1], [0.64, 1.1], [0.64, 0.38]], -hw + 0.04, hw - 0.04);
+    // the back, toward the customer: a raised panel in a moulded frame, and a rosette, as cast
+    bx(trim, -0.42, 0.42, 0.63, 0.66, 0.5, 1.0); bx(body, -0.36, 0.36, 0.655, 0.68, 0.55, 0.95); hc(trim, 'y', 0, 0.69, 0.75, 0.02, 0.09, 0.09, 12);
+    // the cast sides: a dark ground with a medallion and two scrolls on it, and a bead round the hood
+    for (const k of [-1, 1]) {
+      const sx = k * (hw - 0.04), ox = sx + k * 0.02, o2 = sx + k * 0.03;
+      across(ground, [[-0.18, 0.46], [0.08, 0.88], [0.54, 0.98], [0.54, 0.46]], k > 0 ? sx - 0.01 : sx - 0.02, k > 0 ? sx + 0.02 : sx + 0.01);
+      hc(trim, 'x', o2, 0.36, 0.7, 0.02, 0.12, 0.12, 14); hc(body, 'x', o2 + k * 0.02, 0.36, 0.7, 0.02, 0.08, 0.08, 12);
+      for (const [cy0, cz0, d] of k === side ? [] : [[0.06, 0.62, 1]]) {
+        const pts = []; for (let i = 0; i <= 10; i++) { const a = i / 10 * 4.2, r = 0.11 * (1 - i / 13); pts.push([ox, cy0 + d * Math.sin(a) * r, cz0 + Math.cos(a) * r - 0.04]); } tb(trim, pts, 0.012, 4);
+      }
+      { const bx_ = sx + k * 0.012; tb(trim, [[bx_, -0.28, 0.5], [bx_, 0.14, 0.98], [bx_, 0.24, 1.08], [bx_, 0.62, 1.1]], 0.015, 5); }
+    }
+    // the keys: four rows up the slope, six columns across, a brass rim round each round top
+    const cols = 6, rows = 4;
+    for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) {
+      const t = (r + 0.55) / rows, ky = KB0[0] + (KB1[0] - KB0[0]) * t - 0.03, kz = KB0[1] + (KB1[1] - KB0[1]) * t, kx = (c - (cols - 1) / 2) * 0.16;
+      cy(trim, kx, ky, kz - 0.03, kz + 0.06, 0.013, 4); cy(trim, kx, ky, kz + 0.05, kz + 0.065, 0.042, 8);
+      cy(o.accent && c === cols - 1 && r === 0 ? o.accent : c % 3 === 2 ? keyB : keyA, kx, ky, kz + 0.065, kz + 0.085, 0.046, 8);
+    }
+    bx(trim, -hw + 0.06, hw - 0.06, -0.32, -0.27, 0.42, 0.5);                      // the strip along the foot of the keyboard
+    // the reading box: the flags in their window toward the clerk, a picture of them toward the customer
+    sf(body, -hw + 0.08, hw - 0.08, 0.24, 0.62, 1.1, 1.44, 0.03);
+    bx(trim, -hw + 0.05, hw - 0.05, 0.16, 0.65, 1.44, 1.48);
+    bx(ground, -0.38, 0.38, 0.215, 0.25, 1.17, 1.38);
+    [[-0.22, keyA], [0, keyA], [0.2, o.accent ?? 'c#c8202a/0.45']].forEach(([fx, m]) => bx(m, fx - 0.075, fx + 0.075, 0.195, 0.215, 1.2, 1.34));
+    kit.sign(f, x, y + 0.626 * s, z + 1.27 * s, 0.76 * s, 0.24 * s, o.back ?? tillFlags, { cw: o.cw ?? 176, ch: o.ch ?? 56 });
+    // the cresting: an arched plate over the box
+    { const sh = new THREE.Shape(), a = 0.42, h = 0.2;
+      sh.moveTo(-a, 0); sh.lineTo(-a, 0.06); sh.quadraticCurveTo(-a + 0.04, 0.14, -a * 0.55, 0.12); sh.quadraticCurveTo(0, h + 0.06, a * 0.55, 0.12); sh.quadraticCurveTo(a - 0.04, 0.14, a, 0.06); sh.lineTo(a, 0);
+      const g = new THREE.ExtrudeGeometry(sh, { depth: 0.03, bevelEnabled: false, curveSegments: 5 });
+      g.applyMatrix4(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, -1, 0.43, 0, 1, 0, 1.48, 0, 0, 0, 1)); g.scale(s, s, s); K.put(f, g, trim, x, y, z); }
+    // the crank, on its side
+    { const cx = side * (hw - 0.02);
+      hc(trim, 'x', cx + side * 0.03, 0.08, 0.64, 0.06, 0.06, 0.045, 10);
+      tb(trim, [[cx + side * 0.06, 0.08, 0.64], [cx + side * 0.08, -0.02, 0.56], [cx + side * 0.08, -0.1, 0.5]], 0.02, 5);
+      hc(o.knob ?? 'c#3a2214/0.45', 'x', cx + side * 0.16, -0.1, 0.5, 0.16, 0.03, 0.038, 8); }
+    (kit.tills ??= []).push({ at: kit.world(f, x, y), toward: kit.world(f, x, y + 1), y: f.h + z, fh: f.h });      // for the test views (tools)
+  }
+  // The customer's side of the reading box: three flags, the amount just rung up.
+  function tillFlags(g, w, h) {
+    g.fillStyle = '#17140f'; g.fillRect(0, 0, w, h);
+    ['$1', '2', '5'].forEach((t, i) => { const cx = w * (0.27 + i * 0.23); g.fillStyle = i === 0 ? '#efe2bc' : '#f4f1ea'; g.fillRect(cx - w * 0.09, h * 0.14, w * 0.18, h * 0.72); T(g, t, cx, h * 0.52, h * 0.5, '#17140f'); });
+  }
+  return { shelving, plinth, counter, glassCase, pendant, stool, crate, slateBoard, aBoard, card, till, WOOD, DARKW, IRONM };
 }

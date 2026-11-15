@@ -12,7 +12,7 @@
 // What is not the real building:
 //   one room the whole height (the real one has a meeting hall below and the auditorium above)
 //   the far end wall (the real one is hidden by a later addition): plain, with one great window under a round
-//     arch, ten feet by fourteen and a half: three round-headed lights and three roundels in one painted frame
+//     arch, ten feet by fourteen and a half: a single light of leaded glass in a narrow painted rim
 //   the bell-cote on the ridge, which is the one on the Second Presbyterian Church three streets away
 //     (Edwin J. Peck, 1835; HABS IN-24-15, sheet 2, "Bell ordered in 1837"; research/chapel/in0161)
 //   the glass. Each tall window is one round-headed light, and its picture is drawn for the whole of it. The
@@ -167,7 +167,7 @@ export function chapelShell(B0, t) {
   const prism = (mat, pts, depth, m) => B.mesh(mat, new THREE.ExtrudeGeometry(new THREE.Shape(pts.map(([a, y]) => new THREE.Vector2(a, y))), { depth, bevelEnabled: false }).applyMatrix4(m));
 
   // ---- the way in, the floor -------------------------------------------------------------------------
-  box('pavers', -OX - 0.5, OX + 0.5, -0.6, CURB - 0.012, -0.62, 0.3); surf(-OX - 0.5, OX + 0.5, -0.62, 0, CURB);      // the pavement, carried back to the wall
+  box('pavers', -OX - 0.5, OX + 0.5, -0.6, CURB - 0.012, -0.6, 0.3); surf(-OX - 0.5, OX + 0.5, -0.62, 0, CURB);      // the pavement, carried back to the wall
   box(STONE, -2.9, 2.9, 0, FLR, -1.25, 0); surf(-2.9, 2.9, -1.25, 0, FLR);                                          // the one step
   box(STONE, -DOOR.hw, DOOR.hw, 0, FLR, 0, IZ0); surf(-DOOR.hw, DOOR.hw, -0.1, IZ0 + 0.1, FLR);
   box('floor', -IX, IX, FLR - 0.3, FLR, IZ0, IZ1); surf(-IX, IX, IZ0, IZ1, FLR);
@@ -185,13 +185,15 @@ export function chapelShell(B0, t) {
         prism(BRICK, pts, d0, W.M(c, 0));
       }
     }
-    for (const [a0, a1] of (s.door ? [[s.a0, -DOOR.hw - 0.6], [DOOR.hw + 0.6, s.a1]] : [[s.a0, s.a1]])) wb(STONE, a0, a1, 0, BASE, -0.1, 0.3);      // the stone base course
+    for (const [a0, a1] of (s.door ? [[s.a0, -DOOR.hw - 0.6], [DOOR.hw + 0.6, s.a1]] : [[s.a0, s.a1]])) wb(STONE, a0, a1, 0, BASE + 0.02, -0.1, 0.3);      // the stone base course (a hair over the foot of the sunk panels and the pilasters' bases, whose tops it shared)
     for (const [p0, p1] of s.pil) {      // Tuscan pilasters: brick shafts, stone bases and capitals
       wb(STONE, p0 - 0.08, p1 + 0.08, 0, BASE, -PIL.out - 0.1, 0.02); wb(BRICK, p0, p1, BASE, PIL.top, -PIL.out, 0.02);
       wb(TRIM, p0 - 0.04, p1 + 0.04, PIL.top, PIL.top + 0.22, -PIL.out - 0.05, 0.02); wb(TRIM, p0 - 0.13, p1 + 0.13, PIL.top + 0.22, PIL.top + 0.6, -PIL.out - 0.15, 0.02); wb(TRIM, p0 - 0.27, p1 + 0.27, PIL.top + 0.6, CAP, -PIL.out - 0.27, 0.02);
     }
     // the entablature: brick, a fillet, then the wooden cornice on its dentils
-    const e0 = s.a0 - 0.3, e1 = s.a1 + 0.3;
+    // (at the corners the end and side walls' courses meet: the end walls' stop a hair short, inside the side walls' own, whose faces
+    // their ends used to share)
+    const t = k === 'F' || k === 'R' ? 0.02 : 0, e0 = s.a0 - 0.3 + t, e1 = s.a1 + 0.3 - t;
     wb(BRICK, e0, e1, CAP, DENT + 0.35, -0.3, GD); wb(TRIM, e0 - 0.15, e1 + 0.15, BAND - 0.14, BAND + 0.12, -0.45, 0);
     for (let a = e0 + 0.25; a < e1; a += 0.5) wb(TRIM, a - 0.12, a + 0.12, DENT, DENT + 0.35, -0.55, -0.3);
     wb(TRIM, e0 - 0.45, e1 + 0.45, DENT + 0.35, DENT + 0.55, -0.75, 0.3); wb(TRIM, e0 - 0.95, e1 + 0.95, DENT + 0.55, EAVEY - 0.18, -1.25, 0.3); wb(TRIM, e0 - 1.05, e1 + 1.05, EAVEY - 0.18, EAVEY, -OVER, 0.3);
@@ -240,7 +242,7 @@ export function chapelShell(B0, t) {
   }
 
   // ---- the end window: a round arch (the wall over it is made up in two pieces, so that nothing is cut as a
-  // hole), a painted frame with three lights and three roundels cut through it (greatPlan, in chapel/glass.js: the
+  // hole), a painted stone rim with the one light cut through it (greatPlan, in chapel/glass.js: the
   // picture is drawn to the same plan), a casing inside, a stone sill, hood, imposts and keystone outside ------
   {
     const W = WALL.R, { w, h, y0 } = GREAT, yT = y0 + h + 0.15, ySp = yT - GHW, v2 = ([a, y]) => new THREE.Vector2(a, y);
@@ -413,7 +415,7 @@ export function furnishChapel(kit, town) {
     for (const [a, b] of [[-OX - PIL.out, gx + 5.3], [gx - 5.3, xW]]) { box(BRICK, a, b, 0, WALLH, zw, zw + 1); box(TRIM, Math.max(a, b) + 0.1, Math.min(a, b) - 0.1, WALLH, WALLH + 0.22, zw - 0.1, zw + 1.1); solid(a, b, zw, zw + 1, WALLH + 0.3); }
     box(BRICK, xW, xW + 1, 0, WALLH, zw + 1, zw + 9); box(TRIM, xW - 0.1, xW + 1.1, WALLH, WALLH + 0.22, zw + 1, zw + 9.1); solid(xW, xW + 1, zw + 1, zw + 9, WALLH + 0.3);
     for (const [px, pz] of [[xW + 0.5, zw + 0.5], [xW + 0.5, zw + 9], [gx - 4.65, zw + 0.5], [gx + 4.65, zw + 0.5]]) { box(BRICK, px - 0.8, px + 0.8, 0, WALLH + 0.9, pz - 0.8, pz + 0.8); box(TRIM, px - 0.95, px + 0.95, WALLH + 0.9, WALLH + 1.15, pz - 0.95, pz + 0.95); solid(px - 0.8, px + 0.8, pz - 0.8, pz + 0.8, WALLH + 1); }
-    box('flagstone', gx - 4, gx + 4, -0.5, 0.5, zw - 0.85, p0); t0(gx - 4, gx + 4, zw - 0.85, p0, 0.5);          // through the gate, at the paving's height
+    box('flagstone', gx - 4, gx + 4, -0.5, 0.48, zw - 0.85, p0); t0(gx - 4, gx + 4, zw - 0.85, p0, 0.5);          // through the gate, at the paving's height (a hair under the kerb it runs up to, whose top it shared)
     box('flagstone', gx - 2, gx + 2, -0.3, 0.12, p0, p1); t0(gx - 2, gx + 2, p0, p1, 0.12);                     // and on down the yard
     for (const s of [-1, 1]) {      // the gate: two iron leaves, standing open
       const x = gx + s * 3.75;
@@ -461,7 +463,7 @@ const WIN = {
   turing: ["A daisy, and an animal's coat. Turing's two chemicals, spreading at different speeds.", 'Lower down the spots run into stripes. Same rule.'],
   eigen: ["A tangle, smoothed again and again until it's a ball.", 'An object is what stays put when you keep doing the same thing to it.'],
   neuron: ['A nerve cell, the way Cajal drew them. Black on amber.', 'He called them the butterflies of the soul. Given my name, I stay out of it.'],
-  ingression: ['The five regular solids at the top. Under them three plain shapes coming down into bodies: a cell, a flatworm, a pair of gears, a slime mould, a frog.', 'The second worm grew a head at each end, and nobody touched its genes. The pale ones, bottom right, are frog cells nobody told to be a frog. I keep the gears dusted, just in case.'],
+  ingression: ['One solid at the top, and one line coming down from it: facets, an egg dividing, a flatworm, a tadpole, a frog.', "Not a ladder. One pattern, trying on bodies. The worm has a head at each end, and nobody touched its genes. The pink ones are frog cells nobody told to be a frog. No robot in it yet."],
   loop: ["Twelve steps, every one of them up, and you're back where you began.", "Hofstadter thought an 'I' was something like that."],
   lorenz: ["Lorenz's weather. The line never crosses itself and never repeats.", 'He found it by typing a number back in with three decimals instead of six.'],
   logistic: ['One line of arithmetic, done over and over. It settles, then it splits, then it stops settling.', 'May wanted it taught to children.'],
@@ -947,6 +949,8 @@ function stone(g, w, h, seed = 19, col = '#cfc7b8') {
 }
 // Letters cut into a surface: a shadow along the upper edge of each stroke, light along the lower, then the fill
 function carve(g, text, x, y, size, o) {
+  // (a line too long for its stone is cut smaller, to leave a margin at each side, rather than running off the edges)
+  { const room = (o.max ?? g.canvas.width * 0.86); g.font = `${o.italic ? 'italic ' : ''}${size}px ${FONT}`; let w = 0; for (const ch of text) w += g.measureText(ch).width + size * o.track; w -= size * o.track; if (w > room) size *= room / w; }
   const draw = (dx, dy, style) => {
     g.fillStyle = style; let w = 0; const fs = s => `${o.italic ? 'italic ' : ''}${s}px ${FONT}`;
     g.font = fs(size); for (const ch of text) w += g.measureText(ch).width + size * o.track; w -= size * o.track;

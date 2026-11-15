@@ -22,7 +22,7 @@ export function dressWindows(Ks, town) {
     // the marquee: a canopy over the pavement, bulbs all round and under it, letters on three sides
     const v0 = lot.y0 + 3.5, v1 = lot.y1 - 3.5, out = 7.2, h0 = FL + 11.0, h1 = h0 + 2.9, NAVY = 'c#16212d/0.5', GOLD = 'c#c9a45c/0.4/1';
     const B2 = (mat, u0, u1, va, vb, ha, hb) => Ks.box(mat, Math.min(s * u0, s * u1), Math.max(s * u0, s * u1), ha, hb, -Math.max(va, vb), -Math.min(va, vb));
-    B2(NAVY, FRONT - out, FRONT - 0.1, v0, v1, h0, h1); B2(GOLD, FRONT - out - 0.12, FRONT - 0.1, v0 - 0.12, v1 + 0.12, h1, h1 + 0.2); B2(GOLD, FRONT - out - 0.12, FRONT - 0.1, v0 - 0.12, v1 + 0.12, h0 - 0.2, h0);
+    B2(NAVY, FRONT - out, FRONT - 0.1, v0, v1, h0, h1); B2(GOLD, FRONT - out - 0.12, FRONT - 0.1, v0 - 0.12, v1 + 0.12, h1, h1 + 0.2); B2(GOLD, FRONT - out - 0.12, FRONT - 0.1, v0 - 0.12, v1 + 0.12, h0 - 0.22, h0 + 0.02);      // (its underside a hair below the transom rail's, which it runs over; its top up into the canopy)
     for (const v of [v0 + 1, v1 - 1]) Ks.tube('c#1d1b18/0.5', [s * (FRONT - 0.1), h1 + 3.4, -v], [s * (FRONT - out + 0.6), h1 + 0.2, -v], 0.05, 5);
     const bulbs = [];
     for (let v = v0 + 0.5; v < v1; v += 1.15) { bulbs.push([s * (FRONT - out - 0.14), h1 - 0.12, -v], [s * (FRONT - out - 0.14), h0 + 0.12, -v]); for (const u of [FRONT - out + 1.3, FRONT - out + 3.6, FRONT - 1.4]) bulbs.push([s * u, h0 - 0.26, -v]); }

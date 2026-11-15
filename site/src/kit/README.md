@@ -117,8 +117,21 @@ frame sits on the wall face with q facing into the room.
 **Wood** (wood.js) Arts-and-Crafts oak unless `wood:` says otherwise (plain colours become oak).
 - `table(f, w, d, tall, mat, leg, { shelf, overhang })` as before, now with apron rails and tapered legs.
 - `diningTable(f, w, d, { style: 'trestle'|'legs', wood })` top 2.5, centred on the frame.
-- `diningChair(f, x, y, { dq, back: 'ladder'|'spindle', seat, arms, wood, sit })` faces its frame's
-  front (dq more quarter turns). Seat 1.55, sittable. Use the same `wood` as the table for a set.
+- `diningChair(f, x, y, { dq, turn | deg, back: 'ladder'|'spindle'|'splat', seat, pad, arms, w, seatH, wood, sit, block })` faces its
+  frame's front (dq more quarter turns, turn/deg any angle). Back posts rake back above the seat. Seat 1.55
+  (1.48 with `pad: false`, a plain board seat) unless `seatH`; 1.6 wide unless `w`. Sittable. Use the same `wood` as the table for a set.
+- `chair(f, x, y, { kind, dq, turn | deg, wood, seat, seatH, sit, label, block })` (chairs.js) a real chair,
+  its seat's middle at (x, y), facing the frame's front; `turn` (radians) or `deg` turns it to any angle,
+  counter-clockwise from above, and its seat turns with it. kinds: `'bentwood'` (Thonet No. 14 café chair,
+  cane seat, ~1.5k triangles), `'windsor'` (bow back, saddle seat, H-stretcher, ~1.2k), `'captain'` (a
+  low-backed library armchair: arm bow, crest, spindles, ~1.7k), `'office'` (upholstered swivel chair on a
+  five-star base, ~1.7k), or `'ladder'` / `'spindle'` / `'splat'` (diningChair). Seat 1.5 (office and
+  the diningChair kinds 1.55, 1.48 with `pad: false`) unless `seatH`. `sit: false` / `block: false` when the room registers its own seat or obstacle.
+- `stool(f, x, y, { h, wood, seat, back, sit, label, block })` turned stool, splayed legs, a foot ring
+  (h 2.05, a lab or counter stool) or stretchers (h 1.5); `back: true` adds a low bent back.
+- `wallBench(f, w, { d, h, back, cushion, wood, sit, label, block, every })` a plank bench on a wall frame:
+  rounded seat board, shaped ends with an arched foot, a slatted back (`back: false` for none), an optional
+  welted seat pad; a seat about every 2 ft.
 - `desk(f, w, d, { gallery })` top 2.5, three drawers; `dresser(f, w, tall, { d, pull: 'bail'|'knob'|'cup'|'wood' })`;
   `nightstand(f, { w, d, h })` (top 2.15, returns it); `console(f, w, { d, h })`;
   `sideboard(f, w, { d, h, open })`; `sideTable(f, x, y, { kind: 'square'|'round'|'drum', h })`
