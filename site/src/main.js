@@ -171,7 +171,7 @@ if (Q.has('cam')) { camera.position.set(...Q.get('cam').split(',').map(Number));
 let mode = 'orbit';
 function walk(place = true) {
   mode = 'walk'; orbit.enabled = false; walker.enabled = true; camera.fov = WALK_FOV; camera.near = 0.25; camera.updateProjectionMatrix();
-  const sp = Q.get('from') === 'house' && garden?.arrive ? garden.arrive : spawn;      // off the airship from Anna's House: set down at the stop
+  const sp = /^(house|harbor|school)$/.test(Q.get('from') ?? '') && garden?.arrive ? garden.arrive : spawn;      // off the airship from Anna's House: set down at the stop
   if (place) walker.place(sp.x, sp.y ?? 0, sp.z, sp.yaw);
   document.body.classList.add('walking');
 }
@@ -254,7 +254,7 @@ else if (Q.has('view')) {
   const [x, y, z, yaw = 0, pitch = 0] = Q.get('view').split(',').map(Number);
   walk(false); walker.place(x, y, z, yaw, pitch);
 }
-if (!Q.has('view') && !Q.has('at') && Q.get('from') === 'house') walk(false);      // off the airship from Anna's House: no welcome card; the ride in sets you down at the Landing
+if (!Q.has('view') && !Q.has('at') && /^(house|harbor|school)$/.test(Q.get('from') ?? '')) walk(false);      // off the airship from Anna's House: no welcome card; the ride in sets you down at the Landing
 if (Q.has('view') && Q.has('open')) for (const d of house.doors) if (!d.fixed) { d.isOpen = true; d.stop.off = true; }
 
 addEventListener('resize', () => {
