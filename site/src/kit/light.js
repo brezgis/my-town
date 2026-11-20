@@ -71,7 +71,7 @@ export function makeLight(K) {
   function jarCandle(f, x, y, z, o = {}) {
     const r = o.r ?? 0.17, tall = o.tall ?? 0.36, wax = o.wax ?? 'c#efe6d2/0.6';
     put(f, GLASS, lathe([[0, 0], [r - 0.01, 0], [r, 0.012], [r, tall - 0.01], [r - 0.004, tall], [r - 0.012, tall - 0.005], [r - 0.012, 0.02], [0, 0.02]], { seg: 22 }), { at: [x, y, z] });
-    put(f, wax, lathe([[0, 0.02], [r - 0.013, 0.02], [r - 0.013, tall * 0.72], [r * 0.6, tall * 0.7], [0, tall * 0.68]], { seg: 20 }), { at: [x, y, z] });
+    put(f, wax, lathe([[0, 0.035], [r - 0.013, 0.035], [r - 0.013, tall * 0.72], [r * 0.6, tall * 0.7], [0, tall * 0.68]], { seg: 20 }), { at: [x, y, z] });
     if (o.label) put(f, o.label, lathe([[r + 0.003, tall * 0.22], [r + 0.003, tall * 0.62]], { seg: 22 }), { at: [x, y, z] });
     for (let i = 0; i < 3; i++) { const a = i / 3 * TAU; put(f, 'c#1b1612/0.9', lathe([[0.004, 0], [0.003, 0.05], [0, 0.05]], { seg: 3 }), { at: [x + Math.cos(a) * r * 0.45, y + Math.sin(a) * r * 0.45, z + tall * 0.68] }); }
     if (o.lid !== false) put(f, o.lidColour ?? 'c#b9b4aa/0.3/1', lathe([[0, 0], [r + 0.012, 0], [r + 0.012, 0.04], [r - 0.01, 0.05], [0.04, 0.052], [0.035, 0.08], [0, 0.085]], { seg: 22 }), { at: [x + r * 2.3, y + 0.05, z] });

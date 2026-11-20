@@ -156,7 +156,7 @@ export default function museum(kit, lot) {
     ra('left', 0.1, P.front - 0.004); ra('right', 0.1, P.front - 0.004); ra(PF, 0.08, W - 0.08);
     ra('left', P.back + 0.004, D - 0.004); ra('right', P.back + 0.004, D - 0.004); ra(PB, 0.08, W - 0.08); ra('back', 0.08, W - 0.08);
     // the picture gallery's colour: from the dado to the rail on all four walls
-    const red = (w, s0, s1, z0 = 3.25) => A.on(w, WALLRED, s0, s1, 0.004, 0.02, z0, 9.4);
+    const red = (w, s0, s1, z0 = 3.3) => A.on(w, WALLRED, s0, s1, 0.004, 0.02, z0, 9.36);
     red('left', P.back, D - 0.004); red('right', P.back, D - 0.004); red('back', 0.02, DA - 1.55); red('back', DA + 1.55, W - 0.02); red('back', DA - 1.55, DA + 1.55, 6.95);
     red(PB, 0.02, OA0 - 0.36); red(PB, OA1 + 0.36, W - 0.02); red(PB, OA0 - 0.36, OA1 + 0.36, 9.08);
     // the back door, where the real one is: town.js cuts the doorway (3.1 wide, 6.95 high) and hangs the door. Here, its casing and the light over it
@@ -180,7 +180,7 @@ export default function museum(kit, lot) {
   const D1 = 8, D2 = 14, D3 = 20;                            // three stations down each side wall
   // down the left wall: deep time
   { const c = wallCase(onL(D1), EX.megalodon, 'si_megalodon_tooth', { rise: 0.32, rw: 0.7, rd: 0.5 }); for (const s of [-0.1, 0.1]) for (const k of [-0.085, 0.085]) c.f.cyl(BRASS, s, c.yc + k, c.z, c.z + 0.17, 0.008, 0.008, 5); }
-  const tri = wallCase(onL(D2), EX.trilobite, 'si_trilobite', { glass: false, h: 3.3, rise: 0.1, rw: 1.3, rd: 0.75, my: 0.06 });
+  const tri = wallCase(onL(D2), EX.trilobite, 'si_trilobite', { glass: false, h: 3.32, rise: 0.1, rw: 1.3, rd: 0.75, my: 0.06 });
   spot(tri.f, 0, tri.yc, tri.h + 0.4, () => 'touch the trilobite', ctx => ctx.flash('Cool and ridged. It was an animal once.'));
   wallCase(onL(D3), EX.ammonite, 'si_ammonite_exiteloceras', { rise: 0.4, rw: 0.9, rd: 0.7 });
   // down the right wall, beyond the desk: made by hand

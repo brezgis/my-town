@@ -135,7 +135,7 @@ export default function grocery(kit, lot) {
   const stack = (f, x, y, z, b, n, s = 1, lid = true) => { for (let i = 0; i < n; i++) f.box(i % 2 ? tinLid(b) : 'c#b9b8b2/0.3/1', x - 0.31 * s, x + 0.31 * s, y - 0.21 * s, y + 0.21 * s, z + i * 0.1, z + i * 0.1 + 0.092); if (lid) kit.sign(f, x, y, z + n * 0.1 - 0.004, 0.6 * s, 0.4 * s, TIN(b), { cw: 132, ch: 88, flat: true }); };
 
   // a demijohn in its wicker, a plain basket, a barrel
-  const demi = (f, x, y, z) => { ves(f, 'c#2f4a2a/0.2', x, y, z, [[0, 0], [0.3, 0], [0.46, 0.25], [0.46, 0.6], [0.2, 0.95], [0.08, 1.05], [0.08, 1.25], [0, 1.25]], 18); ves(f, 'wicker', x, y, z, [[0.31, 0], [0.47, 0.25], [0.47, 0.5], [0.44, 0.5], [0.3, 0.02]], 18); };
+  const demi = (f, x, y, z) => { ves(f, 'c#2f4a2a/0.2', x, y, z, [[0, 0], [0.3, 0], [0.46, 0.25], [0.46, 0.6], [0.2, 0.95], [0.08, 1.05], [0.08, 1.25], [0, 1.25]], 18); ves(f, 'wicker', x, y, z, [[0.33, 0], [0.49, 0.25], [0.49, 0.5], [0.46, 0.5], [0.32, 0.02]], 18); };
   const basket = (f, x, y, z, r = 0.5, h = 0.7) => ves(f, 'wicker', x, y, z, [[0, 0], [r * 0.8, 0], [r, h], [r * 1.04, h], [r * 1.04, h + 0.05], [r * 0.92, h + 0.05], [r * 0.74, 0.07], [0, 0.07]], 16);
   const barrel = (f, x, y) => { ves(f, 'oak_light#8a6a48', x, y, 0.02, [[0, 0], [0.6, 0], [0.72, 0.5], [0.78, 1.3], [0.72, 2.1], [0.6, 2.6], [0.55, 2.6], [0.55, 2.52], [0, 2.52]], 20);
     for (const [z, r] of [[0.28, 0.7], [0.95, 0.775], [1.65, 0.775], [2.3, 0.695]]) f.cyl(IRON, x, y, z, z + 0.09, r, r, 20); f.block(x - 0.7, x + 0.7, y - 0.7, y + 0.7, 0, 2.6); };
@@ -160,7 +160,7 @@ export default function grocery(kit, lot) {
     // the bottom shelf: catering tins, salt cod, anchovies by the jar
     if (k % 3 === 0) for (let i = 0; i < 4; i++) { const b = FISH[(k + i * 3 + 1) % FISH.length]; tin(l, cx - 1.29 + i * 0.86, 0.6, 1.0, 0.33, 0.8, tinLid(b), `c${b.c[1]}/0.5`); }
     else if (k % 3 === 1) for (let i = 0; i < 3; i++) pack(l, cx - 1.05 + i * 1.05, 0.62, 1.0, 0.8, 0.5, 0.42 + (i % 2) * 0.1, 'c#d9cdb2/0.8', PACK('BACALHAU', 'SALT COD · SOAK 2 DAYS', '#e6dcc0', '#1f3a6b', { pic: 'fish', f: F.bebas }), { cw: 150, ch: 90 });
-    else for (let i = 0; i < 5; i++) jar(l, cx - 1.24 + i * 0.62, 0.55, 1.0, 0.2, 0.62, K.pick(['c#8a5a2a/0.45', 'c#b8361f/0.45', 'c#6a4a2a/0.45']), 0.85, BRASS);
+    else for (let i = 0; i < 5; i++) jar(l, cx - 1.24 + i * 0.62, 0.55, 0.98, 0.2, 0.62, K.pick(['c#8a5a2a/0.45', 'c#b8361f/0.45', 'c#6a4a2a/0.45']), 0.85, BRASS);
     // the top shelf, for the ladder: stock in baskets, a crate, the big tins
     const z = LZ[5];
     if (k % 3 === 0) for (const s of [-1, 1]) basket(l, cx + s * 0.9, 0.56, z, 0.5, 0.72);
@@ -190,12 +190,12 @@ export default function grocery(kit, lot) {
     ves(c, 'glass', -2.3, Y, z, [[0.34, 0], [0.34, 0.3], [0.2, 0.5], [0.04, 0.54], [0, 0.54]], 18); c.cyl('c#e0782a/0.8', -2.3, Y, z, z + 0.16, 0.26, 0.26, 18);
     // the upper shelf: saucisson, a terrine, the sheep, coppa
     for (let i = 0; i < 4; i++) hcyl(c, i % 2 ? 'c#8a1c1c/0.8' : 'c#6a4a2a/0.8', 'x', -6.15 + (i % 2) * 0.12, Y - 0.2 + i * 0.2, z2 + 0.1, 0.95, 0.09, 0.09, 10);
-    c.soft('c#b08a5a/0.8', -4.95, -4.05, Y - 0.25, Y + 0.25, z2, z2 + 0.28, 0.04); c.box('c#e8907a/0.8', -4.07, -4.04, Y - 0.2, Y + 0.2, z2 + 0.03, z2 + 0.25);
-    c.cyl('c#c9a77a/0.8', -3.25, Y, z2, z2 + 0.3, 0.36, 0.36, 22);
-    plate(c, -2.05, Y + 0.04, z2 - 0.045, 0.42); for (let i = 0; i < 6; i++) c.cyl(i % 2 ? 'c#8a1c1c/0.8' : 'c#b8361f/0.8', -2.25 + (i % 3) * 0.2, Y - 0.08 + Math.floor(i / 3) * 0.22, z2 + 0.012, z2 + 0.022, 0.1, 0.1, 12);
+    c.soft('c#b08a5a/0.8', -4.95, -4.05, Y - 0.25, Y + 0.25, z2 + 0.015, z2 + 0.28, 0.04); c.box('c#e8907a/0.8', -4.07, -4.025, Y - 0.2, Y + 0.2, z2 + 0.03, z2 + 0.25);
+    c.cyl('c#c9a77a/0.8', -3.25, Y, z2 + 0.015, z2 + 0.3, 0.36, 0.36, 22);
+    plate(c, -2.05, Y + 0.04, z2 - 0.06, 0.42); for (let i = 0; i < 6; i++) c.cyl(i % 2 ? 'c#8a1c1c/0.8' : 'c#b8361f/0.8', -2.25 + (i % 3) * 0.2, Y - 0.08 + Math.floor(i / 3) * 0.22, z2 + 0.012, z2 + 0.022, 0.1, 0.1, 12);
   }
   // the brass scales
-  kit.model('st_brass_scales', c, -0.5, -1.1, TOP, 0, { scale: 1.25 });
+  kit.model('st_brass_scales', c, -0.5, -1.1, TOP - 0.02, 0, { scale: 1.25 });
   // the till: a real one, cream enamel gone grey at the corners (Poly Haven's CashRegister_01, CC0), at four-fifths
   // of its scanned size so it does not hide Olive; its keys and drawer toward her (-y), and against its back, for
   // the customer, a card
@@ -208,7 +208,7 @@ export default function grocery(kit, lot) {
     for (const s of [-1, 1]) c.box('c#2b2724/0.45/1', px + s * 0.85 - 0.03, px + s * 0.85 + 0.03, -2.2, -1.9, z, z + 0.5); hcyl(c, 'c#2b2724/0.45/1', 'x', px, -2.05, z + 0.42, 1.76, 0.02); hcyl(c, KRAFT, 'x', px, -2.05, z + 0.42, 1.5, 0.22, 0.22, 18);
     c.box(KRAFT, px - 0.75, px + 0.75, -1.86, -1.3, z + 0.006, z + 0.014); c.box(KRAFT, px - 0.75, px + 0.75, -1.86, -1.84, z + 0.014, z + 0.36);
     // a parcel already wrapped, tied with string
-    c.soft(KRAFT, 3.5, 4.3, -1.62, -1.38, z + 0.016, z + 0.3, 0.03); c.box('c#d9cdb2/0.8', 3.88, 3.92, -1.63, -1.37, z + 0.02, z + 0.305); c.box('c#d9cdb2/0.8', 3.49, 4.31, -1.52, -1.48, z + 0.02, z + 0.305);
+    c.soft(KRAFT, 3.5, 4.3, -1.62, -1.38, z + 0.016, z + 0.3, 0.03); c.box('c#d9cdb2/0.8', 3.88, 3.92, -1.63, -1.37, z + 0.03, z + 0.316); c.box('c#d9cdb2/0.8', 3.49, 4.31, -1.52, -1.48, z + 0.03, z + 0.316);
     kit.model('wooden_cutting_board', c, px, -0.6, z, 0);
     for (const dx of [-0.42, 0.42]) { c.box('c#c9a060/0.9', px + dx - 0.15, px + dx + 0.15, -0.7, -0.5, z + 0.14, z + 0.18); hcyl(c, 'c#9aa4a8/0.35/0.3', 'x', px + dx, -0.6, z + 0.2, 0.24, 0.035, 0.035, 6); }
     X.card(c, px + 0.95, -0.45, z, 0.7, 0.36, (g, w, h) => { paper(g, w, h, PAPER); T(g, 'try me', w / 2, h * 0.5, h * 0.56, '#a8361f', { f: F.pacifico }); }, { cw: 180, ch: 92 });
@@ -218,7 +218,7 @@ export default function grocery(kit, lot) {
 
   // ---- behind the counter, on the right wall: the cheese slate with salami under it, and the wine --------
   const b = at(W, CM, 0, 'left');
-  b.box(DARK, -CH, CH, 0.02, 1.4, 0, 3.3, G); b.box('marble', -CH - 0.1, CH + 0.1, 0.02, 1.5, 3.3, 3.4); b.block(-CH, CH, 0, 1.5, 0, 3.4);
+  b.box(DARK, -CH, CH, 0.035, 1.4, 0, 3.3, G); b.box('marble', -CH - 0.1, CH + 0.1, 0.035, 1.5, 3.3, 3.4); b.block(-CH, CH, 0, 1.5, 0, 3.4);
   X.shelving(b, 0.3, CH, [4.75, 6.15, 7.55], { d: 1.05, mat: DARK, over: 1.55, back: false, block: false, th: 0.08, bay: 3.35 });
   b.box(DARK, -CH - 0.33, 0.25, 0.01, 0.32, 9.1, 9.2, G);      // the cornice carries on over the slate
   { const WINE = [['Mardi', 'VIN DE SOIF', '#f3ecd6', '#b3261e', 'sun'], ['The Long Lunch', 'ROSÉ · DRY', '#f2b8b0', '#5a2a1c', 'boat'], ['Polvo Preto', 'TINTO · UNFILTERED', '#17140f', '#e9b93a', 'octo'], ['Fizz, Probably', 'PÉT-NAT', '#a9d0e0', '#1f3a6b', 'moon'], ['Nonno’s Red', 'MONTE-SOMETHING', '#b3261e', '#f3ecd6', 'hill']];
@@ -231,7 +231,7 @@ export default function grocery(kit, lot) {
   for (let i = 0; i < 8; i++) { const x = -5.2 + i * 0.55 + (i % 2) * 0.05, len = 0.75 + (i * 37 % 5) * 0.09; b.cyl('c#d9cdb2/0.8', x, 0.55, 5.0 - 0.22, 5.0, 0.008, 0.008, 4); b.cyl(['c#8a1c1c/0.8', 'c#6a4a2a/0.8', 'c#b8361f/0.8', 'c#e8e2d4/0.8'][i % 4], x, 0.55, 4.78 - len, 4.78, 0.085 + (i % 3) * 0.015, 0.085 + (i % 3) * 0.015, 10); }
   // the red slicer, cornichons, a stack of paper
   { const z = 3.4; b.soft('c#c8202a/0.2', -6.9, -5.7, 0.3, 1.2, z, z + 0.42, 0.06); b.soft('c#c8202a/0.2', -6.8, -6.3, 0.35, 0.9, z + 0.42, z + 0.95, 0.06); hcyl(b, 'c#d4d6d8/0.12/1', 'x', -6.22, 0.7, z + 0.72, 0.04, 0.36, 0.36, 24); b.box('c#d4d6d8/0.12/1', -6.1, -5.72, 0.35, 1.15, z + 0.42, z + 0.47);
-    for (let i = 0; i < 4; i++) jar(b, -4.6 + i * 0.48, 0.5, z, 0.18, 0.5, i % 2 ? 'c#5d8a3a/0.45' : 'c#7fa04a/0.45', 0.85, BRASS);
+    for (let i = 0; i < 4; i++) jar(b, -4.6 + i * 0.48, 0.5, z - 0.02, 0.18, 0.5, i % 2 ? 'c#5d8a3a/0.45' : 'c#7fa04a/0.45', 0.85, BRASS);
     for (let k = 0; k < 8; k++) b.box(KRAFT, -1.6, -0.7, 0.3, 1.1, z + k * 0.012, z + k * 0.012 + 0.01); }
 
   // ---- the right wall by the window: dry goods -----------------------------------------------------------
@@ -240,15 +240,15 @@ export default function grocery(kit, lot) {
   { // tea tins and big jars of pulses
     const TEA = [['Slow Afternoon', 'SMOKY BLACK', '#26314a', '#e9b93a', 'sun'], ['Aunt Bergamot', 'EARL GREY', '#9fb0d8', '#26314a', 'leaf'], ['Mint Condition', 'PEPPERMINT', '#4a6e38', '#f3ecd6', 'leaf']];
     for (let i = 0; i < 6; i++) { const t = TEA[Math.floor(i / 2)]; pack(r, -4.55 + i * 0.6, 0.6, 6.6, 0.48, 0.48, 0.62, `c${t[2]}/0.45`, PACK(t[0], t[1], t[2], t[3], { pic: t[4], f: F.playfair }), { cw: 104, ch: 134 }); }
-    for (let i = 0; i < 6; i++) jar(r, 0.5 + i * 0.78, 0.6, 6.6, 0.3, 0.8, ['c#d9b35a/0.8', 'c#8a1c1c/0.8', 'c#5d8a3a/0.8', 'c#f4f1ea/0.8', 'c#3a2214/0.8', 'c#e0782a/0.8'][i], 0.55 + (i % 3) * 0.15, BRASS);
+    for (let i = 0; i < 6; i++) jar(r, 0.5 + i * 0.78, 0.6, 6.58, 0.3, 0.8, ['c#d9b35a/0.8', 'c#8a1c1c/0.8', 'c#5d8a3a/0.8', 'c#f4f1ea/0.8', 'c#3a2214/0.8', 'c#e0782a/0.8'][i], 0.55 + (i % 3) * 0.15, BRASS);
     // pasta, salt
     const PASTA = [['RIGATONI', '#1f4e8a'], ['BUCATINI', '#b3261e'], ['ORECCHIETTE', '#4a6e38'], ['PACCHERI', '#e0782a']];
     for (let i = 0; i < 8; i++) { const p = PASTA[Math.floor(i / 2)]; pack(r, -4.55 + i * 0.6, 0.62, 5.3, 0.54, 0.24, 1.0, 'c#d9b35a/0.8', (g, w, h) => { fill(g, w, h, '#e3c27a'); grain(g, w, h, 0.05); rect(g, 0, 0, w, h * 0.5, p[1]); T(g, 'PASTIFICIO', w / 2, h * 0.1, h * 0.07, PAPER, { f: F.bebas, ls: 2 }); T(g, 'Distratto', w / 2, h * 0.22, h * 0.12, PAPER, { f: F.yellowtail, max: w * 0.9 }); T(g, p[0], w / 2, h * 0.38, h * 0.085, PAPER, { f: F.abril, max: w * 0.88 }); for (const x of [0.2, 0.4, 0.6, 0.8]) for (let j = 0; j < 5; j++) rrect(g, w * x - 5, h * (0.55 + j * 0.085), 10, h * 0.06, 3, '#c9952a'); }, { cw: 104, ch: 192 }); }
-    for (const jx of [0.9, 1.4]) { jar(r, jx, 0.6, 5.3, 0.2, 1.05, null, 0, BRASS); for (let k = 0; k < 7; k++) r.cyl('c#d9b35a/0.8', jx + Math.cos(k) * 0.09, 0.6 + Math.sin(k) * 0.09, 5.32, 6.2, 0.02, 0.02, 4); }
+    for (const jx of [0.9, 1.4]) { jar(r, jx, 0.6, 5.28, 0.2, 1.05, null, 0, BRASS); for (let k = 0; k < 7; k++) r.cyl('c#d9b35a/0.8', jx + Math.cos(k) * 0.09, 0.6 + Math.sin(k) * 0.09, 5.32, 6.2, 0.02, 0.02, 4); }
     for (let i = 0; i < 4; i++) pack(r, 2.7 + i * 0.62, 0.62, 5.3, 0.46, 0.34, 0.66, i % 2 ? 'c#26364f/0.8' : 'c#f4f1ea/0.8', PACK(i % 2 ? 'Grey Salt' : 'Flaky Salt', i % 2 ? 'DAMP · MINERAL' : 'SEA SALT', i % 2 ? '#26314a' : '#f3ecd6', i % 2 ? '#f3ecd6' : '#26314a', { f: F.abril }), { cw: 96, ch: 138 });
     // jam and honey, tinned tomatoes
     const JAM = ['c#4a2240/0.45', 'c#e0782a/0.45', 'c#c8202a/0.45', 'c#c9952a/0.45', 'c#e8c73a/0.45'];
-    for (let i = 0; i < 10; i++) jar(r, -4.6 + i * 0.47, 0.62, 3.9, 0.19, 0.5, JAM[Math.floor(i / 2)], 0.9, BRASS);
+    for (let i = 0; i < 10; i++) jar(r, -4.6 + i * 0.47, 0.62, 3.88, 0.19, 0.5, JAM[Math.floor(i / 2)], 0.9, BRASS);
     for (let i = 0; i < 8; i++) tin(r, 0.9 + i * 0.47, 0.62 - (i % 2) * 0.1, 3.9, 0.2, 0.52, 'c#c8202a/0.45', i % 3 ? 'c#f3d96a/0.45' : 'c#4a6e38/0.45');
     // biscuit tins, passata
     for (let i = 0; i < 4; i++) for (let k = 0; k < 3 - (i % 2); k++) tin(r, -4.3 + i * 0.72, 0.62, 2.5 + k * 0.27, 0.32, 0.26, ['c#26364f/0.45', 'c#e88aa8/0.45', 'c#d9b35a/0.45'][(i + k) % 3], 'c#f4f1ea/0.45');
@@ -310,11 +310,11 @@ export default function grocery(kit, lot) {
     for (let i = 0; i < 6; i++) { const v = VIN[Math.floor(i / 3)]; lbottle(o, 0.9 + i * 0.56, 0.6, 4.45, { r: 0.115, h: 0.9, col: v[4], cap: 'c#17140f/0.45' }, LABEL(v[0], v[1], v[2], v[3])); }
     // the tasting ledge: bread on a board, a saucer of oil, the bottle
     const z = 2.9; kit.model('wooden_cutting_board', o, -1.2, 0.62, z, 0); kit.model('st_bread_1', o, -1.5, 0.62, z + 0.13, 0, { turn: 0.5 }); for (let i = 0; i < 5; i++) o.box(i % 2 ? 'c#e8e2d4/0.8' : 'c#d9cdb2/0.8', -1.0 + i * 0.09, -0.93 + i * 0.09, 0.42, 0.82, z + 0.14, z + 0.2 + (i % 2) * 0.02);
-    plate(o, 0.45, 0.66, z, 0.3); o.cyl('c#7fa04a/0.2', 0.45, 0.66, z + 0.032, z + 0.04, 0.2, 0.2, 18);
+    plate(o, 0.45, 0.66, z, 0.3); o.cyl('c#7fa04a/0.2', 0.45, 0.66, z + 0.032, z + 0.05, 0.2, 0.2, 18);
     bottle(o, 1.1, 0.5, z, { r: 0.11, h: 0.95, col: 'c#2f4a2a/0.2', label: 'c#efe2bc/0.8' });
     { const [ex, ez] = kit.world(o, -2.62, 0.6); kit.eats.push({ x: ex, y: o.h + z + 0.15, z: ez, name: 'bread dipped in the good oil', label: 'dip some bread in the good oil', bites: 2, reach: 7, note: 'Peppery, green, a little cough at the end.', build: T3 => { const m = new T3.Mesh(new T3.SphereGeometry(0.12, 8, 6), new T3.MeshStandardMaterial({ color: 0xd9b878, roughness: 0.95 })); m.scale.set(1.3, 0.7, 0.9); return m; } }); }
     X.card(o, -2.62, 1.0, z, 0.9, 0.36, (g, w, h) => { paper(g, w, h, PAPER); T(g, 'dip. go on.', w / 2, h * 0.5, h * 0.5, '#3a5a2a', { f: F.pacifico, max: w * 0.9 }); }, { cw: 230, ch: 92 });
-    for (let i = 0; i < 4; i++) jar(o, 2.4 + i * 0.5, 0.55, z, 0.19, 0.55, i % 2 ? 'c#4a6e38/0.45' : 'c#4a2240/0.45', 0.85, BRASS);
+    for (let i = 0; i < 4; i++) jar(o, 2.4 + i * 0.5, 0.55, z - 0.02, 0.19, 0.55, i % 2 ? 'c#4a6e38/0.45' : 'c#4a2240/0.45', 0.85, BRASS);
     // big tins and a demijohn below
     for (let i = 0; i < 4; i++) { const e = EST[i]; pack(o, -3.9 + i * 1.0, 0.62, 1.1, 0.8, 0.5, 1.15, `c${e[2]}/0.45`, PACK(e[0], '3 LITRES', e[2], e[3], { pic: e[4], f: F.playfair }), { cw: 150, ch: 215 }); }
     for (const x of [1.2, 2.5]) demi(o, x, 0.6, 1.1);
@@ -356,7 +356,7 @@ export default function grocery(kit, lot) {
 
   // ---- the window displays (seen from the street: everything faces out) -----------------------------------
   const TW = 3;                                                // half the width of a window step
-  const tiers = f => { f.box(CREAM, -TW, TW, 0.0, 1.1, 0, 3.5, G); f.box(CREAM, -TW, TW, 1.1, 2.1, 0, 2.9, G); f.box(CREAM, -TW, TW, 2.1, 3.02, 0, 2.3, G); for (const [y, z] of [[1.1, 3.5], [2.1, 2.9], [3.02, 2.3]]) f.box(RED, -TW - 0.02, TW + 0.02, y - 0.02, y + 0.02, z - 0.12, z + 0.012); f.block(-TW, TW, 0, 3.05, 0, 3.5); };
+  const tiers = f => { f.box(CREAM, -TW, TW, 0.0, 1.1, 0, 3.5, G); f.box(CREAM, -TW, TW, 1.1, 2.1, 0, 2.9, G); f.box(CREAM, -TW, TW, 2.1, 3.02, 0, 2.3, G); for (const [y, z] of [[1.1, 3.5], [2.1, 2.9], [3.02, 2.3]]) f.box(RED, -TW - 0.02, TW + 0.02, y - 0.02, y + 0.02, z - 0.12, z + 0.025); f.block(-TW, TW, 0, 3.05, 0, 3.5); };
   // left of the door: the tins, a bowl of lemons
   const wl = at(TW + 0.5, 3.4, 0, 'street'); tiers(wl);
   { for (let i = 0; i < 5; i++) { faced(wl, -2.2 + i * 1.1, 0.75, 3.5, FISH[i], 3, 1.5); faced(wl, -2.2 + i * 1.1, 1.75, 2.9, FISH[i + 5], 2, 1.5); }

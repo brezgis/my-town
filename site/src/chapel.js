@@ -200,8 +200,8 @@ export function chapelShell(B0, t) {
     // the windows: a stone sill and cap, a painted frame (the tall ones are a single light now: no bars across)
     const win = (c, y0, h, bars) => {
       const hw = UP.w / 2, f = 0.17, r = 0.22;
-      wb(STONE, c - hw - 0.25, c + hw + 0.25, y0 - 0.3, y0 + 0.012, d0 - 0.2, GD - 0.02); wb(STONE, c - hw - 0.45, c + hw + 0.45, y0 + h - 0.012, y0 + h + 0.42, d0 - 0.17, d0 + 0.1);      // (a hair proud of the opening's own faces, which they would otherwise share)
-      wb(TRIM, c - hw - 0.15, c + hw + 0.15, y0 - 0.1, y0 + 0.01, GD, TH + 0.18);
+      wb(STONE, c - hw - 0.25, c + hw + 0.25, y0 - 0.3, y0 + 0.012, d0 - 0.2, GD - 0.02); wb(STONE, c - hw - 0.45, c + hw + 0.45, y0 + h - 0.025, y0 + h + 0.42, d0 - 0.17, d0 + 0.1);      // (a hair proud of the opening's own faces, which they would otherwise share)
+      wb(TRIM, c - hw - 0.15, c + hw + 0.15, y0 - 0.1, y0 + 0.03, GD, TH + 0.18);
       for (const sg of [-1, 1]) wb(SASH, c + sg * hw, c + sg * (hw - f), y0, y0 + h, GD - 0.16, GD + 0.16);
       wb(SASH, c - hw, c + hw, y0, y0 + r, GD - 0.16, GD + 0.16); wb(SASH, c - hw, c + hw, y0 + h - r, y0 + h, GD - 0.16, GD + 0.16);
       for (const y of bars) wb(SASH, c - hw + f, c + hw - f, y - 0.07, y + 0.07, GD - 0.1, GD + 0.1);

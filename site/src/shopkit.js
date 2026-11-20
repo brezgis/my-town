@@ -95,7 +95,7 @@ export function tools(kit, seed = 1) {
   function jar(f, x, y, z, r, h, fill, lvl = 0.8, lid = 'c#c9ccd0/0.3/1') {
     ves(f, GLASSY, x, y, z, [[0, 0], [r, 0], [r, h * 0.92], [r * 0.85, h], [0, h]], 14);
     if (fill) ves(f, fill, x, y, z + 0.01, [[0, 0], [r - 0.012, 0], [r - 0.012, h * lvl * 0.9], [0, h * lvl * 0.9]], 12);
-    if (lid) f.cyl(lid, x, y, z + h, z + h + 0.05, r * 0.9, r * 0.9, 14);
+    if (lid) f.cyl(lid, x, y, z + h - 0.02, z + h + 0.05, r * 0.9, r * 0.9, 14);      // (its underside a little inside the neck: it lay in the plane of the glass's top, and showed from below)
   }
   function bottle(f, x, y, z, o = {}) {
     const r = o.r ?? 0.11, h = o.h ?? 0.95, col = o.col ?? 'c#2c4a2a/0.15', neck = o.neck ?? 0.035;
@@ -105,8 +105,8 @@ export function tools(kit, seed = 1) {
   }
   // A tin can with a label band.
   function tin(f, x, y, z, r, h, label, band) {
-    f.cyl('c#b9b8b2/0.3/1', x, y, z, z + h, r, r, 14); f.cyl(label, x, y, z + 0.02, z + h - 0.02, r + 0.004, r + 0.004, 14);
-    if (band) f.cyl(band, x, y, z + h * 0.35, z + h * 0.6, r + 0.007, r + 0.007, 14);
+    f.cyl('c#b9b8b2/0.3/1', x, y, z, z + h, r, r, 14); f.cyl(label, x, y, z + 0.02, z + h - 0.02, r + 0.016, r + 0.016, 14);      // (the label and the band stand clear of the can: a hair proud, they flickered on every tin in the street)
+    if (band) f.cyl(band, x, y, z + h * 0.35, z + h * 0.6, r + 0.032, r + 0.032, 14);
   }
   const plate = (f, x, y, z, r = 0.38, col = PORC) => ves(f, col, x, y, z, [[0, 0], [r * 0.6, 0], [r * 0.65, 0.015], [r, 0.05], [r, 0.06], [r * 0.6, 0.03], [0, 0.03]], 20);
   const bowl = (f, x, y, z, r, h, col = PORC, seg = 20) => ves(f, col, x, y, z, [[0, 0], [r * 0.5, 0], [r * 0.85, h * 0.45], [r, h], [r * 0.93, h], [r * 0.8, h * 0.5], [r * 0.45, h * 0.12], [0, h * 0.12]], seg);
@@ -189,9 +189,9 @@ export function fixtures(kit, K) {
   function shelving(f, x0, x1, zs = [1.2, 2.6, 4.0, 5.4], o = {}) {
     const d = o.d ?? 1.0, mat = o.mat ?? WOOD, th = o.th ?? 0.09, top = Math.max(...zs) + (o.over ?? 1.3), n = Math.max(1, Math.round((x1 - x0) / (o.bay ?? 3.4)));
     if (o.back !== false) f.box(o.back ?? mat, x0, x1, 0.01, 0.078, 0, top, G);      // (proud of the shell's 0.06 skirting)
-    for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; f.box(mat, x - 0.045, x + 0.045, 0.01, d, 0, top, G); }
-    for (const z of zs) f.box(mat, x0, x1, 0.02, d + 0.03, z - th, z, G);
-    f.box(mat, x0 - 0.05, x1 + 0.05, 0.01, d + 0.05, top, top + 0.1, G);
+    for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n; f.box(mat, x - 0.045, x + 0.045, o.back !== false ? 0.045 : 0.01, d, 0, top, G); }      // (uprights, shelves and crown start inside the back board: their rear faces lay in its plane)
+    for (const z of zs) f.box(mat, x0, x1, o.back !== false ? 0.05 : 0.02, d + 0.03, z - th, z, G);
+    f.box(mat, x0 - 0.05, x1 + 0.05, o.back !== false ? 0.04 : 0.01, d + 0.05, top, top + 0.1, G);
     if (o.block !== false) f.block(x0, x1, 0, d, 0, Math.min(top, 7));
     return zs;
   }

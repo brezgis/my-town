@@ -124,7 +124,7 @@ export default function rooftop(kit, lot, town) {
     for (const x of [SX0 + 0.1, SX1 - 0.1]) beam(DARKW, [x, YT - 0.15, HT - 0.5], [x, YF + 0.35, H0 - 0.55], 0.2, 0.95);      // the two stringers
     P.box(TREAD, XN - 0.15, SX1, YE, YT, HT - 0.14, HT, G);                                                                      // the landing
     for (const y of [YE + 0.2, YT - 0.2]) P.box(DARKW, BX + 0.02, SX1, y - 0.12, y + 0.12, HT - 0.62, HT - 0.14);              // on two joists out of the wall
-    for (const y of [lot.y1 - 9, lot.y1 - 0.4]) P.box(DARKW, BX + 0.02, SX1, y - 0.12, y + 0.12, hs(y) - 1.5, hs(y) - 0.98);   // and two more under the flight
+    for (const y of [lot.y1 - 9, lot.y1 - 0.4]) P.box(DARKW, BX + 0.02, SX1 - 0.03, y - 0.12, y + 0.12, hs(y) - 1.5, hs(y) - 0.98);   // and two more under the flight
     { const y = lot.y1 + 5.2, h = hs(y) - 1.0;                                                                                   // past the corner: one pair of posts and a beam
       for (const x of [SX0 + 0.1, SX1 - 0.1]) { P.box(DARKW, x - 0.17, x + 0.17, y - 0.17, y + 0.17, 0, h); block(x - 0.22, x + 0.22, y - 0.22, y + 0.22, 0, Math.min(h, 7)); }
       P.box(DARKW, SX0 - 0.1, SX1 + 0.1, y - 0.14, y + 0.14, h - 0.5, h); }
@@ -202,7 +202,7 @@ export default function rooftop(kit, lot, town) {
     const z = TOP;
     ves(c, STEEL, 4.6, -1.2, z, [[0, 0], [0.3, 0], [0.36, 0.5], [0.38, 0.52], [0.34, 0.5], [0.28, 0.05], [0, 0.05]], 18); for (let i = 0; i < 9; i++) c.box('glass', 4.42 + (i % 3) * 0.13, 4.52 + (i % 3) * 0.13, -1.37 + Math.floor(i / 3) * 0.13, -1.27 + Math.floor(i / 3) * 0.13, z + 0.4 + (i % 2) * 0.05, z + 0.5 + (i % 2) * 0.05);
     ves(c, STEEL, 3.8, -1.25, z, [[0, 0], [0.11, 0], [0.15, 0.5], [0.15, 0.56], [0.12, 0.6], [0.08, 0.78], [0.08, 0.86], [0, 0.87]], 14);
-    ves(c, 'glass', 3.25, -1.15, z, [[0, 0], [0.14, 0], [0.16, 0.5], [0.15, 0.5], [0.13, 0.03], [0, 0.03]], 14); tube(c, STEEL, [[3.25, -1.15, z + 0.04], [3.3, -1.1, z + 0.95]], 0.012, 4);
+    ves(c, 'glass', 3.25, -1.15, z + 0.015, [[0, 0], [0.14, 0], [0.16, 0.5], [0.15, 0.5], [0.13, 0.03], [0, 0.03]], 14); tube(c, STEEL, [[3.25, -1.15, z + 0.04], [3.3, -1.1, z + 0.95]], 0.012, 4);
     for (const [i, col] of ['c#3a2214/0.3', 'c#8a1c1c/0.3', 'c#c9952a/0.3'].entries()) bottle(c, 2.55 + i * 0.2, -1.4, z, { r: 0.06, h: 0.42, col, cap: 'c#e8c73a/0.4', neck: 0.02 });
     K.bowl(c, 5.55, -1.3, z, 0.3, 0.16, 'c#e8e2d4/0.3'); fruit(c, 'orange', 5.47, -1.35, z + 0.05); fruit(c, 'lemon', 5.67, -1.21, z + 0.05); fruit(c, 'lime', 5.51, -1.13, z + 0.06);
     c.box('oak_light#c4a477', 5.0, 5.9, -0.75, -0.3, z + 0.004, z + 0.06); c.cyl('c#e0782a/0.45', 5.25, -0.52, z + 0.06, z + 0.085, 0.13, 0.13, 14); c.cyl('c#e0782a/0.45', 5.55, -0.5, z + 0.06, z + 0.085, 0.13, 0.13, 14); c.box(STEEL, 5.75, 5.79, -0.72, -0.34, z + 0.06, z + 0.075);
@@ -210,7 +210,7 @@ export default function rooftop(kit, lot, town) {
     lot.roofBell = { xz: kit.world(c, 0.2, -1.45), y: DK + z + 0.2 };
     K.bowl(c, -1.3, -0.7, z, 0.24, 0.13, 'c#2f5a6a/0.3'); for (let i = 0; i < 12; i++) ball(c, i % 4 ? 'c#5d7a3a/0.3' : 'c#3a2a30/0.3', -1.3 + Math.cos(i * 2.4) * 0.11 * (i % 3) / 2, -0.7 + Math.sin(i * 2.4) * 0.11 * (i % 3) / 2, z + 0.04 + (i % 3 === 0 ? 0.04 : 0), 0.035, 7, 1.2);
     K.bowl(c, -2.3, -0.75, z, 0.2, 0.11, 'c#e8e2d4/0.3'); for (let i = 0; i < 14; i++) ball(c, 'c#a8784a/0.8', -2.3 + Math.cos(i * 2.4) * 0.09 * (i % 3) / 2, -0.75 + Math.sin(i * 2.4) * 0.09 * (i % 3) / 2, z + 0.035 + (i % 3 === 0 ? 0.03 : 0), 0.026, 6, 0.8);
-    ves(c, 'glass', -4.3, -1.1, z, [[0, 0], [0.2, 0], [0.24, 0.3], [0.2, 0.62], [0.15, 0.76], [0.18, 0.86], [0.165, 0.86], [0.135, 0.76], [0.185, 0.62], [0.225, 0.3], [0.19, 0.03], [0, 0.03]], 16); for (let i = 0; i < 4; i++) glass(c, -4.9 + (i % 2) * 0.27, -1.3 + Math.floor(i / 2) * 0.27, z, 0.1, 0.32);
+    ves(c, 'glass', -4.3, -1.1, z + 0.015, [[0, 0], [0.2, 0], [0.24, 0.3], [0.2, 0.62], [0.15, 0.76], [0.18, 0.86], [0.165, 0.86], [0.135, 0.76], [0.185, 0.62], [0.225, 0.3], [0.19, 0.03], [0, 0.03]], 16); for (let i = 0; i < 4; i++) glass(c, -4.9 + (i % 2) * 0.27, -1.3 + Math.floor(i / 2) * 0.27, z, 0.1, 0.32);
     const olive = T3 => { const g = new T3.Group(), m = new T3.MeshStandardMaterial({ color: 0x66803a, roughness: 0.3 }), s = new T3.MeshStandardMaterial({ color: 0xd9cdb2, roughness: 0.8 });
       for (let i = 0; i < 3; i++) { const o = new T3.Mesh(new T3.SphereGeometry(0.035, 10, 8).scale(1, 1.25, 1), m); o.position.set(0, 0.03 + i * 0.07, 0); g.add(o); } const st = new T3.Mesh(new T3.CylinderGeometry(0.004, 0.004, 0.34, 5), s); st.position.y = 0.13; g.add(st); return g; };
     const nuts = T3 => { const g = new T3.Group(), m = new T3.MeshStandardMaterial({ color: 0xa8784a, roughness: 0.8 }); for (let i = 0; i < 6; i++) { const o = new T3.Mesh(new T3.SphereGeometry(0.026, 8, 6).scale(1.3, 0.8, 1), m); o.position.set(Math.cos(i * 1.05) * 0.04, 0.02 + (i % 2) * 0.02, Math.sin(i * 1.05) * 0.04); g.add(o); } return g; };
@@ -243,8 +243,8 @@ export default function rooftop(kit, lot, town) {
     // the top shelf: the good stuff, a radio, things kept for luck
     for (let i = 0; i < 6; i++) bottle(s, -5.8 + i * 0.6, 0.5, zs[2], { r: 0.13, h: 0.8 + (i % 2) * 0.14, col: K.pick(['c#8a5a2a/0.2', 'c#3a2214/0.2', 'c#a8784a/0.2']), label: 'c#17140f/0.5', cap: 'c#b08d4a/0.35/1' });
     s.soft('c#8a5a2a/0.45', -2.0, -0.6, 0.2, 0.75, zs[2], zs[2] + 0.8, 0.08); s.box('c#d9cdb2/0.8', -1.88, -1.3, 0.75, 0.77, zs[2] + 0.14, zs[2] + 0.66); s.box(BRASS, -1.1, -0.8, 0.75, 0.78, zs[2] + 0.3, zs[2] + 0.56); tube(s, STEEL, [[-0.7, 0.5, zs[2] + 0.8], [-0.3, 0.5, zs[2] + 1.9]], 0.01, 4);
-    K.potted(s, 0.6, 0.5, zs[2], { r: 0.24, n: 14, len: 1.5, up: 0.15, out: 0.6, droop: 1.7, pot: 'c#2f5a6a/0.45' }); kit.model('vintage_oil_lamp', s, 2.2, 0.5, zs[2], 0);
-    for (let i = 0; i < 5; i++) K.jar(s, 3.6 + i * 0.55, 0.5, zs[2], 0.2, 0.55, ['c#e0782a/0.6', 'c#e8c73a/0.6', 'c#7fa04a/0.6', 'c#8a1c1c/0.6', 'c#c9a77a/0.8'][i], 0.75, BRASS);      // dried orange, lemon, rosemary, cherries, cinnamon
+    K.potted(s, 0.6, 0.5, zs[2], { r: 0.24, n: 14, len: 1.5, up: 0.15, out: 0.6, droop: 1.7, pot: 'c#2f5a6a/0.45' }); kit.model('vintage_oil_lamp', s, 2.2, 0.5, zs[2] - 0.02, 0);
+    for (let i = 0; i < 5; i++) K.jar(s, 3.6 + i * 0.55, 0.5, zs[2] - 0.02, 0.2, 0.55, ['c#e0782a/0.6', 'c#e8c73a/0.6', 'c#7fa04a/0.6', 'c#8a1c1c/0.6', 'c#c9a77a/0.8'][i], 0.75, BRASS);      // dried orange, lemon, rosemary, cherries, cinnamon
     // glassware on the back counter: wine glasses, rocks glasses, highballs; a board, a towel, a little sink
     const WINE = [[0, 0], [0.11, 0], [0.11, 0.01], [0.015, 0.02], [0.012, 0.25], [0.07, 0.3], [0.13, 0.42], [0.105, 0.6], [0.098, 0.6], [0.122, 0.42], [0.065, 0.31], [0.012, 0.27]];
     for (let i = 0; i < 10; i++) ves(s, 'glass', -6.0 + (i % 5) * 0.34, 0.4 + Math.floor(i / 5) * 0.36, 0, WINE, 12);
@@ -252,7 +252,7 @@ export default function rooftop(kit, lot, town) {
     for (let i = 0; i < 8; i++) glass(s, -1.5 + (i % 4) * 0.25, 0.4 + Math.floor(i / 4) * 0.27, 0, 0.09, 0.5);
     s.box('oak_light#c4a477', 0.3, 1.6, 0.75, 1.45, 0.004, 0.07); fruit(s, 'orange', 0.7, 1.15, 0.07); fruit(s, 'lemon', 1.2, 1.05, 0.07); s.box(STEEL, 1.3, 1.34, 0.85, 1.35, 0.07, 0.085);
     K.towel(s, 2.6, 3.4, 1.72, -0.15, 0.9, 'c#e8e2d4/0.8', 'c#b8361f/0.8');
-    b.box(STEEL, 4.4, 6.2, 0.4, 1.45, 3.26, 3.31); tube(b, STEEL, [[5.3, 0.3, 3.3], [5.3, 0.3, 4.0], [5.3, 0.7, 4.12], [5.3, 0.85, 3.9]], 0.035, 8);
+    b.box(STEEL, 4.4, 6.2, 0.4, 1.45, 3.26, 3.325); tube(b, STEEL, [[5.3, 0.3, 3.3], [5.3, 0.3, 4.0], [5.3, 0.7, 4.12], [5.3, 0.85, 3.9]], 0.035, 8);
   }
   // the pergola: two posts, a beam, rafters back to the wall, slats over them
   {
@@ -280,7 +280,7 @@ export default function rooftop(kit, lot, town) {
     m.box(DARKW, -2.3, 2.3, 0.05, 1.35, 1.8, 2.6, G); m.box('c#3a2214/0.8', -2.2, 2.2, 0.15, 1.25, 2.6, 2.62); for (const x of [-2.2, 2.2]) m.box(DARKW, x - 0.08, x + 0.08, 1.15, 1.31, 0, 1.8, G); m.block(-2.3, 2.3, 0, 1.35, 0, 2.6);
     const herbs = [['mint', 'c#5d8a3a/0.8', 0.11, 0.5], ['rosemary', 'c#4a6e38/0.8', 0.025, 0.9], ['thyme', 'c#7fa04a/0.8', 0.03, 0.35], ['basil', 'c#3a6a3a/0.8', 0.13, 0.55], ['sage', 'c#9fb0a4/0.8', 0.1, 0.5]];
     herbs.forEach(([n, col, w, len], i) => { const x = -1.76 + i * 0.88; for (const dx of [-0.2, 0.2]) leaves(m, x + dx, 0.7, 2.6, { n: 11, len, w, up: 0.95, out: n === 'rosemary' ? 0.25 : 0.6, droop: 0.4, spread: 0.12, col: [col, 'c#5d7a45/0.7'] }); X.card(m, x, 1.36, 2.2, 0.62, 0.3, TAG(n + (n === 'basil' ? ' (optimistic)' : ''), '#e8e2d4')); });
-    kit.model('watering_can_metal_01', m, 3.0, 1.1, 0, 0, { turn: 0.6 });
+    kit.model('watering_can_metal_01', m, 3.0, 1.1, -0.02, 0, { turn: 0.6 });
   }
   {
     // the telescope: brass, on a wooden tripod, laid over the rail on the place where the sun goes

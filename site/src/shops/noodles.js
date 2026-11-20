@@ -106,20 +106,41 @@ export default function noodles(kit, lot) {
   A.rail('right', 0.3, M - 3.42, { z: 9.7, mat: WAIN }); A.rail('right', M + 3.92, PF - 0.01, { z: 9.7, mat: WAIN });
   // three plates over each division between booths, standing on the shelf
   [['c#2f4668/0.25', 1], ['c#8fa69a/0.25', 2], ['c#8a2a1c/0.25', 3]].forEach(([rim, i]) => { const dv = B0 + i * BAY;
-    for (const [dd, r] of [[-1.05, 0.38], [0, 0.48], [1.05, 0.38]]) { hcyl(R, rim, 'x', 0.19, dv + dd, SHELF + 0.004 + r, 0.05, r, r, 20); hcyl(R, PORC, 'x', 0.2, dv + dd, SHELF + 0.004 + r, 0.05, r * 0.66, r * 0.66, 20); } });
+    for (const [dd, r] of [[-1.05, 0.38], [0, 0.48], [1.05, 0.38]]) {      // the coloured rim is a ring round the white well, so nothing lies behind the well
+      K.put(R, kit.geom.xf(kit.geom.lathe([[r * 0.66, 0], [r, 0], [r, 0.05], [r * 0.66, 0.05], [r * 0.66, 0]], { seg: 20 }), { ry: Math.PI / 2 }), rim, 0.165, dv + dd, SHELF + 0.004 + r);
+      hcyl(R, PORC, 'x', 0.2, dv + dd, SHELF + 0.004 + r, 0.05, r * 0.66, r * 0.66, 20); } });
 
   // ---- THE BOOTHS: four, down the left wall; a table for two (four at a squeeze) and a low lantern in each ---------
   { const BW = 3.4, BH = 4.3;
+    // One bench of a booth, its back to the division at dv, facing away from it (s: +1 toward the back of the room,
+    // -1 toward the street). In its frame y runs out from the division's middle, x along the bench (mirrored with s).
+    // A framed base on a recessed black plinth, a nosed seat board, a welted seat cushion, a padded back raked a
+    // little, and at the aisle end a shaped end board as tall as the back, a coat hook on its outer face.
+    const am = (0.24 + BW) / 2, A0 = 0.24, A1 = BW - 0.1;                    // the bench runs from the wall (A0) to its end board (A1..BW)
+    const bench = (s, dv) => {
+      const f = R.sub(am, dv, 0, s > 0 ? 0 : 2), lx = a => s * (a - am), X = (a0, a1) => [Math.min(lx(a0), lx(a1)), Math.max(lx(a0), lx(a1))];
+      f.box('c#17140f/0.8', ...X(A0 + 0.06, A1 - 0.06), 0.12, 1.1, 0, 0.32);                                                    // the toe recess
+      f.box(WAIN, ...X(A0, A1), 0.12, 1.2, 0.32, 1.18, G);                                                                   // the carcass, its face the panels
+      f.bev(WAIN, ...X(A0, A1), 1.2, 1.26, 0.32, 0.48, 0.012, G); f.bev(WAIN, ...X(A0, A1), 1.2, 1.26, 1.02, 1.18, 0.012, G);    // rails
+      for (const a of [A0, (A0 + A1) / 2 - 0.09, A1 - 0.18]) f.bev(WAIN, ...X(a, a + 0.18), 1.2, 1.26, 0.48, 1.02, 0.012, G);      // stiles
+      f.bev(WAIN, ...X(A0, A1), 0.12, 1.34, 1.18, 1.27, 0.025, G);                                                            // the seat board, nosed
+      f.cushion(CUSH, ...X(A0 + 0.04, A1 - 0.04), 0.34, 1.42, 1.27, 1.53, 0.07, { crown: 0.02, welt: 0.008, n: [3, 2, 1], noBottom: true });
+      f.cushion(CUSH, ...X(A0 + 0.06, A1 - 0.06), 0.3, 0.52, 1.5, 3.72, 0.08, { lean: -0.07, crown: 0, welt: 0.008, n: [3, 1, 3] });     // the back, raked
+      const end = [[0.12, 0], [1.46, 0], [1.46, 1.86], [1.41, 1.99], [1.3, 2.05], [0.88, 2.07], [0.64, 2.2], [0.5, 2.6], [0.44, 3.78], [0.39, 3.91], [0.27, 3.97], [0.12, 3.97]];
+      kit.put(f, WAIN, kit.geom.extrude(end, 0, 0.1, { bevel: 0.015 }), { rz: Math.PI / 2, at: [X(A1, BW)[1], 0, 0] });
+      tube(f, BRASS, [[lx(BW), 0.3, 3.5], [lx(BW + 0.14), 0.3, 3.52], [lx(BW + 0.21), 0.3, 3.61], [lx(BW + 0.2), 0.3, 3.7]], 0.017, 5);    // the coat hook, and its short lower prong
+      tube(f, BRASS, [[lx(BW), 0.3, 3.44], [lx(BW + 0.09), 0.3, 3.39], [lx(BW + 0.13), 0.3, 3.31], [lx(BW + 0.13), 0.3, 3.26]], 0.013, 5);
+      hcyl(f, BRASS, 'x', lx(BW + 0.012), 0.3, 3.47, 0.024, 0.05, 0.05, 10);
+    };
     for (let i = 0; i <= 4; i++) { const dv = B0 + i * BAY;
       R.box(WAIN, 0.22, BW, dv - 0.1, dv + 0.1, 0, BH, G); R.box(WAIN, 0.22, BW + 0.06, dv - 0.15, dv + 0.15, BH, BH + 0.09, G);
       for (const s of [-1, 1]) { if ((s < 0 && i === 0) || (s > 0 && i === 4)) continue;
-        const span = (p, q) => [Math.min(dv + s * p, dv + s * q), Math.max(dv + s * p, dv + s * q)];
-        R.box(WAIN, 0.24, BW - 0.06, ...span(0.06, 1.3), 0, 1.28, G);
-        R.soft(CUSH, 0.26, BW - 0.04, ...span(0.12, 1.45), 1.26, 1.55, 0.05); R.soft(CUSH, 0.32, BW - 0.1, ...span(0.06, 0.3), 1.8, 3.95, 0.05);
+        bench(s, dv);
         const sf = s > 0 ? R.sub(0, dv + 0.8, 0, 0) : at(0, dv - 0.8, 0, 'street');
         for (const a of [1.15, 2.45]) kit.seat(sf, s > 0 ? a : -a, 0, 1.55, 'sit in the booth'); } }
     for (let i = 0; i < 4; i++) { const tc = B0 + (i + 0.5) * BAY;
-      R.box(OAK, 0.26, 3.1, tc - 1.0, tc + 1.0, 2.44, 2.54, G); R.box(IRON, 1.55, 1.8, tc - 0.12, tc + 0.12, 0.05, 2.44); R.box(IRON, 1.1, 2.25, tc - 0.4, tc + 0.4, 0, 0.05);
+      R.bev(OAK, 0.26, 3.1, tc - 1.0, tc + 1.0, 2.42, 2.54, 0.03, G);                // the top, its edges eased, well over its pedestal
+      R.lathe(IRON, 1.68, tc, [[0, 0], [0.6, 0], [0.6, 0.03], [0.5, 0.08], [0.2, 0.15], [0.11, 0.24], [0.085, 0.34], [0.085, 2.16], [0.11, 2.24], [0.36, 2.33], [0.4, 2.36], [0.4, 2.42], [0, 2.42]], { seg: 16 });      // a cast pedestal on a round foot, a flange under the top
       R.cyl(LACQ, 0.62, tc - 0.28, 2.54, 2.94, 0.11, 0.13, 10); jar(R, 0.62, tc + 0.28, 2.54, 0.09, 0.2, 'c#b8361f/0.2', 0.7, 'c#17140f/0.45');
       X.pendant(R, 1.7, tc, { kind: 'paper', drop: 5.6, power: 0.45, halo: 0.6 }); kit.lamps[kit.lamps.length - 1].pilot = true; }      // (each lights its table: ../lighting.js lights every lamp of the room after dark; pilot: not under ?light=old)
     R.block(0, BW + 0.06, B0 - 0.15, B0 + 4 * BAY + 0.15, 0, BH); }
@@ -131,10 +152,16 @@ export default function noodles(kit, lot) {
   c.box(BRASS, C0 + 0.3, C1 - 0.3, 0.3, 0.36, 0.62, 0.68); for (let i = 0; i <= 4; i++) { const x = C0 + 0.5 + i * (C1 - C0 - 1) / 4; c.box(BRASS, x - 0.03, x + 0.03, 0, 0.33, 0.6, 0.66); }      // the foot rail
   for (let i = 0; i < 6; i++) X.stool(c.sub(M + (i - 2.5) * 2.6, 1.02, 0, 2), 0, 0, 2.35, { label: 'sit at the counter', mat: REDW });      // turned about: whoever sits faces the kitchen
   // the counter turns to the wall at each end; at the back, a flap by the wall is the way in
-  for (const [d0, d1, a1] of [[C0, C0 + 1.8, W - 0.02], [C1 - 1.8, C1, W - 2.7]]) {
-    R.box('c#17140f/0.8', CE + CD, a1, d0 + 0.06, d1 - 0.06, 0, 0.3); R.box(BLACK, CE + CD, a1, d0, d1, 0.3, 3.3, G); R.box(OAK, CE + CD - 0.02, a1, d0 - 0.08, d1 + 0.08, 3.3, 3.4, G); R.block(CE + CD, a1, d0, d1, 0, 3.4);
+  // (each end panelled on the face the room sees, as the counter's front is; its top butts against the counter's top)
+  for (const [d0, d1, a1, o] of [[C0, C0 + 1.8, W - 0.02, -1], [C1 - 1.8, C1, W - 2.7, 1]]) {
+    const dF = o < 0 ? d0 : d1, dd = (p, q) => [Math.min(dF - o * p, dF - o * q), Math.max(dF - o * p, dF - o * q)];
+    R.box('c#17140f/0.8', CE + CD, a1, ...(o < 0 ? [d0 + 0.12, d1 - 0.06] : [d0 + 0.06, d1 - 0.12]), 0, 0.3); R.box(BLACK, CE + CD, a1, ...(o < 0 ? [d0 + 0.06, d1] : [d0, d1 - 0.06]), 0.3, 3.3, G);
+    const n = Math.max(1, Math.round((a1 - CE - CD) / 2.2)), w = (a1 - CE - CD) / n;
+    for (let i = 0; i < n; i++) { const p = CE + CD + i * w + 0.18, q = CE + CD + (i + 1) * w - 0.18;
+      R.box(BLACK, p, q, ...dd(0.02, 0.06), 0.55, 0.75, G); R.box(BLACK, p, q, ...dd(0.02, 0.06), 2.85, 3.05, G); R.box(BLACK, p, p + 0.2, ...dd(0.02, 0.06), 0.75, 2.85, G); R.box(BLACK, q - 0.2, q, ...dd(0.02, 0.06), 0.75, 2.85, G); }
+    R.box(OAK, CE + CD + 0.04, a1, d0 - 0.08, d1 + 0.08, 3.3, 3.4, G); R.block(CE + CD, a1, d0, d1, 0, 3.4);
   }
-  R.box(OAK, W - 2.72, W - 0.07, C1 - 1.5, C1 - 0.3, 3.3, 3.38, G); R.block(W - 2.7, W, C1 - 1.8, C1, 0, 3.4);
+  R.box(OAK, W - 2.69, W - 0.07, C1 - 1.5, C1 - 0.3, 3.3, 3.38, G); R.block(W - 2.7, W, C1 - 1.8, C1, 0, 3.4);
   // on the customers' side: chopsticks and chilli oil in two places, and the rest of the counter left clear
   for (const x of [M - 2.6, M + 2.6]) {
     c.cyl(LACQ, x - 0.2, -0.82, TOP, TOP + 0.42, 0.11, 0.13, 10); for (let i = 0; i < 7; i++) { const a = i * 0.9, dx = Math.cos(a) * 0.06, dy = Math.sin(a) * 0.06; tube(c, i % 3 ? 'c#b08a5a/0.8' : 'c#3a2214/0.8', [[x - 0.2 + dx * 0.4, -0.82 + dy * 0.4, TOP + 0.05], [x - 0.2 + dx * 1.5, -0.82 + dy * 1.5, TOP + 0.85]], 0.012, 4); }
@@ -226,7 +253,7 @@ export default function noodles(kit, lot) {
 
   // ---- THE STORE, behind the partition: bowls to the ceiling, the miso tubs, flour, the back window and door --------
   { const s = at(0.08, (PB + D) / 2, 0, 'right'), zs = [1.5, 3.1, 4.7, 6.3, 7.9];
-    X.shelving(s, -3.0, 3.0, zs, { d: 1.25, mat: WAIN });
+    X.shelving(s, -3.0, 3.0, zs, { d: 1.25, mat: WAIN, back: false }); s.box(WAIN, -3.0, 3.0, 0.1, 0.16, 0, Math.max(...zs) + 1.3, G);      // (its own back, set clear of the shelves' back edges)
     zs.slice(0, 4).forEach((z, j) => { for (let i = 0; i < 8; i++) { const x = (i < 4 ? -2.58 : 0.42) + (i % 4) * 0.72, n = 4 + (i * 3 + j * 2) % 5; for (let m = 0; m < n; m++) bowl(s, x, 0.65, z + m * 0.075, 0.33, 0.24, [LACQ, PORC, 'c#8a2a1c/0.25', PORC][(j + (i < 4 ? 0 : 1)) % 4], 10); } });
     for (const x of [-2.2, -0.75, 0.75, 2.2]) { ves(s, CROCK, x, 0.66, 0, [[0, 0], [0.38, 0], [0.5, 0.3], [0.5, 0.8], [0.36, 1.0], [0.3, 1.0], [0, 1.0]], 16); s.cyl('c#3a2618/0.4', x, 0.66, 1.0, 1.05, 0.33, 0.33, 14); }
     for (const x of [-1.9, 0, 1.9]) ves(s, x ? 'c#2f4668/0.25' : CROCK, x, 0.62, 7.9, [[0, 0], [0.3, 0], [0.42, 0.25], [0.42, 0.6], [0.26, 0.82], [0.2, 0.82], [0.2, 0.9], [0, 0.9]], 16); }
@@ -237,7 +264,7 @@ export default function noodles(kit, lot) {
     k.block(x - 0.95, x + 0.95, 0.2, 2.2, 0, 2.0); }
   { const x0 = PB + 0.4, x1 = D - 3.0, z = 5.6;                                              // soy, in the big bottles, on a shelf over the tubs
     k.box(WAIN, x0, x1, 0.07, 0.75, z - 0.08, z, G); for (const x of [x0 + 0.4, (x0 + x1) / 2, x1 - 0.4]) k.box(WAIN, x - 0.04, x + 0.04, 0.07, 0.6, z - 0.5, z - 0.08, G);
-    for (let i = 0; i < 7; i++) { const x = x0 + 0.5 + i * 0.52; if (i === 4) continue; k.cyl('c#1f1612/0.15', x, 0.42, z, z + 0.78, 0.17, 0.17, 12); k.cyl('c#1f1612/0.15', x, 0.42, z + 0.78, z + 1.0, 0.17, 0.06, 12); k.cyl('c#1f1612/0.15', x, 0.42, z + 1.0, z + 1.22, 0.06, 0.06, 8); k.cyl('c#b8361f/0.5', x, 0.42, z + 1.22, z + 1.28, 0.07, 0.07, 8); k.cyl('c#efe6d0/0.8', x, 0.42, z + 0.22, z + 0.6, 0.174, 0.174, 12); } }
+    for (let i = 0; i < 7; i++) { const x = x0 + 0.5 + i * 0.52; if (i === 4) continue; k.cyl('c#1f1612/0.15', x, 0.42, z, z + 0.22, 0.17, 0.17, 12); k.cyl('c#1f1612/0.15', x, 0.42, z + 0.6, z + 0.78, 0.17, 0.17, 12); k.cyl('c#1f1612/0.15', x, 0.42, z + 0.78, z + 1.0, 0.17, 0.06, 12); k.cyl('c#1f1612/0.15', x, 0.42, z + 1.0, z + 1.22, 0.06, 0.06, 8); k.cyl('c#b8361f/0.5', x, 0.42, z + 1.22, z + 1.28, 0.07, 0.07, 8); k.cyl('c#efe6d0/0.8', x, 0.42, z + 0.22, z + 0.6, 0.174, 0.174, 12); } }
   { const SACK = 'linen#d6c6a4', a0 = W - 2.65, d0 = D - 2.15;                                // flour, in the corner past the door (clear of the way out)
     R.soft(SACK, a0, a0 + 2.4, d0, d0 + 1.6, 0.004, 0.56, 0.2); R.soft(SACK, a0 + 0.12, a0 + 2.5, d0 + 0.1, d0 + 1.7, 0.54, 1.1, 0.2); R.soft(SACK, a0 + 0.02, a0 + 2.36, d0 + 0.04, d0 + 1.62, 1.08, 1.62, 0.2);
     R.block(a0, a0 + 2.5, d0, d0 + 1.7, 0, 1.7); }

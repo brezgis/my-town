@@ -39,6 +39,9 @@ export function makeKit(B) {
   if (!B.add.short) { const add = B.add.bind(B); B.add = Object.assign((mat, g) => add(typeof mat === 'string' ? mat.replace(/^([ce])#([0-9a-f])([0-9a-f])([0-9a-f])(?![0-9a-f])/i, '$1#$2$2$3$3$4$4') : mat, g), { short: true }); }
   let seed = 20261110;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  // (the stream can be read and set: each shop or room starts from a number of its own, so that what is added to one
+  // does not shift what chance decided in the next: shops/index.js, furnish/index.js)
+  const seedNow = () => seed, reseed = v => { seed = v; };
   const pick = a => a[Math.floor(rnd() * a.length)];
 
   function fr(X, Y, h, q = 0) {
@@ -124,7 +127,7 @@ export function makeKit(B) {
   }
 
   // ---- The builders ----------------------------------------------------------------------
-  const K = { B, F1, F2, wx, wz, geom, mats: M, fr, put, frameMatrix, world, yawOf, seat, lampAt, model, rnd, pick, lamps, seats, candles, models, extras, books, steam, hinged, nooks, book, bookRow, bookStack, sign, pack, rug, hingedDoor,
+  const K = { B, F1, F2, wx, wz, geom, mats: M, fr, put, frameMatrix, world, yawOf, seat, lampAt, model, rnd, seedNow, reseed, pick, lamps, seats, candles, models, extras, books, steam, hinged, nooks, book, bookRow, bookStack, sign, pack, rug, hingedDoor,
     LINEN, OAT, SAGE, RUST, NAVY, MUSTARD, CREAM, ROSE, ENAMEL, BRASS, STEEL, BLACK, GREEN, MARBLE, DARK, WHITE };
   for (const make of [makeLight, makeProps, makeSoft, makeWood, makeBath]) Object.assign(K, make(K));
 

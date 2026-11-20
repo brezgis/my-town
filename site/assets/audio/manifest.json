@@ -83,32 +83,6 @@
   "note": "Ogg Vorbis is gapless for looping; the MP3 twin is a fallback for browsers without Vorbis and may show a tiny gap at the loop point."
  },
  {
-  "file": "rain.ogg",
-  "kind": "ambience",
-  "title": "Gentle rain (40 s loop)",
-  "composer": null,
-  "performer": "ezwa (PDSounds)",
-  "duration_s": 40.0,
-  "source_url": "https://commons.wikimedia.org/wiki/File:Rain_(1).ogg",
-  "licence": "Public domain (PDSounds; Wikimedia Commons)",
-  "alt_file": "rain.mp3",
-  "loop": true,
-  "note": "Ogg Vorbis is gapless for looping; the MP3 twin is a fallback for browsers without Vorbis and may show a tiny gap at the loop point."
- },
- {
-  "file": "clock_tick.ogg",
-  "kind": "ambience",
-  "title": "Clock ticking, 1 tick/s (15 s loop, cut on whole ticks)",
-  "composer": null,
-  "performer": "natalie (PDSounds)",
-  "duration_s": 14.98,
-  "source_url": "https://commons.wikimedia.org/wiki/File:Clock_ticking.ogg",
-  "licence": "Public domain (PDSounds; Wikimedia Commons)",
-  "alt_file": "clock_tick.mp3",
-  "loop": true,
-  "note": "Ogg Vorbis is gapless for looping; the MP3 twin is a fallback for browsers without Vorbis and may show a tiny gap at the loop point."
- },
- {
   "file": "schumann_traumerei.mp3",
   "kind": "music",
   "title": "Kinderszenen, Op. 15 No. 7: Träumerei (Dreaming)",

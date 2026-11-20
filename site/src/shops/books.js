@@ -119,6 +119,32 @@ export default function books(kit, lot) {
   const ticket = (f, x, k, txt, w = 1.5) => kit.sign(f, x, 0.966, shelfZ(k) - 0.05, w, 0.2, TICKET(txt), { cw: Math.round(w * 160), ch: 32 });
   // a lettered board standing on a bookcase's cornice (front edge at y)
   const crest = (f, y, z, w, main, sub) => { f.box(DARKW, -w / 2 - 0.08, w / 2 + 0.08, y - 0.06, y, z, z + 0.84); kit.sign(f, 0, y + 0.012, z + 0.42, w, 0.72, SECTION(main, sub), { cw: Math.round(w * 128), ch: 92 }); };
+  // The display table, centred on (x, y), w by d, top at h, a lower shelf whose top is at sh: a thick top with an
+  // eased edge overhanging a framed base (four tapered legs, aprons tenoned into them, a shelf on stretchers). Returns h.
+  const table = (f, x, y, w, d, h, sh) => {
+    const ov = 0.22, lg = 0.2, lx = w / 2 + 0.06 - ov, ly = d / 2 + 0.06 - ov, ap = 0.07, ar = 0.03;          // legs' outer faces at lx, ly
+    f.bev(WOOD, x - w / 2 - 0.06, x + w / 2 + 0.06, y - d / 2 - 0.06, y + d / 2 + 0.06, h - 0.12, h, 0.035, { grain: 'x' });
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) f.bev(WOOD, x + sx * lx - (sx > 0 ? lg : 0), x + sx * lx + (sx < 0 ? lg : 0), y + sy * ly - (sy > 0 ? lg : 0), y + sy * ly + (sy < 0 ? lg : 0), 0, h - 0.1, 0.014, { grain: 'z', taper: 0.28 });
+    for (const s of [-1, 1]) {
+      f.bev(WOOD, x - lx + lg / 2, x + lx - lg / 2, y + s * (ly - ar) - ap / 2 - s * ap / 2, y + s * (ly - ar) + ap / 2 - s * ap / 2, h - 0.46, h - 0.12, 0.01, { grain: 'x' });      // long aprons
+      f.bev(WOOD, x + s * (lx - ar) - ap / 2 - s * ap / 2, x + s * (lx - ar) + ap / 2 - s * ap / 2, y - ly + lg / 2, y + ly - lg / 2, h - 0.46, h - 0.12, 0.01, { grain: 'y' });      // end aprons
+      f.bev(WOOD, x - lx + lg / 2, x + lx - lg / 2, y + s * (ly - 0.1) - 0.05, y + s * (ly - 0.1) + 0.05, sh - 0.25, sh - 0.09, 0.01, { grain: 'x' });  // stretchers under the shelf
+    }
+    f.bev(WOOD, x - lx + 0.04, x + lx - 0.04, y - ly + 0.04, y + ly - 0.04, sh - 0.09, sh, 0.012, { grain: 'x' });  // the lower shelf, let into the legs
+    f.block(x - w / 2, x + w / 2, y - d / 2, y + d / 2, 0, Math.max(h, 1.6));
+    return h;
+  };
+  // Open shelving against a wall: shopkit's fixture, made here so that the uprights, shelves and cap start inside
+  // the back board instead of sharing its face toward the wall (they flickered there).
+  const shelving = (f, x0, x1, zs, o = {}) => {
+    const d = o.d ?? 1.0, mat = o.mat ?? WOOD, th = 0.09, top = Math.max(...zs) + (o.over ?? 1.3), n = Math.max(1, Math.round((x1 - x0) / 3.4)), yb = 0.045;
+    f.box(o.back ?? mat, x0, x1, 0.01, 0.078, 0, top, G);
+    for (let i = 0; i <= n; i++) { const xx = x0 + (x1 - x0) * i / n; f.box(mat, xx - 0.045, xx + 0.045, yb, d, 0, top, G); }
+    for (const z of zs) f.box(mat, x0, x1, yb, d + 0.03, z - th, z, G);
+    f.box(mat, x0 - 0.05, x1 + 0.05, yb, d + 0.05, top, top + 0.1, G);
+    f.block(x0, x1, 0, d, 0, Math.min(top, 7));
+    return zs;
+  };
 
   // ---- wall cases down both long walls, to the picture rail; four of them carry a board -----------------------
   // (0.04 off the wall: the case's back then stands clear of the skirting's face, 0.06 out, instead of in it)
@@ -162,7 +188,7 @@ export default function books(kit, lot) {
 
   // ---- the front table: three new books, each with its first sentence -----------------------------------------
   {
-    const TA = SP, TD = 10, TOP = X.plinth(R, TA, TD, 5.0, 3.0, 2.6, { mat: WOOD, shelf: 0.95 });
+    const TA = SP, TD = 10, TOP = table(R, TA, TD, 5.0, 3.0, 2.6, 0.95);
     const t = at(TA, TD, 0, 'street');                       // +y toward the street
     NEW.forEach((b, i) => { const x = (i - 1) * 1.4;
       jacket(t, x, 0.12, TOP + 0.005, b, 0.66, 0.97);
@@ -189,7 +215,7 @@ export default function books(kit, lot) {
       for (let r = 0; r < 4; r++) for (let i = 0; i < 10 - (r === 3 ? 3 : 0); i++) { const kx = -0.45 + i * 0.1 + r * 0.025 + (r === 3 ? 0.1 : 0), ky = 0.24 + r * 0.115, kz = 0.27 - r * 0.045; t.cyl('c#efe9da/0.3', kx, ky, kz - 0.06, kz + 0.02, 0.04, 0.04, 6); }
       t.box(BLACK, -0.72, 0.72, -0.46, -0.16, 0.34, 0.42); hcyl(t, BLACK, 'x', 0, -0.3, 0.52, 1.36, 0.09, 0.09, 10);
       t.box(CREAMP, -0.38, 0.38, -0.262, -0.25, 0.5, 1.72); kit.sign(t, 0, -0.243, 1.12, 0.74, 1.18, POSTER.typed, { cw: 236, ch: 376 }); }
-    kit.model('st_bankers_lamp', c, 2.5, 2.7, TOP, 0); kit.lampAt(c, 2.5, 2.8, TOP + 0.8, 0.5);
+    kit.model('st_bankers_lamp', c, 2.5, 2.7, TOP - 0.02, 0); kit.lampAt(c, 2.5, 2.8, TOP + 0.8, 0.5);         // (the lamp's foot is let into the top a little: its underside lay in the top's face)
     // and they can: E at the keys adds the next sentence
     const ADDED = ['"It rained on the lighthouse, and on the fox."', '"Nobody had asked the keeper what he thought of endings."', '"The tide came in with a book under its arm."', '"asdf," said the fox, and meant it.'];
     const [tx, tz] = kit.world(c, 1.1, 3.1); let n = 0;
@@ -198,15 +224,15 @@ export default function books(kit, lot) {
       ctx.flash('You type: ' + ADDED[n++ % ADDED.length]); } catch { /* a sentence is not worth a crash */ } } }));
   }
   // behind the counter: the holds shelf
-  X.shelving(c, -3.0, 3.0, [1.3, 2.55, 3.8], { d: 0.8, mat: WOOD, over: 0.05 });
+  shelving(c, -3.0, 3.0, [1.3, 2.55, 3.8], { d: 0.8, mat: WOOD, over: 0.05 });
   for (const z of [1.3, 2.55]) kit.bookRow(c, -2.9, 2.9, 0.06, z, 1.1, 0.7);
-  kit.bookStack(c, 1.6, 0.42, 3.86, 3);
+  kit.bookStack(c, 1.6, 0.42, 3.952, 3);         // on the cap
   X.pendant(c, 0, 2.9, { kind: 'dome', drop: 4.6, colour: 'c#2f4a40/0.35', power: 1.0 });
 
   // ---- the quiet find: blind date with a book, on the right wall past the counter ------------------------------
   {
     const b = at(W - 0.02, 15.9, 0, 'left');                 // x runs toward the back of the shop
-    X.shelving(b, -2.3, 2.3, [2.4, 3.95], { d: 0.85, mat: WOOD, over: 1.45, back: OXB });
+    shelving(b, -2.3, 2.3, [2.4, 3.95], { d: 0.85, mat: WOOD, over: 1.45, back: OXB });
     BLIND.forEach((cl, i) => { const z = [3.95, 2.4][Math.floor(i / 4)], x = -1.65 + (i % 4) * 1.1 + (K.rnd() - 0.5) * 0.08; kit.pack(b, x, 0.5, z + 0.004, 0.86, 0.17, 1.16, KRAFT, WRAPPED(cl, i), { cw: 168, ch: 226 }); });
     kit.sign(b, 0, 0.022, 6.25, 3.3, 0.86, (g, w, h) => { paper(g, w, h, '#b99a6b', 4);
       T(g, 'BLIND DATE WITH A BOOK', w / 2, h * 0.36, h * 0.32, '#3a2214', { f: F.abril, ls: 1, max: w * 0.88 }); T(g, 'three clues. no title.', w / 2, h * 0.76, h * 0.24, '#8a1c1c', { f: F.caveat, w: 700, max: w * 0.86 }); }, { cw: 420, ch: 110 });
@@ -249,11 +275,11 @@ export default function books(kit, lot) {
   // ---- the window: books to read at dusk, under a paper moon ---------------------------------------------------
   {
     const wa0 = 0.6, wa1 = AIS - 3.9, w = at((wa0 + wa1) / 2, 2.5, 0, 'street'), hw = (wa1 - wa0) / 2, NAVY = 'velvet#26364f';   // +y toward the glass, x toward smaller a
-    w.box(OXB, -hw, hw, 0, 2.4, 0, 1.86, G); w.box(NAVY, -hw, hw, 0, 2.4, 1.86, 1.9);
+    w.box(OXB, -hw, hw, 0, 2.4, 0, 1.86, G); w.box(NAVY, -hw, hw, 0, 2.22, 1.86, 1.9);       // (the cloth stops short of the sill's lip, which is at the same height)
     w.block(-hw, hw, -0.05, 2.5, 0, 1.9);
     DUSK.forEach((b, i) => { const x = (i - 1.5) * (hw * 0.52) ; w.box(DARKW, x - 0.2, x + 0.2, 1.1, 1.32, 1.9, 2.5); jacket(w, x, 1.38, 1.905, b, 0.84, 1.24, { cw: 176, ch: 260 }); });
     w.box(DARKW, -1.0, 1.0, 1.82, 1.88, 1.9, 2.92); kit.sign(w, 0, 1.892, 2.41, 1.9, 0.96, POSTER.dusk, { cw: 300, ch: 152 });
-    kit.bookStack(w, -hw + 0.9, 1.6, 1.9, 5); kit.pillarCandle(w, hw - 0.8, 1.7, 1.9, 0.6, 0.13); kit.pillarCandle(w, hw - 1.15, 1.45, 1.9, 0.38, 0.13);
+    kit.bookStack(w, -hw + 0.9, 1.76, 1.9, 5); kit.pillarCandle(w, hw - 0.8, 1.7, 1.9, 0.6, 0.13); kit.pillarCandle(w, hw - 1.15, 1.45, 1.9, 0.38, 0.13);
     const mo = [hw - 1.6, 1.3, 7.7];                          // the paper moon, on a thread
     w.cyl('c#17140f/0.8', mo[0], mo[1], mo[2] + 0.85, 12, 0.008, 0.008, 4);
     kit.sign(w, mo[0], mo[1] + 0.03, mo[2], 1.7, 1.7, POSTER.moon, { round: true, glow: 1.1, cw: 128, ch: 128 }); kit.sign(w.sub(mo[0], mo[1] - 0.03, 0, 2), 0, 0, mo[2], 1.7, 1.7, POSTER.moon, { round: true, glow: 1.1, cw: 128, ch: 128 });
@@ -268,8 +294,8 @@ export default function books(kit, lot) {
   // ---- out on the pavement: the free cart and the board ---------------------------------------------------------
   {
     const o = K.wrap(lot.frOut(kit, 3.7, 0.45, 0, 'street'));   // the cart: +y toward the kerb
-    for (const z of [1.0, 2.15]) { o.box(WOOD, -1.8, 1.8, 0, 0.86, z, z + 0.08, G); kit.bookRow(o, -1.7, 1.7, 0.03, z + 0.08, 1.0, 0.86); }
-    o.box(WOOD, -1.8, 1.8, 0, 0.05, 1.0, 3.3, G); o.box(WOOD, -1.8, 1.8, 0, 0.9, 3.25, 3.33, G); for (const s of [-1, 1]) o.box(WOOD, s * 1.8 - 0.04, s * 1.8 + 0.04, 0, 0.88, 1.0, 3.3, G);
+    for (const z of [1.0, 2.15]) { o.box(WOOD, -1.8, 1.8, 0.02, 0.86, z, z + 0.08, G); kit.bookRow(o, -1.7, 1.7, 0.03, z + 0.08, 1.0, 0.86); }
+    o.box(WOOD, -1.8, 1.8, 0, 0.05, 1.03, 3.25, G); o.box(WOOD, -1.8, 1.8, 0, 0.9, 3.25, 3.33, G); for (const s of [-1, 1]) o.box(WOOD, s * 1.8 - 0.04, s * 1.8 + 0.04, 0.02, 0.88, 1.03, 3.3, G);
     for (const y of [-0.07, 0.95]) { hcyl(o, IRON, 'y', 1.15, y, 0.55, 0.07, 0.55, 0.55, 16); o.box(WOOD, -1.5, -1.4, y < 0 ? 0.02 : 0.76, y < 0 ? 0.12 : 0.86, 0, 1.0); }
     for (const y of [0.06, 0.82]) tube(o, WOOD, [[-1.8, y, 2.3], [-2.3, y, 2.52]], 0.04, 6, true);
     o.box(DARKW, -1.38, 1.38, 0.4, 0.46, 3.33, 3.93);

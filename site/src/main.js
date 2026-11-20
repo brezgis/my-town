@@ -4,7 +4,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { Builder } from './builder.js';
 import { makeMaterials, markDressed } from './materials.js';
 import { buildTown, FL, CEIL } from './town.js';
-import { furnish } from './shops/index.js';
+import { furnish, furnishStart, furnishSteps } from './shops/index.js';
 import { buildIsland } from './island.js';
 import { layStreet, TREES, ISLAND, placeName } from './street.js';
 import { makeTrees } from './trees.js';
@@ -23,6 +23,7 @@ import { makeShade } from './shade.js';
 
 import { loadFonts } from './fonts.js';
 import { makeFrameMeter } from './engine/frame.js';
+import { openStage } from './engine/stage.js';
 
 // Every sign, label, leaf and face on the street is painted on a 2D canvas and handed to the renderer as
 // a texture. Browsers keep such canvases on the graphics card unless told otherwise, and a card that is
@@ -81,14 +82,22 @@ const builder = new Builder();
 builder.zone = 'shell';                                   // the house itself is always drawn (see visibility.js)
 const STAGE = {}, mark = k => { STAGE[k] = Math.round(performance.now()); };      // start-up timings, for perf.js
 mark('start');
+const stage = openStage({ mark, onEarlyEnter: () => sound.start() });      // the place opens on a picture before it is furnished (engine/stage.js): the photos are counted from here
 const house = buildTown(builder); mark('house');
 installHouseLight(house.boxes, FL, CEIL);                                      // indoor light, patched into the shaders before anything compiles (lighting.js)
 const { surfaces, rooms, lamps, spawn } = house;
 const vis = makeVisibility({ rooms, portals: house.portals ?? [], footprints: house.footprints, quality: QUALITY });
 builder.zone = null; builder.zoner = vis.zoner;          // furniture and garden go to the zone they stand in
 for (const l of lamps) l.kind = l.fire ? 'fire' : (l.kind ?? 'fill');
-const items = furnish(builder, house); mark('furnish');
-lamps.push(...items.lamps); items.lamps = lamps;
+// The shops are fitted out after the picture. A plain visit opens on the island seen from above, where no shop can
+// be seen into: so the street is built with its shops bare, the island is drawn and the threshold lifts, and the
+// shops are fitted out behind that picture, one at a time (shops/index.js furnishSteps), before anything else is set
+// going. Any address that asks for a particular view or test fits everything out at once, as before (so does ?stream=0).
+const PLAIN = new Set(['fps', 'quality', 'time', 'stages', 'loadlog', 'welcome', 'stream', 'aa', 'lamps', 'tex', 'shadow', 'ratio']);
+const STREAM = Q.has('stream') ? Q.get('stream') !== '0' : [...Q.keys()].every(k => PLAIN.has(k));
+const items = STREAM ? furnishStart(builder, house) : furnish(builder, house); mark('furnish');
+const kitLamps = items.lamps; let kitLampsIn = kitLamps.length;
+lamps.push(...kitLamps); items.lamps = lamps;
 lightShops(house);                                        // each shop lowers its even light after dark and lets its lamps make pools (lighting.js)
 const garden = Q.get('street') === '0' ? null : layStreet(builder, items, house); mark('garden');
 const materials = makeMaterials(renderer, QUALITY);
@@ -113,6 +122,23 @@ function outlineAt(a) {                                 // smooth radius from IS
 buildIsland({ ISLAND, outlineAt, materials, outdoors });
 
 mark('island');
+const ABOVE = [-250, 165, 150], ABOVE_AT = [0, 12, -70];      // the first view
+const exposure = makeExposure(Q);
+const winGlow = makeWindowGlow({ scene: outdoors, materials, windows: house.windows ?? [], rooms });
+if (STREAM) {
+  camera.near = 2; camera.updateProjectionMatrix(); camera.position.set(...ABOVE); camera.lookAt(...ABOVE_AT);
+  sky.setHour(hour); setHourLight(sky.state, materials); sun.shadow.needsUpdate = true;
+  kitLampsIn = kitLamps.length;      // (only what the shops list from here on: as before, the street's own are not counted twice)
+  await stage.furnish(furnishSteps(items.kit, house), {
+    picture: () => {
+      exposure.update(renderer, 'out', sky.state, 1, true);
+      winGlow.update(sky.state.night, true, 1 - THREE.MathUtils.smoothstep(sky.state.light, 0.42, 0.97));
+      sky.update(0, 0, camera); renderer.render(scene, camera);
+    },
+  });
+  lamps.push(...kitLamps.slice(kitLampsIn));
+  zoned.push(...builder.finalize(scene, materials));
+}
 const life = bringToLife({ scene, outdoors, vis, quality: QUALITY, renderer, camera, items, garden, materials, doors: house.doors, colliders: builder.colliders, onChange: () => { sun.shadow.needsUpdate = true; } });
 
 // Hooks for the parts of the house that move and answer back. The garden may
@@ -135,11 +161,9 @@ import('./welcome.js').then(m => m.setupWelcome(ctx)).catch(e => console.warn('w
 // soft fills stand in for daylight bouncing round the rooms; from dusk the lamps, candles and
 // fire take over. Glows, indoor light and the window light are in lighting.js.
 const lampPool = makeLampPool({ scene, lamps, vis, size: QUALITY.lamps, day, camera });
-const winGlow = makeWindowGlow({ scene: outdoors, materials, windows: house.windows ?? [], rooms });
 const vignette = makeVignette();
 const halos = makeHalos({ scene, lamps, day });
 const shade = Q.get('shade') === '0' ? null : makeShade({ scene, rooms, colliders: builder.colliders, lampPool, camera });      // soft shade on the floor under the furniture (shade.js)
-const exposure = makeExposure(Q);
 const warmer = makeWarmer({ renderer, scene, camera, range: 60 });      // textures and shaders made ready a little ahead of the visitor (warm.js)
 
 // ---- Two ways of looking: circling outside, and walking -----------------------------
@@ -168,9 +192,8 @@ const lanternMesh = new THREE.Group();
 camera.add(lanternMesh);
 if (Q.has('lantern')) { lampPool.setLantern(true, { at: [0.62, -0.42, -1.25] }); lanternMesh.visible = true; }      // ?lantern: lit from the start (test shots)
 const orbit = new OrbitControls(camera, renderer.domElement);
-orbit.target.set(0, 12, -70); orbit.enableDamping = true; orbit.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches; orbit.autoRotateSpeed = 0.35;
+orbit.target.set(...ABOVE_AT); orbit.enableDamping = true; orbit.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches; orbit.autoRotateSpeed = 0.35;
 orbit.maxPolarAngle = Math.PI / 2 + 0.2; orbit.minDistance = 60; orbit.maxDistance = 1100;
-const ABOVE = [-250, 165, 150];
 camera.position.set(...ABOVE);
 
 if (Q.has('cam')) { camera.position.set(...Q.get('cam').split(',').map(Number)); orbit.autoRotate = false; }      // a fixed outside viewpoint, for test shots
@@ -231,7 +254,7 @@ function use() {
   if (aimed.seat) walker.sit(aimed.seat); else aimed.act();
 }
 const touch = 'ontouchstart' in window;
-$('enter').addEventListener('click', () => { walk(); sound.start(); if (!touch) renderer.domElement.requestPointerLock?.(); });
+$('enter').addEventListener('click', () => { walk(); sound.start(); if (!touch) renderer.domElement.requestPointerLock?.()?.catch?.(() => {}); });      // (refused when the press was made for the visitor a moment late: the next click on the picture asks again)
 renderer.domElement.addEventListener('click', () => {
   if (mode !== 'walk') return;
   if (!touch && document.pointerLockElement !== renderer.domElement) { renderer.domElement.requestPointerLock?.(); return; }
@@ -384,7 +407,7 @@ renderer.setAnimationLoop(() => {
 
 // ---- Measuring (perf.js): ?statsdump visits the test viewpoints and writes the numbers into the page
 let loading = 0;
-THREE.DefaultLoadingManager.onStart = () => { loading++; };
+THREE.DefaultLoadingManager.onStart = () => { loading++; stage.loading(); };
 THREE.DefaultLoadingManager.onProgress = (url, done, total) => { loading = total - done; };
 const perf = { quality: QUALITY.name, gpu: QUALITY.gpu, stages: STAGE, visTime: () => vis.visMs(), resetVisTime: () => vis.resetMs(), vis, frames: 0, items, renderer, scene, camera, setView, setHour: h => setHour(h), pending: () => loading + life.pending() };
 window.__house = perf; perf.light = { HL, lampPool, sun, exposure };      // for looking at one light at a time (tools/evaljs.sh)
@@ -393,7 +416,8 @@ perf.lampChoice = (names = Object.keys(VIEWS), h) => { if (h !== undefined) setH
 if (Q.has('statsdump')) statsDump(perf, Q.get('statsdump') || null, (Q.get('hours') ?? '13,22').split(',').map(Number));
 
 let sharpened = false;
-THREE.DefaultLoadingManager.onLoad = () => { perf.readyMs ??= Math.round(performance.now()); sun.shadow.needsUpdate = true; if (perf.frames) document.body.classList.add('ready'); window.__ready = true; markDressed(); if (!sharpened) { sharpened = true; setTimeout(() => sharpenTextures(), 2500); } };      // (the photos came at half size; now the full ones, one at a time)
+const allIn = THREE.DefaultLoadingManager.onLoad = () => { stage.loaded(); perf.readyMs ??= Math.round(performance.now()); sun.shadow.needsUpdate = true; if (perf.frames) document.body.classList.add('ready'); window.__ready = true; markDressed(); if (!sharpened) { sharpened = true; setTimeout(() => sharpenTextures(), 2500); } };      // (the photos came at half size; now the full ones, one at a time)
+if (stage.photosIn) allIn();      // (they came while the shops were being fitted out)
 if (Q.has('view') || Q.has('shot')) { renderer.domElement.style.transition = 'none'; document.body.classList.add('ready'); }
 window.house = { ctx, setHour: h => { setHour(h); ctx.hourMoved = true; }, get hour() { return hour; } };
 ctx.hourMoved = Q.has('time'); ctx.hourNow = () => hour;      // carried on the airship, so the sky is the same at both ends
@@ -405,3 +429,4 @@ if (Q.has('keys')) for (const k of Q.get('keys').split(',')) { const [code, ms] 
 window.house.quality = { options: QUALITY_OPTIONS, get: () => storedChoice() ?? 'auto', set: v => { chooseTier(v); location.reload(); }, get current() { return QUALITY.name; } };
 
 await import('./ui.js');      // the interface reads window.house, so it comes after it
+stage.enterIfAsked();      // (Take a walk, pressed before the place was ready: engine/stage.js)

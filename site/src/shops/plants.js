@@ -136,8 +136,8 @@ export default function plants(kit, lot) {
     const lip = { std: 0.93, cyl: 0.9, bowl: 0.9, egg: 0.68, foot: 0.92, taper: 0.9 }[style] * r;
     const outer = { std: [[0, 0], [r * 0.7, 0], [r * 0.94, h * 0.84], [r * 1.07, h * 0.86], [r * 1.07, h]], cyl: [[0, 0], [r, 0], [r, h]], bowl: [[0, 0], [r * 0.45, 0], [r * 0.85, h * 0.45], [r, h]],
       egg: [[0, 0], [r * 0.55, 0], [r * 0.95, h * 0.3], [r, h * 0.6], [r * 0.78, h]], foot: [[0, 0], [r * 0.5, 0], [r * 0.5, h * 0.05], [r * 0.3, h * 0.13], [r * 0.62, h * 0.3], [r, h * 0.82], [r * 1.04, h]], taper: [[0, 0], [r * 0.6, 0], [r, h]] }[style];
-    ves(f, mat, x, y, z, [...outer, ...(empty ? [[lip, h], [lip * 0.8, h * 0.25], [0, h * 0.2]] : [[lip, h], [lip, h * 0.9], [0, h * 0.9]])], r > 0.5 ? 18 : r > 0.3 ? 14 : 10);
-    if (!empty) f.cyl(SOIL, x, y, z + h * 0.9, z + h * 0.925, lip * 0.98, lip * 0.98, 10);
+    ves(f, mat, x, y, z, [...outer, ...(empty ? [[lip, h], [lip * 0.8, h * 0.25], [0, h * 0.2]] : [[lip, h], [lip, h * 0.9 - 0.015], [0, h * 0.9 - 0.015]])], r > 0.5 ? 18 : r > 0.3 ? 14 : 10);
+    if (!empty) f.cyl(SOIL, x, y, z + h * 0.9 - 0.015, z + h * 0.925, lip * 0.98, lip * 0.98, 10);
     return z + h * 0.925;
   }
   // the house species: (frame, x, y, soil height, scale)
@@ -174,7 +174,7 @@ export default function plants(kit, lot) {
     fiddle: (f, x, y, z, s = 1) => tree(f, x, y, z, { H: 5.6 * s, bare: 0.38, n: 18, L: 1.0 * s, W: 0.3 * s, shape: 'round', cols: DEEP, tr: 0.09 * s, droop: 0.3, pitch: 0.2 }),
     olive: (f, x, y, z, s = 1) => tree(f, x, y, z, { H: 3.8 * s, bare: 0.5, n: 90, L: 0.36 * s, W: 0.075 * s, shape: 'lance', cols: ['c#9fb0a4/0.8', 'c#4a6e38/0.8'], bushy: 1.2 * s, tr: 0.09 * s, droop: 0.1, pitch: -0.2, bark: 'c#9a9590/0.8' }),
     dracaena: (f, x, y, z, s = 1) => tree(f, x, y, z, { H: 4.2 * s, bare: 1, n: 0, tr: 0.07 * s, wob: 0.3, bark: 'c#b08a5a/0.8', crown: { n: 22, L: 1.3 * s, W: 0.045 * s, shape: 'strap', p0: 1.4, p1: -0.2, droop: 0.7, cols: ['c#4a6e38/0.45', 'c#8a1c1c/0.45', 'c#3a6a3a/0.45'] } }),
-    ponytail: (f, x, y, z, s = 1) => { ves(f, 'c#b08a5a/0.8', x, y, z - 0.02, [[0, 0], [0.2 * s, 0], [0.25 * s, 0.12 * s], [0.2 * s, 0.3 * s], [0.08 * s, 0.6 * s], [0.055 * s, 1.5 * s], [0, 1.52 * s]], 10); rosette(f, x, y, z + 1.48 * s, { n: 38, L: 1.5 * s, W: 0.025 * s, shape: 'strap', p0: 1.3, p1: 0.1, droop: 1.3, cols: LIME }); },
+    ponytail: (f, x, y, z, s = 1) => { ves(f, 'c#b08a5a/0.8', x, y, z - 0.005, [[0, 0], [0.2 * s, 0], [0.25 * s, 0.12 * s], [0.2 * s, 0.3 * s], [0.08 * s, 0.6 * s], [0.055 * s, 1.5 * s], [0, 1.52 * s]], 10); rosette(f, x, y, z + 1.48 * s, { n: 38, L: 1.5 * s, W: 0.025 * s, shape: 'strap', p0: 1.3, p1: 0.1, droop: 1.3, cols: LIME }); },
     banana: (f, x, y, z, s = 1) => { ves(f, 'c#7fa04a/0.8', x, y, z, [[0, 0], [0.2 * s, 0], [0.13 * s, 2.2 * s], [0, 2.3 * s]], 8); rosette(f, x, y, z + 2.1 * s, { n: 9, L: 1.9 * s, W: 0.33 * s, shape: 'paddle', p0: 1.4, p1: 0.6, droop: 0.5, fold: 0.25, cols: ['c#5d8a3a/0.8', 'c#7fa04a/0.8', 'c#4a6e38/0.8'] }); },
     opuntia: (f, x, y, z, s = 1) => { const c = 'c#5d8a3a/0.8'; leaf(f, c, [x, y, z], 0.3, 1.5, 0.5 * s, 0.17 * s, { shape: 'round', fold: 0, droop: 0 }); leaf(f, c, [x + 0.03, y + 0.02, z + 0.42 * s], 0.3, 1.0, 0.34 * s, 0.13 * s, { shape: 'round', fold: 0, droop: 0 }); leaf(f, c, [x - 0.02, y, z + 0.4 * s], 3.4, 1.05, 0.3 * s, 0.12 * s, { shape: 'round', fold: 0, droop: 0 }); ball(f, 'c#e88aa8/0.8', x + 0.2 * s, y + 0.07 * s, z + 0.66 * s, 0.03 * s, 6); },
     column: (f, x, y, z, s = 1) => cactus(f, x, y, z, { H: 0.55 * s, r: 0.07 * s, arms: s > 1.5 ? [[1, 0.2 * s, 0.2 * s]] : [] }),
@@ -194,7 +194,7 @@ export default function plants(kit, lot) {
   // a handwritten tag on a stake, facing the frame's front
   function tagF(f, x, y, z, name, note, o = {}) {
     const w = o.w ?? 0.8, t = w * 0.625, s = o.stick ?? 0.5;
-    if (s) f.box(KRAFT, x - 0.025, x + 0.025, y - 0.022, y - 0.006, z - 0.05, z + s + t * 0.7);
+    if (s) f.box(KRAFT, x - 0.025, x + 0.025, y - 0.028, y - 0.012, z - 0.05, z + s + t * 0.7);
     f.box('c#d9cdb2/0.8', x - w / 2, x + w / 2, y - 0.006, y + 0.002, z + s, z + s + t);
     kit.sign(f, x, y + 0.007, z + s + t / 2, w, t, TAG(name, note, o.c), { cw: 240, ch: 150 });
   }
@@ -445,7 +445,7 @@ export default function plants(kit, lot) {
     for (const x of [-2.7, 2.7]) for (const y of [0.16, 2.1]) b.box(DARKW, x - 0.08, x + 0.08, y - 0.08, y + 0.08, 0, top - 0.1, G);
     b.box(OAK, -2.85, 2.85, 0.05, 2.25, top - 0.1, top, G); b.box(OAK, -2.7, 2.7, 0.12, 2.1, 0.82, 0.9, G); b.box(DARKW, -2.7, 2.7, 2.0, 2.08, top - 0.45, top - 0.1, G);
     b.block(-2.85, 2.85, 0, 2.25, 0, 4);
-    kit.model('watering_can_metal_01', b, -2.15, 1.2, top, 0, { turn: 0.5 }); kit.model('trowel_01', b, -0.75, 1.55, top, 0, { turn: 1.1 }); kit.model('garden_gloves_01', b, 1.0, 1.7, top, 0, { turn: -0.4 });
+    kit.model('watering_can_metal_01', b, -2.15, 1.2, top - 0.02, 0, { turn: 0.5 }); kit.model('trowel_01', b, -0.75, 1.55, top, 0, { turn: 1.1 }); kit.model('garden_gloves_01', b, 1.0, 1.7, top, 0, { turn: -0.4 });
     kit.pack(b, 2.1, 0.75, top, 1.15, 0.55, 1.7, 'c#c9a77a/0.8', MIX, { cw: 230, ch: 340 });
     ball(b, SOIL, 0.25, 1.05, top - 0.03, 0.42, 9, 0.28); for (let i = 0; i < 5; i++) ball(b, SOIL, -0.3 + rnd() * 1.2, 0.6 + rnd() * 1.0, top - 0.01, 0.03 + rnd() * 0.03, 5, 0.6);
     { const z = pot(b, 0.35, 0.7, top, 0.24, 0.36, CLAY); SP.pilea(b, 0.35, 0.7, z, 0.7); }
@@ -453,7 +453,7 @@ export default function plants(kit, lot) {
     // hand tools on a rail beside the window
     b.box(OAK, -2.85, -2.0, 0.035, 0.1, 4.9, 5.02, G);
     for (let i = 0; i < 3; i++) { const x = -2.68 + i * 0.26; b.box(IRON, x - 0.012, x + 0.012, 0.1, 0.16, 4.9, 4.94); b.box('c#8a5a2a/0.8', x - 0.035, x + 0.035, 0.11, 0.17, 4.28, 4.9); b.box(ZINC, x - (i % 2 ? 0.07 : 0.02), x + (i % 2 ? 0.07 : 0.02), 0.125, 0.15, 3.86, 4.28); }
-    kit.model('st_terracotta_jar_1', b, -1.9, 1.1, 0.9, 0, {}); stack(b, 1.9, 1.0, 0.9, 5, 0.32); stack(b, 1.1, 1.2, 0.9, 3, 0.32);
+    kit.model('st_terracotta_jar_1', b, -1.9, 1.1, 0.88, 0, {}); stack(b, 1.9, 1.0, 0.9, 5, 0.32); stack(b, 1.1, 1.2, 0.9, 3, 0.32);
   }
 
   // the left wall: sacks of compost on a pallet by the doorway, then the long tools on their rail
@@ -480,7 +480,7 @@ export default function plants(kit, lot) {
   // the right wall: clay pots by the stack
   {
     const r = RW(34.6), zs = X.shelving(r, -3.9, 3.9, [1.5, 3.2, 4.9, 6.6], { d: 1.3, mat: OAK, over: 1.4, back: false });
-    for (let i = 0; i < 3; i++) stack(r, -3.1 + i * 1.05, 0.68, zs[0], 4, 0.4); kit.model('st_terracotta_pot_3', r, 2.3, 0.68, zs[0], 0, {});
+    for (let i = 0; i < 3; i++) stack(r, -3.1 + i * 1.05, 0.68, zs[0], 4, 0.4); kit.model('st_terracotta_pot_3', r, 2.3, 0.68, zs[0] - 0.02, 0, {});
     for (let i = 0; i < 6; i++) stack(r, -3.3 + i * 0.78, 0.68, zs[1], 5 - (i % 3 === 2 ? 2 : 0), 0.3);
     for (let i = 0; i < 6; i++) stack(r, -0.6 + i * 0.6, 0.68, zs[2], 6 - (i % 2), 0.22);
     [[-3.1, 0.4, NAVY, 'egg'], [-1.9, 0.44, CREAM, 'foot'], [1.2, 0.38, CELADON, 'taper'], [2.5, 0.42, RUST, 'egg'], [3.3, 0.3, MUSTARD, 'cyl']].forEach(([x, rr, m, st]) => pot(r, x, 0.68, zs[3], rr, rr * 1.6, m, st, true));

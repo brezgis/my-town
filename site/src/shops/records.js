@@ -92,7 +92,9 @@ export default function records(kit, lot) {
   // A sleeve standing or hanging at (x, y, z = its centre), s square, facing the frame's front.
   const sleeve = (f, x, y, z, i, s = 1.25, o = {}) => { f.box(SPINES[(i * 5 + 3) % SPINES.length], x - s / 2, x + s / 2, y - 0.035, y, z - s / 2, z + s / 2); kit.sign(f, x, y + 0.005, z, s * 0.985, s * 0.985, COVER(i), { cw: o.px ?? 256, ch: o.px ?? 256, rough: 0.6 }); };
   // A run of LPs standing side by side, spines out (on a shelf): x0..x1, backs at y0, on z.
-  const spines = (f, x0, x1, y0, z) => { for (let x = x0; x < x1 - 0.05;) { const t = 0.03 + K.rnd() * 0.035; f.box(K.pick(SPINES), x, x + t - 0.005, y0, y0 + 1.03, z + 0.005, z + 1.0 + K.rnd() * 0.04); x += t; } };
+  // `posts`: x of the shelving's uprights (0.09 thick): a sleeve that would stand in one is left out, its draws still made.
+  const clear = (posts, a, b) => !posts || posts.every(u => b < u - 0.065 || a > u + 0.065);
+  const spines = (f, x0, x1, y0, z, posts) => { for (let x = x0; x < x1 - 0.05;) { const t = 0.03 + K.rnd() * 0.035, m = K.pick(SPINES), zt = z + 1.0 + K.rnd() * 0.04; if (clear(posts, x, x + t - 0.005)) f.box(m, x, x + t - 0.005, y0, y0 + 1.03, z + 0.005, zt); x += t; } };
   // A row of LPs in a crate or bin, faces to the front: centred on x, from y0 forward to y1, standing on z.
   // The one at the front shows its cover.
   const row = (f, x, y0, y1, z, o = {}) => { let y = y0; const stop = y0 + (y1 - y0) * (o.fill ?? (0.72 + K.rnd() * 0.28));
@@ -101,7 +103,9 @@ export default function records(kit, lot) {
   // A bank of bins: the browser stands on the +y side. From x0, back at y = 0, 1.5 deep. sections = SECTIONS.*
   const bank = (f, x0, sections, o = {}) => {
     const top = 2.3, dep = 1.5, PW = 1.14, n = sections.reduce((a, s) => a + s[1], 0), x1 = x0 + n * PW + 0.14, wood = WALNUT;
-    f.box(wood, x0, x1, 0.02, dep, top - 0.12, top, G); f.box(wood, x0, x1, dep - 0.06, dep, top, top + 0.42, G); f.box(wood, x0, x1, 0.02, 0.07, 0.3, top + 1.78, G);
+    // (the boards run between the end posts, not through them, and the bin floor starts in front of the back board:
+    // no two faces share a plane. Against a wall the back board starts above the shell's skirting, 0.6 high.)
+    f.box(wood, x0 + 0.07, x1 - 0.07, 0.07, dep, top - 0.12, top, G); f.box(wood, x0 + 0.07, x1 - 0.07, dep - 0.06, dep, top, top + 0.42, G); f.box(wood, x0 + 0.07, x1 - 0.07, 0.02, 0.07, o.wall ? 0.68 : 0.3, top + 1.78, G);
     for (const x of [x0, x1 - 0.07]) f.box(wood, x, x + 0.07, 0.02, dep, 0, top + 0.6, G);
     f.box(EBONY, x0 + 0.07, x1 - 0.07, 0.12, dep - 0.1, 0.42, 0.5, G);                                   // the shelf underneath, for overstock
     let x = x0 + 0.07;
@@ -134,7 +138,7 @@ export default function records(kit, lot) {
 
   // ---- the right wall: one long bank, and over it the wall of sleeves ----------------------------------------
   const rw = at(W, IC, 0, 'left');                              // +x runs toward the back of the shop
-  bank(rw, -(14 * 1.14 + 0.14) / 2, SECTIONS.wall, { style: 2, boxes: [-5.2, 3.1] });
+  bank(rw, -(14 * 1.14 + 0.14) / 2, SECTIONS.wall, { style: 2, boxes: [-5.2, 3.1], wall: true });
   for (const z of [4.66, 6.31]) rw.box(WALNUT, -8.0, 8.0, 0.02, 0.22, z - 0.06, z, G);
   WALL.forEach((name, i) => sleeve(rw, -6.83 + (i % 8) * 1.95, 0.1, i < 8 ? 6.98 : 5.33, ci(name), 1.3));
 
@@ -152,7 +156,31 @@ export default function records(kit, lot) {
 
   // ---- the counter, along the left wall --------------------------------------------------------------------------
   const c = at(5.5, DC, 0, 'right');                            // +y is the customers' side (the main aisle); +x runs toward the street
-  const TOP = X.counter(c, -4.6, 4.6, -2.2, 0, 3.4, { front: EBONY, top: WALNUT });
+  // A joiner's counter, the size of the box it replaced (x -4.6..4.6, y -2.2..0, the top at 3.4): a walnut frame
+  // with ebony raised panels, three on the front (the middle one painted) and one at each end; square corner posts
+  // that stand on the floor as feet, the plinth between them set back for the toes; a walnut top with an eased edge
+  // overhanging the front; the back open, with a shelf for Otis. Every face has a plane of its own.
+  const TOP = 3.4;
+  { const x0 = -4.6, x1 = 4.6, y0 = -2.2, yf = -0.04, yb = -0.18, P = 0.3, ZK = 0.35, ZR = 0.75, ZT = 2.95, ZU = TOP - 0.12;
+    const panel = (u0, u1, v0, v1, mk) => { mk(u0 - 0.04, u1 + 0.04, 0.06, 0.1, v0 - 0.04, v1 + 0.04, 0.004); mk(u0 + 0.12, u1 - 0.12, 0.03, 0.06, v0 + 0.12, v1 - 0.12, 0.012); };   // (u along, depth back from the face, v up)
+    c.bev(WALNUT, x0 - 0.08, x1 + 0.08, y0 - 0.04, 0.22, ZU, TOP, 0.03, G);                                        // the top
+    for (const [a, b] of [[x0, x0 + P], [x1 - P, x1]]) for (const [p, q] of [[yf - P, yf], [y0, y0 + P]]) c.bev(WALNUT, a, b, p, q, 0.004, ZU, 0.012, G);   // corner posts
+    c.bev(WALNUT, -0.15, 0.15, y0, y0 + 0.3, 0.004, ZU, 0.012, G);                                                   // and one in the middle of the back
+    // the front: rails, two muntins, three panels
+    c.bev(WALNUT, x0 + P, x1 - P, yb, yf, ZK, ZR, 0.01, G); c.bev(WALNUT, x0 + P, x1 - P, yb, yf, ZT, ZU, 0.01, G);
+    for (const m of [-1.975, 1.975]) c.bev(WALNUT, m - 0.125, m + 0.125, yb, yf, ZR, ZT, 0.01, G);
+    const front = (u0, u1, d0, d1, v0, v1, e) => c.bev(EBONY, u0, u1, yf - d1, yf - d0, v0, v1, e, G);
+    panel(x0 + P, -2.1, ZR, ZT, front); panel(-1.85, 1.85, ZR, ZT, front); panel(2.1, x1 - P, ZR, ZT, front);
+    // the ends: rails and a panel between the posts, faced like the front
+    for (const s of [-1, 1]) { const xe = s > 0 ? x1 : x0, lo = xe - s * 0.14;
+      c.bev(WALNUT, Math.min(xe, lo), Math.max(xe, lo), y0 + P, yf - P, ZK, ZR, 0.01, G); c.bev(WALNUT, Math.min(xe, lo), Math.max(xe, lo), y0 + P, yf - P, ZT, ZU, 0.01, G);
+      panel(y0 + P, yf - P, ZR, ZT, (u0, u1, d0, d1, v0, v1, e) => c.bev(EBONY, Math.min(xe - s * d0, xe - s * d1), Math.max(xe - s * d0, xe - s * d1), u0, u1, v0, v1, e, G)); }
+    // the plinth, 0.26 behind the face, and the floor of the carcass on it; the back: an apron under the top and Otis's shelf
+    c.box(EBONY, x0 + P, x1 - P, y0 + P, yf - P + 0.04, 0.004, ZK, G);
+    c.box(WALNUT, x0 + 0.14, x1 - 0.14, y0 + P, yb, ZK, ZK + 0.07, G);
+    for (const [a, b] of [[x0 + P, -0.15], [0.15, x1 - P]]) c.bev(WALNUT, a, b, y0, y0 + 0.14, ZT, ZU, 0.01, G);
+    c.bev(WALNUT, x0 + 0.14, x1 - 0.14, y0 + 0.06, yb - 0.04, 1.55, 1.63, 0.012, G);
+    c.block(x0, x1, y0, 0, 0, TOP); }
   { // the till: orange enamel, round keys, a flag
     const x = 0.6, y = -1.15, z = TOP;
     X.till(c, x, y, z, { body: 'c#e0782a/0.45', trim: 'c#c9ccd0/0.45/1', crank: -1, knob: 'c#17140f/0.45' });
@@ -164,14 +192,15 @@ export default function records(kit, lot) {
     c.cyl(BRASS, 2.0, -0.5, z, z + 0.04, 0.2, 0.18, 16); ves(c, BRASS, 2.0, -0.5, z + 0.04, [[0.17, 0], [0.16, 0.08], [0.1, 0.15], [0, 0.17]], 16); ball(c, BRASS, 2.0, -0.5, z + 0.2, 0.03, 8);
     [[3.3, -0.6], [3.75, -0.95], [3.2, -1.2]].forEach(([x2, y2], k) => kit.sign(c, x2, y2, z + 0.006 + k * 0.002, 0.5, 0.5, STICKER, { flat: true, round: true, cw: 120, ch: 120, turn: k * 0.9 }));
     kit.mug(c, 1.6, -1.6, z, 'c#17140f/0.3', true);
-    // painted on the front of the counter
-    kit.sign(c, 0, 0.012, 1.95, 3.4, 1.5, (g, w, h) => { fill(g, w, h, '#232224'); ICON.record(g, w * 0.16, h / 2, h * 0.78, CREAM, '#232224'); disc(g, w * 0.16, h / 2, h * 0.1, ORANGE); T(g, 'WE BUY RECORDS', w * 0.62, h * 0.4, h * 0.3, CREAM, { f: F.bebas, ls: 2, max: w * 0.62 }); T(g, 'bring a box', w * 0.62, h * 0.7, h * 0.17, ORANGE, { f: F.caveat, w: 600 }); }, { cw: 420, ch: 186, rough: 0.9 });
+    // painted on the middle panel of the counter's front (its raised field's face is at y = -0.07)
+    kit.sign(c, 0, -0.05, 1.95, 3.4, 1.5, (g, w, h) => { fill(g, w, h, '#232224'); ICON.record(g, w * 0.16, h / 2, h * 0.78, CREAM, '#232224'); disc(g, w * 0.16, h / 2, h * 0.1, ORANGE); T(g, 'WE BUY RECORDS', w * 0.62, h * 0.4, h * 0.3, CREAM, { f: F.bebas, ls: 2, max: w * 0.62 }); T(g, 'bring a box', w * 0.62, h * 0.7, h * 0.17, ORANGE, { f: F.caveat, w: 600 }); }, { cw: 420, ch: 186, rough: 0.9 });
   }
   // behind the counter: stock to nearly nine feet, the tapes at eye level, a plant
   const b = at(0, DC, 0, 'right');
   X.shelving(b, -4.6, 4.6, [1.4, 2.8, 4.3, 5.8, 7.3], { d: 1.15, mat: WALNUT, over: 1.35 });
-  spines(b, -4.45, 1.9, 0.07, 1.4); spines(b, -4.45, -1.2, 0.07, 2.8); spines(b, 0.6, 4.4, 0.07, 2.8); spines(b, -4.45, -0.2, 0.07, 5.8); spines(b, 1.4, 4.45, 0.07, 5.8); spines(b, -2.2, 3.1, 0.07, 7.3);
-  { let x = -4.4, n = 0; while (x < 2.3) { if (n % 12 === 5) { kit.pack(b, x + 0.13, 0.5, 4.3, 0.24, 0.06, 0.36, K.pick(SPINES), TAPE(n), { cw: 64, ch: 96 }); x += 0.3; } else { b.box(K.pick(SPINES), x, x + 0.05, 0.22, 0.45, 4.304, 4.658); x += 0.057; } n++; if (K.rnd() < 0.04) x += 0.25; } }
+  const BP = [-4.6 / 3, 4.6 / 3];                                // its two inner uprights (shelving's bays: 3 across 9.2)
+  spines(b, -4.45, 1.9, 0.07, 1.4, BP); spines(b, -4.45, -1.2, 0.07, 2.8, BP); spines(b, 0.6, 4.4, 0.07, 2.8, BP); spines(b, -4.45, -0.2, 0.07, 5.8, BP); spines(b, 1.4, 4.45, 0.07, 5.8, BP); spines(b, -2.2, 3.1, 0.07, 7.3, BP);
+  { let x = -4.4, n = 0; while (x < 2.3) { if (n % 12 === 5) { const m = K.pick(SPINES); if (clear(BP, x + 0.01, x + 0.25)) kit.pack(b, x + 0.13, 0.5, 4.3, 0.24, 0.06, 0.36, m, TAPE(n), { cw: 64, ch: 96 }); x += 0.3; } else { const m = K.pick(SPINES); if (clear(BP, x, x + 0.05)) b.box(m, x, x + 0.05, 0.22, 0.45, 4.304, 4.658); x += 0.057; } n++; if (K.rnd() < 0.04) x += 0.25; } }
   potted(b, 3.4, 0.6, 4.3, { r: 0.24, n: 16, len: 1.3, up: 0.3, out: 0.6, droop: 1.3, pot: 'c#e0782a/0.45' });
   kit.pottedPlant(R, 1.9, P.front - 2.3, 0, 'leafy', { size: 1.6 });
   kit.model('wall_clock', at((OA + 4.36 + 14.64) / 2, P.front, 0, 'street'), 0, 0.08, 6.5, 0, { hang: true });
@@ -194,7 +223,7 @@ export default function records(kit, lot) {
     ls.box('glass', -0.85, 0.85, 0.2, 0.25, CT + 0.17, CT + 1.4);                                      // the lid, up
     const [sx, sz] = kit.world(ls, px, py); kit.spots.push({ action: 'record', x: sx, y: ls.h + CT + 0.282, z: sz });
     // amplifier: brushed face, three knobs, a warm dial
-    ls.soft(CHROME, 1.05, 2.05, 0.3, 1.45, CT, CT + 0.42, 0.02); ls.box('e#ffd9a0/2.2', 1.15, 1.6, 1.45, 1.46, CT + 0.24, CT + 0.34);
+    ls.soft(CHROME, 1.05, 2.05, 0.3, 1.45, CT, CT + 0.42, 0.02); ls.box('e#ffd9a0/2.2', 1.15, 1.6, 1.45, 1.48, CT + 0.24, CT + 0.34);
     for (const x of [1.72, 1.86, 1.98]) hcyl(ls, 'c#2b2724/0.45', 'y', x, 1.47, CT + 0.28, 0.05, 0.04);
     // speakers at the ends
     for (const x of [-2.62, 2.62]) { ls.soft(WALNUT, x - 0.42, x + 0.42, 0.3, 1.25, CT, CT + 1.5, 0.03); ls.box('c#2b2724/0.8', x - 0.36, x + 0.36, 1.25, 1.265, CT + 0.06, CT + 1.44); hcyl(ls, 'c#5a5a56/0.45', 'y', x, 1.275, CT + 0.5, 0.02, 0.27, 0.27, 20); hcyl(ls, 'c#17140f/0.45', 'y', x, 1.285, CT + 0.5, 0.02, 0.1, 0.1, 12); hcyl(ls, 'c#5a5a56/0.45', 'y', x, 1.275, CT + 1.12, 0.02, 0.12, 0.12, 14); }
@@ -282,7 +311,7 @@ export default function records(kit, lot) {
   { // a portable player in an open case, and a plant
     const x = 1.55, y = 2.75, z = 1.95;
     v.soft('c#e0782a/0.45', x - 0.8, x + 0.8, y - 0.6, y + 0.6, z, z + 0.4, 0.05); v.soft('c#e0782a/0.45', x - 0.8, x + 0.8, y - 0.72, y - 0.6, z + 0.1, z + 1.3, 0.04); v.box('c#efe2bc/0.8', x - 0.74, x + 0.74, y - 0.55, y + 0.55, z + 0.4, z + 0.415);
-    v.cyl(CHROME, x - 0.12, y, z + 0.415, z + 0.45, 0.46, 0.46, 28); v.cyl(VINYL, x - 0.12, y, z + 0.45, z + 0.462, 0.44, 0.44, 28); v.cyl('c#3c8fa0/0.8', x - 0.12, y, z + 0.462, z + 0.466, 0.15, 0.15, 16);
+    v.cyl(CHROME, x - 0.12, y, z + 0.415, z + 0.45, 0.46, 0.46, 28); v.cyl(VINYL, x - 0.12, y, z + 0.45, z + 0.48, 0.44, 0.44, 28); v.cyl('c#3c8fa0/0.8', x - 0.12, y, z + 0.45, z + 0.51, 0.15, 0.15, 16);      // (the record and its label each 0.03 proud of what is under them)
     tube(v, CHROME, [[x + 0.6, y - 0.4, z + 0.5], [x + 0.5, y, z + 0.5], [x + 0.3, y + 0.22, z + 0.48]], 0.014, 5); v.cyl(CHROME, x + 0.6, y - 0.4, z + 0.415, z + 0.5, 0.05, 0.05, 8);
     hcyl(v, 'c#5a5a56/0.45', 'y', x, y - 0.59, z + 0.8, 0.02, 0.3, 0.3, 18);
     kit.pottedPlant(v, -5.8, 2.9, z, 'snake', { size: 0.9, block: false });

@@ -83,7 +83,7 @@ export function arch(kit, lot, K) {
         R.box(trim, p.a0 - c - 0.06, p.a1 + c + 0.06, ya - 0.012, yb + 0.012, p.z1 + c, p.z1 + c + 0.1, G); R.box(trim, p.a0 - 0.02, p.a1 + 0.02, ya, yb, p.z1 + 0.02, p.z1 + c, G);
       }
       if (p.glass) {
-        R.box('glass', p.a0 + 0.06, p.a1 - 0.06, d - 0.012, d + 0.012, p.z0 + 0.02, p.z1 - 0.06);
+        R.box('glass', p.a0 + 0.045, p.a1 - 0.045, d - 0.012, d + 0.012, p.z0 + 0.005, p.z1 - 0.045);      // (let into the lining and the sill, not ending in their faces)
         for (let k = 1; k <= (p.bars ?? 0); k++) { const a = p.a0 + (p.a1 - p.a0) * k / (p.bars + 1); R.box(trim, a - 0.03, a + 0.03, d - 0.04, d + 0.04, p.z0 + 0.02, p.z1 - 0.06, G); }
         if (door) R.block(p.a0, p.a1, y0, y1, 0, H);
       }

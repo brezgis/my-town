@@ -80,7 +80,7 @@ export default function coffee(kit, lot) {
   }
   // grinder and one milk jug
   { const x = 5.4, y = -1.3, z = TOP;
-    c.soft('c#2a2622/0.35', x - 0.27, x + 0.27, y - 0.32, y + 0.32, z, z + 1.05, 0.08); ves(c, 'glass', x, y, z + 1.05, [[0.08, 0], [0.24, 0.45], [0.25, 0.5], [0, 0.5]], 18); ves(c, 'c#3a2214/0.9', x, y, z + 1.07, [[0.08, 0], [0.2, 0.3], [0, 0.32]], 14); c.cyl(BLACK, x, y, z + 1.55, z + 1.6, 0.25, 0.25, 18);
+    c.soft('c#2a2622/0.35', x - 0.27, x + 0.27, y - 0.32, y + 0.32, z, z + 1.05, 0.08); ves(c, 'glass', x, y, z + 1.03, [[0.08, 0], [0.24, 0.45], [0.25, 0.5], [0, 0.5]], 18); ves(c, 'c#3a2214/0.9', x, y, z + 1.07, [[0.08, 0], [0.2, 0.3], [0, 0.32]], 14); c.cyl(BLACK, x, y, z + 1.55, z + 1.6, 0.25, 0.25, 18);
     for (const [dx, s] of [[-0.8, 1]]) ves(c, 'c#c9ccd0/0.2/1', 1.6 + dx, -2.0, z, [[0, 0], [0.13 * s, 0], [0.14 * s, 0.25 * s], [0.12 * s, 0.4 * s], [0, 0.4 * s]], 14); }
   // the pastry case
   X.glassCase(c, -6.9, -2.7, -1.5, -0.25, TOP, 1.0);
@@ -98,7 +98,7 @@ export default function coffee(kit, lot) {
   // the till: brass; and the tip jar
   { const x = -0.8, y = -1.1, z = TOP;
     X.till(c, x, y, z);
-    jar(c, 0.5, -0.5, z, 0.16, 0.42, null, 0, null); for (let i = 0; i < 7; i++) c.cyl('c#b08d4a/0.35/1', 0.5 + (i % 3 - 1) * 0.05, -0.5 + (i % 2) * 0.05, z + 0.02 + i * 0.014, z + 0.032 + i * 0.014, 0.05, 0.05, 8);
+    jar(c, 0.5, -0.5, z - 0.02, 0.16, 0.42, null, 0, null); for (let i = 0; i < 7; i++) c.cyl('c#b08d4a/0.35/1', 0.5 + (i % 3 - 1) * 0.05, -0.5 + (i % 2) * 0.05, z + 0.02 + i * 0.014, z + 0.032 + i * 0.014, 0.05, 0.05, 8);
     X.card(c, 0.5, -0.22, z, 0.5, 0.26, TAG('for oil & new bearings'));
     lot.pickup = { xz: kit.world(c, 1.5, -0.55), y: lot.fr(kit, 0, 0).h + TOP };       // where finished drinks are set down
   }
@@ -106,11 +106,11 @@ export default function coffee(kit, lot) {
   // back bar on the left wall: a counter, one shelf of cups and bean jars, and the slate above
   const b = at(0, DC, 0, 'right');
   X.shelving(b, -7.8, 7.8, [4.9], { d: 1.0, mat: OAK, back: 'tile_subway', block: false });
-  b.box(OAK, -7.8, 7.8, 0.02, 1.4, 0, 3.3, G); b.box('marble', -7.9, 7.9, 0.02, 1.5, 3.3, 3.4); b.block(-7.9, 7.9, 0, 1.5, 0, 6.2);
+  b.box(OAK, -7.8, 7.8, 0.035, 1.4, 0, 3.3, G); b.box('marble', -7.9, 7.9, 0.035, 1.5, 3.3, 3.4); b.block(-7.9, 7.9, 0, 1.5, 0, 6.2);
   for (let i = 0; i < 12; i++) cupSaucer(b, -7.2 + i * 0.5, 0.55, 4.9, K.pick([PORC, 'c#c9d6d8/0.25', 'c#2f4a40/0.3', 'c#e3c9b8/0.3']), false);
-  for (let i = 0; i < 6; i++) jar(b, 3.4 + i * 0.6, 0.5, 4.9, 0.17, 0.6, K.pick(['c#3a2214/0.9', 'c#4a2a18/0.9', 'c#2a180e/0.9']), 0.4 + K.rnd() * 0.5, BRASS);
+  for (let i = 0; i < 6; i++) jar(b, 3.4 + i * 0.6, 0.5, 4.88, 0.17, 0.6, K.pick(['c#3a2214/0.9', 'c#4a2a18/0.9', 'c#2a180e/0.9']), 0.4 + K.rnd() * 0.5, BRASS);
   b.box('c#c9ccd0/0.2/1', -3.2, -1.6, 0.25, 1.25, 3.405, 3.45); tube(b, 'c#c9ccd0/0.2/1', [[-2.4, 0.2, 3.4], [-2.4, 0.2, 4.1], [-2.4, 0.6, 4.2], [-2.4, 0.75, 4.0]], 0.035, 8);
-  kit.model('vintage_electric_kettle', b, 1.4, 0.7, 3.4, 0, { scale: 0.8 });
+  kit.model('vintage_electric_kettle', b, 1.4, 0.7, 3.38, 0, { scale: 0.8 });
   X.slateBoard(b, 0, 8.4, 11, 3.6, MENU, { cw: 1100, ch: 360 });
   for (const x of [5.3, 0, -5.2]) X.pendant(c, x, -0.9, { kind: 'dome', drop: 4.6, colour: 'c#2f4a40/0.35', power: 1.0 });      // between the beams
 
@@ -152,7 +152,7 @@ export default function coffee(kit, lot) {
     X.shelving(l, -2.7, 2.7, [1.3, 2.7, 4.1, 5.5], { d: 1.1, mat: OAK, back: CREAM });
     const bags = [['Morning Person', 'ETHIOPIA · WASHED', '#b8452e'], ['Night Owl', 'DECAF · SWISS WATER', '#26314a'], ['Slow Hand No. 3', 'HOUSE ESPRESSO', '#24382f'], ['Fog Lifter', 'GUATEMALA · HONEY', '#c9952a'], ['Phin Blend', 'ROBUSTA · DARK', '#5a2a1c']];
     for (const [zi, z] of [2.7, 4.1].entries()) for (let i = 0; i < 5; i++) { const bg = bags[(i + zi * 2) % bags.length]; kit.pack(l, -2.1 + i * 1.05, 0.55, z, 0.62, 0.34, 0.95, `c${bg[2]}/0.8`, BAG(bg[0], bg[1], bg[2]), { cw: 124, ch: 190 }); }
-    for (let i = 0; i < 3; i++) { const x = -1.6 + i * 1.6; ves(l, 'glass', x, 0.55, 5.5, [[0, 0], [0.2, 0], [0.24, 0.2], [0.1, 0.42], [0.1, 0.5], [0.22, 0.75], [0.21, 0.76], [0.085, 0.5], [0.085, 0.42], [0.22, 0.2], [0, 0.03]], 16); l.box(WALNUT, x - 0.12, x + 0.12, 0.43, 0.67, 5.9, 5.98); }       // pour-over carafes with wooden collars
+    for (let i = 0; i < 3; i++) { const x = -1.6 + i * 1.6; ves(l, 'glass', x, 0.55, 5.48, [[0, 0], [0.2, 0], [0.24, 0.2], [0.1, 0.42], [0.1, 0.5], [0.22, 0.75], [0.21, 0.76], [0.085, 0.5], [0.085, 0.42], [0.22, 0.2], [0, 0.03]], 16); l.box(WALNUT, x - 0.12, x + 0.12, 0.43, 0.67, 5.9, 5.98); }       // pour-over carafes with wooden collars
     for (let i = 0; i < 6; i++) kit.mug(l, -2.1 + i * 0.84, 0.5, 1.3, ['c#2f4a40/0.3', 'c#e8e2d4/0.3'][i % 2]); }
 
   // two big plants stand either side of the opening

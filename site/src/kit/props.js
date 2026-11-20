@@ -170,8 +170,8 @@ export function makeProps(K) {
     for (let i = 0; i < n; i++) {
       const t = 0.018 + r() * 0.012, turn = (r() - 0.5) * 0.25 + (o.turn ?? 0), pal = PAL[Math.floor(r() * PAL.length)], s = f.sub(x + (r() - 0.5) * 0.05, y + (r() - 0.5) * 0.05, 0);
       put(s, PAPER, bev(-0.36, 0.36, -0.47, 0.47, h, h + t, 0.004), { rz: turn });
-      put(s, 'c#' + pal[0].slice(1) + '/0.6', bev(-0.362, 0.362, -0.472, 0.472, h + t - 0.002, h + t + 0.001, 0.001), { rz: turn });
-      if (i === n - 1) K.sign(s, 0, 0, h + t + 0.011, 0.72, 0.94, cover(TITLES[Math.floor(r() * TITLES.length)], pal, r), { flat: true, turn, cw: 192, ch: 256 });
+      put(s, 'c#' + pal[0].slice(1) + '/0.6', bev(-0.362, 0.362, -0.472, 0.472, h + t - 0.002, h + t + 0.016, 0.001), { rz: turn });      // (the cover stands a little over the paper: a thousandth of a foot apart, they flickered)
+      if (i === n - 1) K.sign(s, 0, 0, h + t + 0.027, 0.72, 0.94, cover(TITLES[Math.floor(r() * TITLES.length)], pal, r), { flat: true, turn, cw: 192, ch: 256 });
       h += t + 0.002;
     }
     return h;

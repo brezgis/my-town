@@ -334,6 +334,33 @@ function setRoomAmb() {
 export function makeWindowGlow({ scene, materials, windows, rooms, groundY = 0.56 }) {
   const glass = materials.glass;
   outdoorLit(glass);
+  // Lamplight on the panes. A pane is smooth, so each lit lamp left a soft bright smear on it: from indoors after
+  // dark, pale blobs hung in every window, over the garden. The sun's glint by day is kept; the renderer's highlights
+  // are faded out as the lamps come on (update, below), and the lamps are shown in the glass as GLINT draws them.
+  // After dark a pane shows the lamps as a dark window does: each lit lamp as a small soft disc, the size its shade
+  // would be in a mirror at that distance and a fraction as bright, where the eye would see it reflected. (The
+  // renderer's own highlight of a lamp on smooth glass is a point of enormous brightness whose skirts spread into
+  // a pale blob; that is what is faded out.)
+  const GLINT = `
+	reflectedLight.directSpecular *= uGlint;
+	#if NUM_POINT_LIGHTS > 0
+	if ( uGlint < 0.999 ) {
+		vec3 glR = reflect( - geometryViewDir, normal );
+		for ( int i = 0; i < NUM_POINT_LIGHTS; i ++ ) {
+			vec3 glD = pointLights[ i ].position - geometryPosition; float glL = length( glD );
+			vec3 glC = pointLights[ i ].color; float glM = max( glC.r, max( glC.g, glC.b ) );
+			if ( glM < 0.01 || glL > 18.0 || dot( normal, glD ) <= 0.0 ) continue;      // (a lamp on the eye's side of the pane, and near: not one in another room)
+			float glA = acos( clamp( dot( glR, glD / glL ), - 1.0, 1.0 ) ), glS = 0.3 / max( glL, 1.0 ), glQ = glA / glS;
+			float glK = exp( - glQ * glQ * 1.6 ) * ( 1.0 - smoothstep( 9.0, 18.0, glL ) );
+			reflectedLight.directSpecular += ( 1.0 - uGlint ) * uGlintLamp * glK * smoothstep( 0.0, 6.0, glM ) * ( glC / glM ) / max( opacity, 0.05 );
+		}
+	}
+	#endif
+`;
+  const glint = { value: 1 }, glintLamp = { value: Number(new URLSearchParams(globalThis.location?.search ?? '').get('lampglint') ?? 0.09) };
+  { const prev = glass.onBeforeCompile, key = glass.customProgramCacheKey?.bind(glass);
+    glass.onBeforeCompile = (sh, r) => { prev?.call(glass, sh, r); sh.uniforms.uGlint = glint; sh.uniforms.uGlintLamp = glintLamp; sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uGlint, uGlintLamp;').replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\n' + GLINT); };
+    glass.customProgramCacheKey = () => (key ? key() : '') + '|glint3'; }
   // After dark the glass glows amber from outside (as the house's does), but only where a room stands behind it:
   // the shader looks four feet past the pane (the walls are up to two thick), along the line of sight, and asks
   // whether that is indoors (the boxes of light). An attic or a stair with no box behind its window stays dark glass. One material for every
@@ -380,6 +407,7 @@ export function makeWindowGlow({ scene, materials, windows, rooms, groundY = 0.5
   return {
     // night: 0..1; outside: is the eye outdoors (glass glows only from outside)
     update(night, outside, glowsOn) {
+      glint.value = new URLSearchParams(globalThis.location?.search ?? '').get('glint') === '1' ? 1 : 1 - Math.min(1, Number(glowsOn) || 0);      // (?glint=1: as it was)
       const k = Math.max(smooth(night, 0.25, 0.9), 0.6 * (Number(glowsOn) || 0));      // the windows begin to glow as the lamps come on at dusk
       spillMat.opacity = (LIGHT_OLD ? 0.3 : SPILL) * k; spill.visible = k > 0.01;
       if (!LIGHT_OLD) glass.emissiveIntensity = outside ? GLASS_GLOW * k : 0;

@@ -61,7 +61,7 @@ export default function apothecary(kit, lot) {
   // a turned wooden stand
   const stand = (f, x, y, z, h, r = 0.28) => ves(f, WALNUT, x, y, z, [[0, 0], [r, 0], [r, 0.05], [r * 0.4, 0.12], [r * 0.3, h - 0.16], [r * 0.9, h - 0.06], [r, h - 0.04], [r, h], [0, h]], 16);
   // a stack of banded soap; its name lies on top
-  const soap = (f, x, y, z0, n, col, name) => { for (let i = 0; i < n; i++) { const z = z0 + i * 0.135; f.soft(col, x - 0.23, x + 0.23, y - 0.14, y + 0.14, z, z + 0.13, 0.02); f.box('c#efe2bc/0.8', x - 0.15, x + 0.15, y - 0.143, y + 0.143, z + 0.002, z + 0.133); } if (name) kit.sign(f, x, y, z0 + n * 0.135 + 0.003, 0.3, 0.28, SOAPBAND(name), { flat: true, cw: 108, ch: 100 }); };
+  const soap = (f, x, y, z0, n, col, name) => { for (let i = 0; i < n; i++) { const z = z0 + i * 0.135; f.soft(col, x - 0.23, x + 0.23, y - 0.14, y + 0.14, z, z + 0.118, 0.02); f.box('c#efe2bc/0.8', x - 0.15, x + 0.15, y - 0.155, y + 0.155, z + 0.015, z + 0.133); } if (name) kit.sign(f, x, y, z0 + n * 0.135 + 0.003, 0.3, 0.28, SOAPBAND(name), { flat: true, cw: 108, ch: 100 }); };
   // a stoneware crock
   const crock = (f, x, y, z, r, h, col) => ves(f, col, x, y, z, [[0, 0], [r * 0.8, 0], [r, h * 0.16], [r, h * 0.78], [r * 0.74, h * 0.9], [r * 0.8, h], [r * 0.6, h], [0, h * 0.97]], 16);
   // a dried bunch hanging head-down from z
@@ -84,7 +84,7 @@ export default function apothecary(kit, lot) {
     f.box(o.top ?? WALNUT, x0 - e0, x1 + e1, 0.02, BD + 0.1, h - 0.1, h, G); f.block(x0, x1, 0, BD, 0, h); return h; };
   const drawers = (f, x0, x1, rows = 3, z0 = 0.36, z1 = BH - 0.14) => { const cols = Math.max(1, Math.round((x1 - x0) / 1.4)), dw = (x1 - x0) / cols, dh = (z1 - z0) / rows;
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) { const a = x0 + c * dw + 0.05, b = a + dw - 0.1, xm = (a + b) / 2, p = z0 + r * dh + 0.035, q = p + dh - 0.07;
-      f.box(DRAWER, a, b, BD, BD + 0.05, p, q, G); hcyl(f, BRASS, 'y', xm, BD + 0.09, (p + q) / 2 - 0.14, 0.08, 0.045, 0.035, 8); f.box(BRASS, xm - 0.2, xm + 0.2, BD + 0.05, BD + 0.057, q - 0.27, q - 0.13); } };
+      f.box(DRAWER, a, b, BD, BD + 0.05, p, q, G); hcyl(f, BRASS, 'y', xm, BD + 0.09, (p + q) / 2 - 0.14, 0.08, 0.045, 0.035, 8); f.box(BRASS, xm - 0.2, xm + 0.2, BD + 0.05, BD + 0.065, q - 0.27, q - 0.13); } };
   const uppers = (f, x0, x1, zs = [5.0, 6.5, 8.0]) => { const n = Math.max(1, Math.round((x1 - x0) / 2.8));
     f.box(NAVYP, x0, x1, 0.01, 0.05, BH, UT, G);
     for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n, a = i === 0 ? x : i === n ? x - 0.1 : x - 0.05; f.box(WALNUT, a, a + 0.1, 0.05, UD, BH, UT, G); }
@@ -105,7 +105,7 @@ export default function apothecary(kit, lot) {
     kit.tableLamp(w, -1.9, -0.2, 2.0, 'c#8a5a2a/0.4', { shade: 'pleat' });
     flask(w, -0.75, 0.1, 2.0, AMBER, 'rose\nwater', { h: 1.05 }); flask(w, -0.3, 0.35, 2.0, BLUE, 'bay rum', { h: 0.85 });
     soap(w, 0.75, 0.3, 2.0, 3, 'c#c9b48a/0.8'); soap(w, 1.3, 0.15, 2.0, 1, 'c#9fb0a4/0.8');
-    jar(w, 2.1, -0.2, 2.0, 0.2, 0.55, null, 0, null); leaves(w, 2.1, -0.2, 2.05, { n: 14, len: 1.3, w: 0.016, up: 1, out: 0.22, droop: 0.1, spread: 0.08, col: ['c#8a5ab0/0.8', 'c#7fa04a/0.8'] }); }
+    jar(w, 2.1, -0.2, 1.98, 0.2, 0.55, null, 0, null); leaves(w, 2.1, -0.2, 2.05, { n: 14, len: 1.3, w: 0.016, up: 1, out: 0.22, droop: 0.1, spread: 0.08, col: ['c#8a5ab0/0.8', 'c#7fa04a/0.8'] }); }
   // the bit of wall beside each window, boarded in the blue
   for (const wall of ['left', 'right']) A.wainscot(wall, 0.3, RUN0 - 0.06, { h: BH, mat: NAVYP, style: 'plain' });
 
@@ -116,7 +116,7 @@ export default function apothecary(kit, lot) {
   [tA, tB].forEach((f, side) => {
     for (let i = 0; i < 5; i++) {
       const [name, wax] = SCENTS[side * 5 + i], x = 2.6 - i * 1.3;
-      kit.jarCandle(f, x, 1.12, TT, { r: 0.2, tall: 0.42, wax, label: 'c#efe2bc/0.8' });
+      kit.jarCandle(f, x, 1.12, TT + 0.015, { r: 0.2, tall: 0.42, wax, label: 'c#efe2bc/0.8' });
       kit.sign(f, x, 1.54, TT + 0.004, 1.0, 0.27, NAME(name), { flat: true, cw: 252, ch: 68 });
     }
   });
@@ -133,7 +133,7 @@ export default function apothecary(kit, lot) {
     base(L, -h, h); drawers(L, -h, h); const n = uppers(L, -h, h);
     spots(-h, h, n, 2, 0.6).forEach((x, i) => crock(L, x, SY, 8.0, 0.33, 0.8, i % 3 === 1 ? 'c#6a4a2a/0.5' : 'c#d9cdb2/0.7'));
     spots(-h, h, n, 4).forEach((x, i) => bottle(L, x, SY, 6.5, { r: 0.15 + (i % 2) * 0.02, h: 0.9 + (i % 3) * 0.1, col: i % 4 === 3 ? BLUE : AMBER, neck: 0.05, cap: CORK }));
-    spots(-h, h, n, 3, 0.45).forEach((x, i) => jar(L, x, SY, 5.0, 0.23, 0.62, ['c#c9b48a/0.8', 'c#8a5ab0/0.8', 'c#9fb0a4/0.8', 'c#e88aa8/0.8', 'c#e8c73a/0.8'][i % 5], 0.7, CORK));
+    spots(-h, h, n, 3, 0.45).forEach((x, i) => jar(L, x, SY, 4.98, 0.23, 0.62, ['c#c9b48a/0.8', 'c#8a5ab0/0.8', 'c#9fb0a4/0.8', 'c#e88aa8/0.8', 'c#e8c73a/0.8'][i % 5], 0.7, CORK));
     spots(-h, h, n, 2, 0.6).forEach(x => bottle(L, x, SY, BH, { r: 0.24, h: 1.25, col: AMBER, neck: 0.07, cap: CORK }));
     bowl(L, 0.4, 1.35, BH, 0.26, 0.26, 'c#9a9590/0.8', 16); tube(L, 'c#9a9590/0.8', [[0.4, 1.35, BH + 0.08], [0.62, 1.28, BH + 0.48]], 0.04, 6, true);     // a mortar
     kit.tableLamp(L, h - 0.8, 1.35, BH, 'c#8a5a2a/0.4', { base: 'gourd' }); }
@@ -147,13 +147,13 @@ export default function apothecary(kit, lot) {
     for (const s of [-1, 1]) kit.candle(L, s * 2.1, O + 0.36, 4.64, 0.7);
     L.box('c#17140f/0.45', -2.07, 2.07, y, y + 0.05, 5.82, 8.68); kit.sign(L, 0, y + 0.058, 7.25, 3.9, 2.63, BURN, { cw: 600, ch: 404 }); }
   { const c0 = (BAY1 + RUN1) / 2, h = (RUN1 - BAY1) / 2, L = at(0, c0, 0, 'right');     // the chandler's side: the drawer chest, candles by the row
-    base(L, -h, h);
+    base(L, -h, h, { h: BH + 0.015 });
     { const cols = 6, rows = 4, dw = 2 * h / cols, dh = 2.9 / rows;
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
         const x0 = -h + c * dw + 0.05, x1 = x0 + dw - 0.1, xm = (x0 + x1) / 2, z0 = 0.36 + r * dh + 0.03, z1 = z0 + dh - 0.06, name = DRAWERS[(rows - 1 - r) * cols + (cols - 1 - c)];
         L.box(DRAWER, x0, x1, BD, BD + 0.05, z0, z1, G); hcyl(L, BRASS, 'y', xm, BD + 0.09, z0 + 0.17, 0.08, 0.045, 0.035, 8);
-        L.box(BRASS, xm - 0.36, xm + 0.36, BD + 0.05, BD + 0.057, z1 - 0.36, z1 - 0.08);
-        kit.sign(L, xm, BD + 0.062, z1 - 0.22, 0.66, 0.22, DRAWERLABEL(name), { cw: 156, ch: 52 });
+        L.box(BRASS, xm - 0.36, xm + 0.36, BD + 0.05, BD + 0.065, z1 - 0.36, z1 - 0.08);
+        kit.sign(L, xm, BD + 0.07, z1 - 0.22, 0.66, 0.22, DRAWERLABEL(name), { cw: 156, ch: 52 });
         if (name === 'open me') { const [wx, wz] = kit.world(L, xm, BD + 0.1), wy = L.h + (z0 + z1) / 2;
           kit.later.push(ctx => ctx.interact.push({ x: wx, y: wy, z: wz, reach: 5, size: 0.7, label: () => 'open the drawer', act: () => { try { ctx.sound.note(79, 0, 0.5, 0.02); ctx.flash('One birthday candle. Somebody has been saving it.'); } catch { /* a drawer is not worth a crash */ } } })); }
       } }
@@ -162,7 +162,7 @@ export default function apothecary(kit, lot) {
     spots(-h, h, n, 5).forEach((x, i) => L.cyl(['c#efe6d2/0.6', 'c#d9b35a/0.6', 'c#4a5a80/0.6'][Math.floor(i / 5) % 3], x, SY, 6.5, 6.5 + 0.9 - (i % 5 % 2) * 0.25, 0.15, 0.15, 14));
     spots(-h, h, n, 4).forEach((x, i) => L.cyl('c#efe6d2/0.6', x, SY, 5.0, 5.0 + 0.55 + (i % 4 % 3) * 0.2, 0.2, 0.2, 14));
     spots(-h, h, n, 3, 0.5).forEach((x, i) => { hcyl(L, i % 2 ? 'c#d9b35a/0.6' : 'c#efe6d2/0.6', 'y', x, 0.56, BH + 0.2, 0.9, 0.19, 0.19, 12); hcyl(L, TWINE, 'y', x, 0.8, BH + 0.2, 0.06, 0.196, 0.196, 12); });   // tapers by the bundle
-    kit.model('st_brass_scales', L, 1.0, 1.36, BH, 0);
+    kit.model('st_brass_scales', L, 1.0, 1.36, BH - 0.02, 0);
     kit.pillarCandle(L, h - 0.9, 1.36, BH, 0.6, 0.16, 'c#d9b35a/0.6');
     kit.tableLamp(L, -h + 0.8, 1.35, BH, 'c#8a5a2a/0.4', { base: 'gourd' }); }
 
@@ -183,7 +183,7 @@ export default function apothecary(kit, lot) {
       .forEach(([c, n], i) => soap(Rt, 0.3 + (i % 3) * 0.8, 0.5 + Math.floor(i / 3) * 0.72, ST, 2 + ((i * 3) % 4), c, n));
     { const x = -1.5, y = 0.98;                                    // the basin: enamel, navy rim, a jug, a towel, the card
       bowl(Rt, x, y, ST, 0.6, 0.32, ENAMEL, 24); ves(Rt, 'c#26364f/0.45', x, y, ST + 0.305, [[0.575, 0], [0.615, 0], [0.615, 0.03], [0.575, 0.03]], 24); Rt.cyl('c#9fb0d8/0.2', x, y, ST + 0.19, ST + 0.2, 0.5, 0.5, 20);
-      kit.model('metal_jug', Rt, -0.45, 0.5, ST, 0, { scale: 0.62 });
+      kit.model('metal_jug', Rt, -0.45, 0.5, ST + 0.015, 0, { scale: 0.62 });
       kit.foldedStack(Rt, 2.35, 1.3, ST, 2, ['c#e8e2d4/0.8', 'c#9fb0a4/0.8'], { w: 0.5, d: 0.7 });
       Rt.box(WALNUT, x - 0.7, x + 0.7, 0.1, 0.28, ST, ST + 0.06, G);
       kit.sign(Rt, x, 0.28, ST + 0.55, 1.3, 0.8, CARD('wash your hands.', 'tell Ember what you think.'), { cw: 300, ch: 184, tilt: 0.1, rough: 0.9 });
@@ -199,7 +199,7 @@ export default function apothecary(kit, lot) {
     spots(x0, h, n, 2, 0.6).forEach((x, i) => kit.foldedStack(S, x, SY, 8.0, 4, i % 2 ? ['c#e8e2d4/0.8', 'c#9fb0a4/0.8', 'c#e8e2d4/0.8', 'c#9fb0a4/0.8'] : ['c#e8e2d4/0.8', 'c#26364f/0.8', 'c#e8e2d4/0.8', 'c#26364f/0.8'], { w: 0.75, d: 0.7 }));
     spots(x0, h, n, 3, 0.5).forEach((x, i) => soap(S, x, SY, 6.5, 3 + (i % 3), ['c#c9b48a/0.8', 'c#9fb0a4/0.8', 'c#e88aa8/0.8', 'c#e8c73a/0.8', 'c#8a5ab0/0.8', 'c#2b2724/0.8'][i % 6]));
     spots(x0, h, n, 4).forEach((x, i) => bottle(S, x, SY, 5.0, { r: 0.16, h: 0.95 + (i % 2) * 0.12, col: i % 4 === 1 ? AMBER : BLUE, neck: 0.05, cap: CORK }));
-    spots(x0, h, n, 2, 0.6).forEach((x, i) => jar(S, x, SY, BH, 0.27, 0.8, ['c#e88aa8/0.8', 'c#f4f1ea/0.8', 'c#9fb0d8/0.8'][i % 3], 0.7, 'c#b08d4a/0.35/1'));
+    spots(x0, h, n, 2, 0.6).forEach((x, i) => jar(S, x, SY, BH - 0.02, 0.27, 0.8, ['c#e88aa8/0.8', 'c#f4f1ea/0.8', 'c#9fb0d8/0.8'][i % 3], 0.7, 'c#b08d4a/0.35/1'));
     kit.tableLamp(S, h - 0.8, 1.35, BH, 'c#8a5a2a/0.4', { base: 'gourd' });
     // the rail and the ladder
     tube(S, BRASS, [[x0 + 0.1, 1.3, 8.72], [h - 0.1, 1.3, 8.72]], 0.03, 6, true); for (let i = 0; i <= n; i++) { const x = x0 + (h - x0) * i / n + (i === 0 ? 0.1 : i === n ? -0.1 : 0); tube(S, BRASS, [[x, UD - 0.02, 8.72], [x, 1.3, 8.72]], 0.02, 5); }
@@ -223,10 +223,10 @@ export default function apothecary(kit, lot) {
   { const x = -1.8, y = -0.55; c.cyl('c#2b2724/0.45', x, y, TOP, TOP + 0.04, 0.2, 0.2, 14); ves(c, BRASS, x, y, TOP + 0.04, [[0.17, 0], [0.16, 0.06], [0.1, 0.13], [0.03, 0.16], [0.03, 0.2], [0, 0.2]], 16); }   // the bell
   kit.candle(c, -0.8, -1.2, TOP, 0.75);
   // wrapping: a few sheets of tissue, the kraft roll on its cradle, twine, one parcel waiting
-  ['c#f4f1ea/0.8', 'c#e88aa8/0.8', 'c#efe2bc/0.8'].forEach((col, i) => c.box(col, 0.2 + i * 0.03, 1.5 + i * 0.03, -1.5 + i * 0.04, -0.5 + i * 0.04, TOP + i * 0.012, TOP + i * 0.012 + 0.011));
+  ['c#f4f1ea/0.8', 'c#e88aa8/0.8', 'c#efe2bc/0.8'].forEach((col, i) => c.box(col, 0.2 + i * 0.03, 1.5 + i * 0.03, -1.5 + i * 0.04, -0.5 + i * 0.04, TOP + i * 0.02, TOP + i * 0.02 + 0.019));
   { const z = TOP + 0.3; for (const x of [1.95, 3.95]) c.box(WALNUT, x - 0.04, x + 0.04, -1.85, -1.35, TOP, z + 0.1, G); hcyl(c, 'c#c9a77a/0.8', 'x', 2.95, -1.6, z, 1.8, 0.22, 0.22, 14); hcyl(c, WALNUT, 'x', 2.95, -1.6, z, 2.1, 0.03, 0.03, 6); }
   ball(c, TWINE, 4.0, -0.5, TOP, 0.14, 10);
-  c.box('c#c9a77a/0.8', 2.5, 3.3, -0.95, -0.35, TOP, TOP + 0.4); c.box('c#8a1c1c/0.8', 2.85, 2.95, -0.955, -0.345, TOP, TOP + 0.405);
+  c.box('c#c9a77a/0.8', 2.5, 3.3, -0.95, -0.35, TOP, TOP + 0.4); c.box('c#8a1c1c/0.8', 2.85, 2.95, -0.965, -0.335, TOP, TOP + 0.418);
   for (const x of [-2.5, 2.5]) X.pendant(c, x, -0.9, { kind: 'bulb', drop: 5.0, power: 0.7 });
 
   // ---- the screen: a blue wall across the room, a long window into the pouring room, the way through ---------
@@ -263,7 +263,7 @@ export default function apothecary(kit, lot) {
   { const B = at(6.2, D, 0, 'street'), BT = X.plinth(B, 0, 1.4, 10.4, 2.2, 3.0, { mat: OAK, shelf: 0.9, leg: 0.2 }), TIN = 'c#b9b4aa/0.3/1';
     for (const s of [-1, 1]) for (let k = 0; k < 3; k++) B.box('c#d9a84a/0.6', 4.3 - 0.45 + (k === 2 ? 0.2 : 0), 4.3 + 0.45 + (k === 2 ? 0.2 : 0), 1.1 + s * 0.42 - 0.38, 1.1 + s * 0.42 + 0.38, BT + k * 0.26 + 0.002, BT + k * 0.26 + 0.25);     // beeswax by the block
     B.box(OAK, 1.1, 3.2, 0.75, 1.45, BT, BT + 0.1, G); for (let i = 0; i < 6; i++) { ves(B, TIN, 1.35 + (i % 3) * 0.8, 0.92 + Math.floor(i / 3) * 0.36, BT + 0.1, [[0, 0], [0.1, 0], [0.13, 0.75], [0.11, 0.75], [0.085, 0.03], [0, 0.03]], 12); }   // moulds
-    for (let i = 0; i < 4; i++) { const x = 0.2 - i * 0.5; jar(B, x, 1.2 + (i % 2) * 0.2, BT, 0.2, 0.42, ['c#d9cdb2/0.6', 'c#d9b35a/0.6'][i % 2], 0.75, null); }
+    for (let i = 0; i < 4; i++) { const x = 0.2 - i * 0.5; jar(B, x, 1.2 + (i % 2) * 0.2, BT - 0.02, 0.2, 0.42, ['c#d9cdb2/0.6', 'c#d9b35a/0.6'][i % 2], 0.75, null); }
     kit.candle(B, -1.9, 0.6, BT, 0.5);
     { const x = -3.0, y = 1.15; B.cyl('c#1d1b18/0.7', x, y, BT, BT + 0.14, 0.44, 0.44, 14);                            // the wax pot on its ring
       ves(B, 'c#b0683a/0.35/1', x, y, BT + 0.14, [[0, 0], [0.5, 0], [0.56, 0.1], [0.56, 0.78], [0.6, 0.8], [0.52, 0.8], [0.52, 0.12], [0, 0.1]], 20); B.cyl('c#e9d9a8/0.35', x, y, BT + 0.6, BT + 0.62, 0.52, 0.52, 20);
@@ -272,7 +272,7 @@ export default function apothecary(kit, lot) {
     for (const x of [-3.4, 0, 3.4]) X.crate(B, x, 1.4, 0.9, 1.7, 1.3, 0.85);
     // one shelf over it
     { const z = 5.6; B.box(OAK, -5.0, 5.0, 0.02, 0.85, z - 0.09, z, G); for (const x of [-4.4, 0, 4.4]) tube(B, 'c#1d1b18/0.7', [[x, 0.05, z - 0.55], [x, 0.75, z - 0.09]], 0.022, 5);
-      ['c#4a5a80/0.6', 'c#d9b35a/0.6', 'c#b8452e/0.6', 'c#efe6d2/0.6', 'c#9fb0a4/0.6', 'c#8a5ab0/0.6', 'c#d9cdb2/0.6'].forEach((col, i) => jar(B, 3.9 - i * 0.75, 0.45, z, 0.26, 0.75, col, 0.6 + (i % 3) * 0.12, CORK));
+      ['c#4a5a80/0.6', 'c#d9b35a/0.6', 'c#b8452e/0.6', 'c#efe6d2/0.6', 'c#9fb0a4/0.6', 'c#8a5ab0/0.6', 'c#d9cdb2/0.6'].forEach((col, i) => jar(B, 3.9 - i * 0.75, 0.45, z - 0.02, 0.26, 0.75, col, 0.6 + (i % 3) * 0.12, CORK));
       hcyl(B, TWINE, 'x', -2.5, 0.45, z + 0.2, 0.5, 0.2, 0.2, 14); hcyl(B, TWINE, 'x', -3.3, 0.45, z + 0.2, 0.5, 0.2, 0.2, 14); }       // wick by the spool
     X.stool(B, 1.2, 3.35, 2.2, { mat: WALNUT }); }
   // stock on the left wall, crates by the way in
