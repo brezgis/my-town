@@ -1,0 +1,182 @@
+[
+  {
+    "slug": "fantin_latour_roses",
+    "title": "Roses in a Bowl",
+    "artist": "Henri Fantin-Latour",
+    "year": "1881",
+    "width_px": 843,
+    "height_px": 703,
+    "source_url": "https://www.artic.edu/artworks/20534",
+    "licence": "Public domain (Art Institute of Chicago, CC0 open access)"
+  },
+  {
+    "slug": "coorte_strawberries",
+    "title": "Strawberries on a Stone Ledge",
+    "artist": "Adriaen Coorte",
+    "year": "1696",
+    "width_px": 809,
+    "height_px": 1024,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Adriaen_Coorte_-_Een_bakje_aardbeien_op_een_stenen_plint_-_SK-A-5098_-_Rijksmuseum.jpg",
+    "licence": "Public domain (Wikimedia Commons: Public domain)"
+  },
+  {
+    "slug": "milkmaid",
+    "title": "The Milkmaid",
+    "artist": "Johannes Vermeer",
+    "year": "about 1660",
+    "width_px": 913,
+    "height_px": 1024,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg",
+    "licence": "Public domain (Wikimedia Commons). Pre-existing file; source identified after the fact by matching aspect ratio, so treat the exact file as probable."
+  },
+  {
+    "slug": "van_gogh_almond_blossom",
+    "title": "Almond Blossom",
+    "artist": "Vincent van Gogh",
+    "year": "1890",
+    "width_px": 1024,
+    "height_px": 809,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_Almond_blossom_-_Google_Art_Project.jpg",
+    "licence": "Public domain (Wikimedia Commons: Public domain)"
+  },
+  {
+    "slug": "vermeer_little_street",
+    "title": "The Little Street",
+    "artist": "Johannes Vermeer",
+    "year": "about 1658",
+    "width_px": 827,
+    "height_px": 1024,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Johannes_Vermeer_-_Gezicht_op_huizen_in_Delft,_bekend_als_%27Het_straatje%27_-_Google_Art_Project.jpg",
+    "licence": "Public domain (Wikimedia Commons: Public domain)"
+  },
+  {
+    "slug": "durer_turf",
+    "title": "The Great Piece of Turf",
+    "artist": "Albrecht Dürer",
+    "year": "1503",
+    "width_px": 856,
+    "height_px": 1100,
+    "source_url": "https://sammlungenonline.albertina.at/objects/39098/das-groe-rasenstuck",
+    "licence": "Public domain (Albertina, Vienna; image via Wikimedia Commons)"
+  },
+  {
+    "slug": "durer_hare",
+    "title": "Young Hare",
+    "artist": "Albrecht Dürer",
+    "year": "1502",
+    "width_px": 996,
+    "height_px": 1100,
+    "source_url": "https://sammlungenonline.albertina.at/objects/39222/feldhase",
+    "licence": "Public domain (Albertina, Vienna; image via Wikimedia Commons)"
+  },
+  {
+    "slug": "hiroshige_kameido_plum",
+    "title": "Plum Garden at Kameido",
+    "artist": "Utagawa Hiroshige",
+    "year": "1857",
+    "width_px": 704,
+    "height_px": 1024,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Plum_garden_at_Kameido_(Kameido_umeyashiki)_(CBL_J_2693).jpg",
+    "licence": "Public domain (Wikimedia Commons: Public domain)"
+  },
+  {
+    "slug": "habs_madison_plans",
+    "title": "Mulberry Street Block, Madison, Indiana: plans",
+    "artist": "Historic American Buildings Survey",
+    "year": "1971",
+    "width_px": 1024,
+    "height_px": 803,
+    "source_url": "https://www.loc.gov/item/in0038/",
+    "licence": "Public domain (a work of the U.S. Government; Library of Congress, Prints & Photographs Division)"
+  },
+  {
+    "slug": "habs_madison_301",
+    "title": "Nos. 301 to 307, east elevation",
+    "artist": "Historic American Buildings Survey",
+    "year": "1971",
+    "width_px": 1024,
+    "height_px": 803,
+    "source_url": "https://www.loc.gov/item/in0038/",
+    "licence": "Public domain (a work of the U.S. Government; Library of Congress, Prints & Photographs Division)"
+  },
+  {
+    "slug": "habs_madison_309",
+    "title": "Nos. 309 to 315, east elevation",
+    "artist": "Historic American Buildings Survey",
+    "year": "1971",
+    "width_px": 1024,
+    "height_px": 803,
+    "source_url": "https://www.loc.gov/item/in0038/",
+    "licence": "Public domain (a work of the U.S. Government; Library of Congress, Prints & Photographs Division)"
+  },
+  {
+    "slug": "habs_norwalk_fronts",
+    "title": "South Main Street, South Norwalk, Connecticut: fronts",
+    "artist": "Historic American Buildings Survey",
+    "year": "1977",
+    "width_px": 1024,
+    "height_px": 681,
+    "source_url": "https://www.loc.gov/item/ct0326/",
+    "licence": "Public domain (a work of the U.S. Government; Library of Congress, Prints & Photographs Division)"
+  },
+  {
+    "slug": "habs_norwalk_plan",
+    "title": "Buildings 20 to 24, first floor plan",
+    "artist": "Historic American Buildings Survey",
+    "year": "1977",
+    "width_px": 1024,
+    "height_px": 683,
+    "source_url": "https://www.loc.gov/item/ct0326/",
+    "licence": "Public domain (a work of the U.S. Government; Library of Congress, Prints & Photographs Division)"
+  },
+  {
+    "slug": "habs_chapel",
+    "title": "First Baptist Church, Madison, Indiana",
+    "artist": "Historic American Buildings Survey",
+    "year": "1978",
+    "width_px": 1024,
+    "height_px": 683,
+    "source_url": "https://www.loc.gov/item/in0025/",
+    "licence": "Public domain (a work of the U.S. Government; Library of Congress, Prints & Photographs Division)"
+  },
+  {
+    "slug": "cezanne_basket_of_apples",
+    "title": "The Basket of Apples",
+    "artist": "Paul Cézanne",
+    "year": "about 1893",
+    "width_px": 1024,
+    "height_px": 817,
+    "source_url": "https://www.artic.edu/artworks/111436",
+    "licence": "Public domain (Art Institute of Chicago, CC0 open access)"
+  },
+  {
+    "slug": "van_gogh_grapes_lemons",
+    "title": "Grapes, Lemons, Pears, and Apples",
+    "artist": "Vincent van Gogh",
+    "year": "1887",
+    "width_px": 1024,
+    "height_px": 848,
+    "source_url": "https://www.artic.edu/artworks/64957",
+    "licence": "Public domain (Art Institute of Chicago, CC0 open access)"
+  },
+  {
+    "slug": "morris_willow_bough",
+    "title": "Willow Bough (wallpaper)",
+    "artist": "William Morris (Morris & Co.)",
+    "year": "designed 1887",
+    "width_px": 792,
+    "height_px": 1024,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Willow_Bough_MET_DP306734.jpg",
+    "licence": "Public domain (Wikimedia Commons: CC0)"
+  },
+  {
+    "slug": "redoute_rose",
+    "title": "Rosa centifolia foliacea (from Les Roses)",
+    "artist": "Pierre-Joseph Redouté",
+    "year": "1824",
+    "width_px": 710,
+    "height_px": 1024,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Redoute_-_Rosa_centifolia_foliacea.jpg",
+    "licence": "Public domain (Wikimedia Commons: Public domain)"
+  }
+]

@@ -661,7 +661,7 @@ export function bringToLife({ scene, outdoors = scene, vis = null, quality = {},
       // panel and its raised inset share a material: one mesh
       const panel = new THREE.BoxGeometry(w - 0.02, h1 - h0, d.slab.th), raised = new THREE.BoxGeometry(Math.max(0.05, w - 0.5), Math.max(0.05, h1 - h0 - 0.5), d.slab.th + 0.02);
       const body = new THREE.Mesh(mergeGeometries([panel, raised]), materials.make(d.slab.mat)); body.position.set(w / 2, (h0 + h1) / 2, 0); body.castShadow = body.receiveShadow = true;
-      const pull = new THREE.Mesh(new THREE.BoxGeometry(0.05, Math.min(0.5, (h1 - h0) * 0.3), 0.12), materials.make(d.slab.handle)); pull.position.set(w - 0.16, (h0 + h1) / 2, 0.06 * Math.sign(d.open - d.closed) * -1);
+      const pull = new THREE.Mesh(new THREE.BoxGeometry(0.05, Math.min(0.5, (h1 - h0) * 0.3), 0.12), materials.make(d.slab.handle)); pull.position.set(w - 0.16, (h0 + h1) / 2, (d.slab.th / 2 + 0.045) * Math.sign(d.open - d.closed) * -1);      // (standing off the panel's own face: on a thick door, the fridge's, its front lay exactly in that face)
       g.add(body, pull);
       d.isOpen = false;
       interact.push({ x: d.cx, y: (h0 + h1) / 2, z: d.cz, reach: 5.5, label: () => `${d.isOpen ? 'close' : 'open'} the ${d.label}`, act: () => { d.isOpen = !d.isOpen; } });
@@ -673,7 +673,7 @@ export function bringToLife({ scene, outdoors = scene, vis = null, quality = {},
       part(st, w - st, h0, h0 + 0.85, 0.15, 'fir'); part(st, w - st, h0 + 0.85, h1 - 0.42, 0.02, 'glass');
       const gh = h1 - 0.42 - (h0 + 0.85), gw = w - 2 * st, cols = gw > 2 ? 3 : 2;
       for (let i = 1; i < 4; i++) part(st, w - st, h0 + 0.85 + (gh * i) / 4 - 0.03, h0 + 0.85 + (gh * i) / 4 + 0.03, 0.09, 'fir');
-      for (let i = 1; i < cols; i++) part(st + (gw * i) / cols - 0.03, st + (gw * i) / cols + 0.03, h0 + 0.85, h1 - 0.42, 0.09, 'fir');
+      for (let i = 1; i < cols; i++) part(st + (gw * i) / cols - 0.03, st + (gw * i) / cols + 0.03, h0 + 0.85, h1 - 0.42, 0.096, 'fir');      // (a hair proud of the cross bars: where they cross, the two lay in one plane with the grain running two ways, and flickered)
     } else {
       part(st, w - st, h0, h1 - 0.42, 0.08, 'fir'); part(st, w - st, h0, h0 + 0.7, 0.15, 'fir');
       const ph = (h1 - 0.42 - (h0 + 0.7)) / 5;

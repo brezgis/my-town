@@ -26,6 +26,7 @@
 //
 // Inside: a boarded dado, pews, the stone table with candles and a bowl of water, a lectern on the step with
 // a book open at the last paragraph of the Origin of Species, one board of numbers, the bell rope, and Wren.
+// By the door, the rope's tail on its hook, the ringers' board for the one method the bells ring, and a bench.
 // Outside: the churchyard on the west (a gate from the Overlook, a path, a bench, one stone) and the
 // green on the east (stepping stones and a bench).
 //
@@ -78,6 +79,8 @@ const BC = { z: 3.4, hw: 1.8, foot: RIDGE + 0.5, top: RIDGE + 4.1, peak: RIDGE +
 const DAIS = { z0: 39.5, y: FLR + 0.5 };
 const TABLE = { x0: -3.4, x1: 3.4, z0: 42.8, z1: 45.2, y: DAIS.y + 3.3 };
 const PEWS = { rows: [12, 16, 20, 24, 28, 32], x0: 2.4, x1: 9.6 };
+// The bell rope: where it hangs (clear of the cornice's lip), its sally, how far a pull takes it down, the hook its tail is looped over
+const ROPE = { x: 5.6, z: IZ0 + 1.15, sally: [FLR + 4.2, FLR + 6.8], dip: 0.55, hook: { x: 6.55, y: FLR + 3.742, z: IZ0 + 0.2 } };
 // The churchyard, west of the nave, where the street's animals expect it (world x -35.5 to -84.5, z -197.5 to -223;
 // the path's middle on z = -210): its wall, the gate's middle, its west side, its far end, the path's two ends
 const YARD = { zw: 10.9, gx: -28, xW: -41, z1: 59.9, p0: 15.4, p1: 51.9 };
@@ -325,22 +328,57 @@ export function furnishChapel(kit, town) {
   const solid = (x0, x1, z0, z1, y1, y0 = 0) => B.colliders.push({ x0: Math.min(x0, x1), x1: Math.max(x0, x1), z0: Math.min(z0, z1), z1: Math.max(z0, z1), y0, y1 });
   const fw = (x, z, h = 0, q = 0) => { const [X, Z] = toW(x, z); return kit.fr(X, -Z, h, (q + 3) % 4); };      // a kit frame at one of the chapel's own points (q 0 faces the door end, 1 the west flank, 2 the table end, 3 the east flank)
   const sign = (x, z, h, q, w, tall, draw, o = {}) => kit.sign(fw(x, z, 0, q), 0, 0, h, w, tall, draw, o);
-  const G = { grain: 'long' }, OAK = 'oak_light', OAKD = 'oak_light#9a8068';      // (the darker wood: pew ends, the lectern's post, the board)
+  const OAKD_GROUND = 'oak_light#7e634e', OAK = 'oak_light', OAKD = 'oak_light#9a8068';      // (the darker wood: pew ends, the lectern's post, the board)
   const t0 = (x0, x1, z0, z1, h) => town.surfaces.push({ ...rectW(x0, x1, z0, z1), h });
 
   // ---- pews, facing the table ----------------------------------------------------------------------------
-  PEWS.rows.forEach((zr, k) => {
-    for (const s of [-1, 1]) {
-      const xa = s * PEWS.x0, xb = s * PEWS.x1, x0 = Math.min(xa, xb), x1 = Math.max(xa, xb);
-      box(OAK, x0 + 0.1, x1 - 0.1, FLR + 1.36, FLR + 1.5, zr, zr + 1.5, G);                                // seat
-      box(OAK, x0 + 0.1, x1 - 0.1, FLR + 0.3, FLR + 3.05, zr - 0.14, zr, G);                                // back
-      box(OAK, x0 + 0.1, x1 - 0.1, FLR + 3.05, FLR + 3.17, zr - 0.2, zr + 0.06, G);                         // its cap
-      for (const xe of [xa, xb]) box(OAKD, xe - 0.1, xe + 0.1, FLR, FLR + 3.1, zr - 0.24, zr + 1.62);
-      solid(x0, x1, zr - 0.24, zr + 1.62, FLR + 3.1, FLR);
-      kit.seat(fw(s * 4.4, zr + 0.8, FLR, 2), 0, 0, 1.5, 'sit for a while');
-      if (k % 2 === 0) kit.seat(fw(s * 8.0, zr + 0.8, FLR, 2), 0, 0, 1.5, 'sit for a while');
-    }
-  });
+  // Slip pews of the plain kind, after the ones measured in the Avon Congregational Church, Avon, Connecticut
+  // (David Hoadley's meeting house of 1819, altered in 1833 and 1858; the sheet does not say when its pews were
+  // made. HABS CT-480, sheet 11 of 15, "Pew Details", measured and drawn by Chester A. Case Jr., 1993, and
+  // marked unverified; https://www.loc.gov/item/ct0736/, sheet 13 there): an end whose top is one S-curved rim,
+  // a scroll at the back over the rail and a lower scroll at the front for the arm, its edges rounded; a back
+  // that leans, with a round rail on it; a plain board seat. Theirs are painted white with only the rims
+  // varnished; these are oak all through, a shade darker at the ends as before, with a plinth at the foot of
+  // each end, a book ledge on the back of each back (the real church in Madison had cast-iron racks there:
+  // HABS IN-127, photograph 6), and one standard under the middle of the seat.
+  // Each end on the aisle has one roundel sunk in it with a small figure carved in low relief, a footnote
+  // to one of the twelve windows (west pews from the door: Lorenz, Life, Turing, the strange loop, eigen-
+  // behaviour, ingression; east: the murmuration, McCulloch & Pitts, the neuron, broken symmetry, Darwin's tree,
+  // the logistic map; in the windows' own order, each as near its window as the order allows). The wall ends
+  // are plain. (The book ledge takes the pew's back two inches further back than the old plain box did: the
+  // obstacle below goes with it. The seat, its height, the seats one sits on and the ends' faces are where
+  // they were.)
+  {
+    const EMB = { '-1': ['lorenz', 'life', 'turing', 'loop', 'eigen', 'ingression'], '1': ['murmuration', 'calculus', 'neuron', 'symmetry', 'tree', 'logistic'] };
+    const RND = { r: 0.36, z: 0.55, y: 2.05 };                       // the roundel: its sinking's radius, where its middle is (from the pew's back line, above the floor)
+    PEWS.rows.forEach((zr, k) => {
+      for (const s of [-1, 1]) {
+        const xa = s * PEWS.x0, xb = s * PEWS.x1, x0 = Math.min(xa, xb), x1 = Math.max(xa, xb), i0 = x0 + 0.1, i1 = x1 - 0.1;
+        B.mesh(OAK, alongX(seatShape(zr), i0, i1));                                                          // seat, falling a little to the back, its nose rounded
+        B.mesh(OAK, alongX(backShape(zr), i0, i1));                                                          // back, upright below the seat and leaning above it
+        B.mesh(OAK, roundRail(i0, i1, FLR + PEW.rail[1], zr + PEW.rail[0], PEW.rail[2]));                   // its round rail
+        B.mesh(OAK, alongX(ledgeShape(zr), i0, i1));                                                         // the book ledge behind, with a lip
+        B.mesh(OAKD, alongX(standardShape(zr), (i0 + i1) / 2 - 0.05, (i0 + i1) / 2 + 0.05));                // the standard under the middle of the seat
+        for (const xe of [xa, xb]) {
+          const aisle = xe === xa, out = Math.sign(-xe);                                                   // (an aisle end's carved face looks toward the middle of the nave)
+          if (!aisle) B.mesh(OAKD, alongX(endShape(zr), xe - 0.1, xe + 0.1, { bevel: 0.02 }));
+          else {
+            const face = xe + out * 0.1, floor = face - out * 0.042, c = [zr + RND.z, FLR + RND.y];
+            B.mesh(OAKD, alongX(endShape(zr), Math.min(xe - out * 0.1, floor), Math.max(xe - out * 0.1, floor), { bevel: 0.02 }));      // the end itself
+            B.mesh(OAKD, alongX(endShape(zr, c, RND.r), Math.min(floor, face), Math.max(floor, face)));                                   // and the face over it, with the roundel cut through
+            B.mesh(OAKD_GROUND, ground(floor + out * 0.006, c[1], c[0], RND.r + 0.005, out));             // the ground it is cut from, darker as the hollows of old carving are
+            B.mesh(OAKD, emblemGeo(EMB[s][k], [floor, c[1], c[0]], out, RND.r - 0.06));
+            B.mesh(OAKD, bead(face, c[1], c[0], RND.r + 0.03, 0.022));                                      // a bead round it
+          }
+          for (const [ez, ey] of PEW.eyes) B.mesh(OAKD, roundRail(xe - 0.12, xe + 0.12, FLR + ey, zr + ez, 0.07, 14));      // the scrolls' eyes, a little proud each side
+          box(OAKD, xe - 0.13, xe + 0.13, FLR, FLR + 0.28, zr - 0.42, zr + 1.62);                                 // the plinth
+        }
+        solid(x0, x1, zr - 0.44, zr + 1.62, FLR + 3.1, FLR);
+        kit.seat(fw(s * 4.4, zr + 0.8, FLR, 2), 0, 0, 1.5, 'sit for a while');
+        if (k % 2 === 0) kit.seat(fw(s * 8.0, zr + 0.8, FLR, 2), 0, 0, 1.5, 'sit for a while');
+      }
+    });
+  }
 
   // ---- the stone table before the end window: candles, a bowl of water, Piaget's sentence in its edge ----
   {
@@ -388,6 +426,49 @@ export function furnishChapel(kit, town) {
       goudy(g, 'Charles Darwin, 1859.', w * 0.75, h * 0.895, h * 0.032, '#7a4a2a', { it: 1 }); goudy(g, 'The last paragraph: its first sentence and its last.', w * 0.75, h * 0.94, h * 0.032, '#7a4a2a', { it: 1, max: cw });
       goudy(g, '489', w * 0.25, h * 0.93, h * 0.036, '#7a4a2a'); line(g, [[w * 0.56, h * 0.855], [w * 0.94, h * 0.855]], 'rgba(122,74,42,.5)', 1);
     }, { cw: 792, ch: 528, tilt: t, rough: 0.85 });
+  }
+
+  // ---- the back of the chapel, by the door ---------------------------------------------------------------------
+  // The rope's fixed parts (the rope itself is bell()'s): a turned boss where it comes through the ceiling, and an
+  // iron hook on the wall for its tail
+  fw(ROPE.x, ROPE.z, CEIL - 0.42, 0).lathe(OAKD, 0, 0, [[0.068, 0.41], [0.068, 0], [0.13, 0], [0.16, 0.03], [0.17, 0.09], [0.21, 0.14], [0.25, 0.22], [0.275, 0.31], [0.28, 0.37], [0.28, 0.41]], { seg: 20 });
+  {
+    const { x, y, z } = ROPE.hook, put = g => B.mesh(IRON, g.toNonIndexed());
+    put(new THREE.CylinderGeometry(0.09, 0.09, 0.03, 12).rotateX(Math.PI / 2).translate(x, y, IZ0 + 0.02));                         // the plate
+    put(new THREE.CylinderGeometry(0.028, 0.028, 0.34, 8).rotateX(Math.PI / 2).translate(x, y, IZ0 + 0.2));                         // the arm
+    put(new THREE.CylinderGeometry(0.026, 0.028, 0.15, 8).translate(x, y + 0.06, z + 0.15)); put(new THREE.SphereGeometry(0.036, 8, 6).translate(x, y + 0.14, z + 0.15));      // turned up at its end
+  }
+  // The ringers' board, on the blind bay of the east wall beside the rope. In an English ringing chamber a painted
+  // board records a notable peal; this one records the one thing these bells ring, and draws it as ringers draw a
+  // method: the treble's line and the second's through every row (from plainBob(), the same rows the bells ring).
+  {
+    const z0 = 3.6, z1 = 6.8, y0 = FLR + 4.35, y1 = FLR + 6.15, zc = (z0 + z1) / 2;
+    box(OAKD, IX - 0.12, IX - 0.02, y0, y1, z0, z1);
+    for (const [a0, a1, b0, b1] of [[z0 - 0.06, z1 + 0.06, y1, y1 + 0.08], [z0 - 0.06, z1 + 0.06, y0 - 0.08, y0], [z0 - 0.06, z0, y0, y1], [z1, z1 + 0.06, y0, y1]]) box(OAKD, IX - 0.17, IX - 0.02, b0, b1, a0, a1);
+    sign(IX - 0.13, zc, (y0 + y1) / 2, 1, z1 - z0 - 0.06, y1 - y0 - 0.06, (g, w, h) => {
+      fill(g, w, h, '#2e2722'); const r = rng(13);
+      for (let i = 0; i < 30; i++) { g.strokeStyle = `rgba(${i % 2 ? '18,12,8' : '90,70,52'},.2)`; g.lineWidth = 1 + (i % 3); g.beginPath(); const gy = r() * h; g.moveTo(0, gy); g.bezierCurveTo(w * 0.3, gy + 3, w * 0.7, gy - 3, w, gy + 1); g.stroke(); }
+      const cream = '#e4d9bd'; g.strokeStyle = 'rgba(228,217,189,.5)'; g.lineWidth = 2; g.strokeRect(w * 0.025, h * 0.05, w * 0.95, h * 0.9);
+      T(g, 'PLAIN BOB MINIMUS', w / 2, h * 0.2, h * 0.115, cream, { f: FONT, ls: 7 });
+      T(g, 'the extent: all twenty-four changes on these four bells', w / 2, h * 0.34, h * 0.062, '#cbbf9f', { f: FONT, it: 1 });
+      const rows = plainBob(), gx = i => w * 0.08 + i * w * 0.84 / (rows.length - 1), gy = p => h * 0.5 + p * h * 0.1;
+      g.strokeStyle = 'rgba(228,217,189,.16)'; g.lineWidth = 1; for (let p = 0; p < 4; p++) { g.beginPath(); g.moveTo(gx(0), gy(p)); g.lineTo(gx(rows.length - 1), gy(p)); g.stroke(); }
+      for (const [b, c, lw] of [[1, '#b0584a', 3], [0, cream, 4]]) { g.strokeStyle = c; g.lineWidth = lw; g.lineJoin = 'round'; g.beginPath(); rows.forEach((row, i) => (i ? g.lineTo(gx(i), gy(row.indexOf(b))) : g.moveTo(gx(i), gy(row.indexOf(b))))); g.stroke(); }
+      for (let p = 0; p < 4; p++) T(g, String(p + 1), w * 0.05, gy(p), h * 0.06, '#cbbf9f', { f: FONT });
+    }, { cw: 640, ch: 352, rough: 0.8 });
+  }
+  // A plain bench against the front wall, the other side of the door from the rope: somewhere to wait, or to sit
+  // at the back and look down the nave to the great window. Two board ends with a round cut at the foot, a
+  // seat with a rounded nose, a rail between.
+  {
+    const x0 = -8.7, x1 = -4.7, z0 = IZ0 + 0.17, z1 = IZ0 + 1.3, zc = (z0 + z1) / 2, e = new THREE.Shape();
+    e.moveTo(z0 + 0.06, FLR); e.lineTo(zc - 0.26, FLR); e.absarc(zc, FLR, 0.26, Math.PI, 0, true); e.lineTo(z1 - 0.08, FLR); e.lineTo(z1 - 0.08, FLR + 1.3); e.quadraticCurveTo(z1 - 0.08, FLR + 1.42, z1 - 0.2, FLR + 1.42); e.lineTo(z0 + 0.06, FLR + 1.42);
+    for (const xe of [x0 + 0.25, x1 - 0.25]) B.mesh(OAKD, alongX(e, xe - 0.075, xe + 0.075, { bevel: 0.015 }));
+    const st = new THREE.Shape(); st.moveTo(z0, FLR + 1.42); st.lineTo(z0, FLR + 1.5); st.lineTo(z1 - 0.045, FLR + 1.5); st.absarc(z1 - 0.045, FLR + 1.46, 0.04, Math.PI / 2, -Math.PI / 2, true); st.lineTo(z0, FLR + 1.42);
+    B.mesh(OAK, alongX(st, x0, x1));
+    box(OAKD, x0 + 0.32, x1 - 0.32, FLR + 0.45, FLR + 0.6, zc - 0.06, zc + 0.06);
+    solid(x0, x1, z0, z1, FLR + 1.6, FLR);
+    for (const x of [x0 + 1.1, x1 - 1.1]) kit.seat(fw(x, zc, FLR, 2), 0, 0, 1.5, 'sit at the back');
   }
 
   // ---- the words over the door, and a lamp for each lantern ------------------------------------------------
@@ -601,7 +682,7 @@ void main() {
     for (const s of [-1, 1]) for (const [z0, z1, y0, y1] of inner(s < 0 ? 'W' : 'E')) rectZY(s * (IX - e), z0, z1, y0, y1);
     for (const [x0, x1, y0, y1] of inner('R')) rectXY(IZ1 - e, x0, x1, y0, y1);
     for (const [x0, x1, y0, y1] of inner('F')) rectXY(IZ0 + e, x0, x1, y0, y1);
-    for (const zr of PEWS.rows) for (const s of [-1, 1]) rectXZ(Math.min(s * PEWS.x0, s * PEWS.x1) + 0.1, Math.max(s * PEWS.x0, s * PEWS.x1) - 0.1, zr, zr + 1.5, FLR + 1.5 + e);
+    for (const zr of PEWS.rows) for (const s of [-1, 1]) { const x0 = Math.min(s * PEWS.x0, s * PEWS.x1) + 0.1, x1 = Math.max(s * PEWS.x0, s * PEWS.x1) - 0.1, z0 = zr - 0.02, z1 = zr + 1.42, y0 = FLR + 1.456 + e, y1 = FLR + 1.5 + e; quads.push([[x0, y1, z1], [x1, y1, z1], [x1, y0, z0], [x0, y0, z0]]); }      // the seats (which fall an inch to the back)
     rectXZ(TABLE.x0, TABLE.x1, TABLE.z0, TABLE.z1, TABLE.y + e);
     const pos = [], idx = [];
     for (const q of quads) { const n = pos.length / 3; for (const p of q) pos.push(...p); idx.push(n, n + 1, n + 2, n, n + 2, n + 3); }
@@ -765,21 +846,15 @@ function bell(ctx, scene) {
     return { g, clapper, midi, at: -100 };
   });
   for (const dz of [-0.6, 0.6]) { const m = new THREE.Mesh(new THREE.BoxGeometry(BC.hw * 2 - 0.9, 0.3, 0.28), new THREE.MeshStandardMaterial({ color: 0x5a4636, roughness: 0.9 })); m.position.set(0, yTop + 0.17, z + dz); m.userData.cat = 'chapel'; scene.add(m); }
-  const RX = 5.6, RZ = IZ0 + 1.15, y0 = FLR + 3.2;      // (clear of the cornice's lip)
-  const tube = (a, b, r, n = 6) => { const A = new THREE.Vector3(...a), Bv = new THREE.Vector3(...b), d = Bv.clone().sub(A), g = new THREE.CylinderGeometry(r, r, d.length(), n); g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize())); g.translate((A.x + Bv.x) / 2, (A.y + Bv.y) / 2, (A.z + Bv.z) / 2); return g.toNonIndexed(); };
-  const tint = (g, f) => { const p = g.attributes.position, c = new Float32Array(p.count * 3); for (let i = 0; i < p.count; i++) c.set(f(p.getX(i), p.getY(i), p.getZ(i)), i * 3); g.setAttribute('color', new THREE.BufferAttribute(c, 3)); return g; };
-  const HEMP = () => [0.62, 0.52, 0.36], ropeMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 });
-  const sallyGeo = new THREE.CylinderGeometry(0.13, 0.13, 2.6, 10, 26).translate(RX, FLR + 5.5, RZ).toNonIndexed();
-  tint(sallyGeo, (x, y, zz) => { const k = Math.floor((y - FLR - 4.2) / 0.2 + Math.atan2(zz - RZ, x - RX) / 2.1 + 20) % 3; return k === 0 ? [0.6, 0.1, 0.09] : k === 1 ? [0.85, 0.8, 0.68] : [0.12, 0.2, 0.44]; });
-  const rope = new THREE.Mesh(mergeAll([tint(tube([RX, y0, RZ], [RX, CEIL + 1.1, RZ], 0.045), HEMP), sallyGeo], ['position', 'normal', 'color']), ropeMat);
+  const RX = ROPE.x, RZ = ROPE.z;
+  const rope = new THREE.Mesh(ropeGeo(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }));
   rope.name = 'chapel bell rope'; rope.userData.cat = 'chapel'; scene.add(rope);
+  const slack = v => { rope.position.y = v; rope.morphTargetInfluences[0] = -v / ROPE.dip; };      // (the tail's end stays on its hook: see ropeGeo)
 
   // the touch: two rounds, then the 24 changes of Plain Bob Minimus (the last brings them round), as [bell, time]
   const BEAT = 0.27, strikes = [];
-  { let row = [0, 1, 2, 3], t = 0, n = 0; const rows = [row, row];
-    const swap = (r, pairs) => { const q = r.slice(); for (const [a, b] of pairs) [q[a], q[b]] = [q[b], q[a]]; return q; };
-    for (let lead = 0; lead < 3; lead++) for (let k = 0; k < 8; k++) { row = swap(row, k % 2 === 0 ? [[0, 1], [2, 3]] : k === 7 ? [[2, 3]] : [[1, 2]]); rows.push(row); }
-    for (const r of rows) { for (const b of r) { strikes.push([b, t]); t += BEAT; } if (++n % 2 === 0) t += BEAT; }      // a beat's pause after every second row, as ringers leave at the handstroke lead
+  { let t = 0, n = 0;
+    for (const r of plainBob()) { for (const b of r) { strikes.push([b, t]); t += BEAT; } if (++n % 2 === 0) t += BEAT; }      // a beat's pause after every second row, as ringers leave at the handstroke lead
   }
   const LEN = strikes.at(-1)[1] + 4;
   let rung = -1e9, now = 0, next = 0;
@@ -789,10 +864,10 @@ function bell(ctx, scene) {
   const near = new THREE.Vector3(toW(0, z)[0], 30, toW(0, z)[1]);
   animated.push((t) => {
     now = t; const dt = t - rung;
-    if (dt > LEN + 1) { if (rope.position.y) rope.position.y = 0; return; }
+    if (dt > LEN + 1) { if (rope.position.y) slack(0); return; }
     while (next < strikes.length && strikes[next][1] <= dt) { const b = BELLS[strikes[next][0]]; b.at = t; strike(b.midi, ctx.camera.position.distanceToSquared(near) < 200 * 200 ? 1 : 0.4); next++; }
     for (const b of BELLS) { const u = t - b.at, a = u < 2.5 ? 0.34 * Math.exp(-u / 0.55) * Math.cos(u * 9) : 0; b.g.rotation.x = a; b.clapper.rotation.x = -a * 1.4; }
-    rope.position.y = dt < LEN - 3.5 ? -0.55 * (0.5 - 0.5 * Math.cos(dt * Math.PI / (BEAT * 4.5))) : rope.position.y * 0.9;
+    slack(dt < LEN - 3.5 ? -ROPE.dip * (0.5 - 0.5 * Math.cos(dt * Math.PI / (BEAT * 4.5))) : rope.position.y * 0.9);
   });
 }
 
@@ -891,6 +966,217 @@ function planting(outdoors) {
   drift('fern', OX + 1.5, BAYS_Z[3], 0.8, 3, 5, 1.0);                                                                           // one clump on the green side
   const meshes = set.build(outdoors, { x: crossGeo(3), r: rosetteGeo(7, 0.62) }, { material: proto.material, depth: proto.customDepthMaterial });
   for (const mesh of meshes) { mesh.name = 'plants'; mesh.userData.cat = proto.userData.cat; }
+}
+
+// ---- the bells' method and the rope ---------------------------------------------------------------------------
+// Plain Bob Minimus as rows of bells (0 the treble): rounds twice, then the extent, every one of the twenty-four
+// orders once, the last of them rounds again. (x, 14, x, 14 ... and 12 at each lead end.)
+function plainBob() {
+  let row = [0, 1, 2, 3]; const rows = [row, row];
+  const swap = (r, pairs) => { const q = r.slice(); for (const [a, b] of pairs) [q[a], q[b]] = [q[b], q[a]]; return q; };
+  for (let lead = 0; lead < 3; lead++) for (let k = 0; k < 8; k++) { row = swap(row, k % 2 === 0 ? [[0, 1], [2, 3]] : k === 7 ? [[2, 3]] : [[1, 2]]); rows.push(row); }
+  return rows;
+}
+// The rope, in the chapel's feet: laid hemp, three strands twisted together, from above the ceiling down through
+// its boss to the sally (wool, tufted, in three colours wound round it: madder, natural and a slate green, as
+// sallies are striped), then the tail, which hangs in a loose bight to the iron hook beside the door, is
+// looped over it and ends in a whipping. A pull takes the whole rope down (bell(): rope.position.y); the tail's
+// one morph lifts it back again in proportion along the bight, so that its end stays on the hook and only the
+// bight between gives.
+function ropeGeo() {
+  const { x, z, sally: [s0, s1], hook: h, dip } = ROPE, R = 0.05, NR = 12, PITCH = 0.3;
+  const C = [], kind = [];      // the line down the middle of it, and what each ring is
+  const put = (p, k) => { C.push(p); kind.push(k); };
+  for (let y = CEIL + 1.1; y > FLR + 12; y -= 0.5) put(new THREE.Vector3(x, y, z), 'high');
+  for (let y = FLR + 12; y > s1; y -= 0.05) put(new THREE.Vector3(x, y, z), 'rope');
+  for (let y = s1; y > s0; y -= 0.035) put(new THREE.Vector3(x, y, z), 'sally');
+  const tail = new THREE.CatmullRomCurve3([[x, s0, z], [x + 0.01, s0 - 0.35, z - 0.02], [x + 0.15, s0 - 0.9, z - 0.15], [x + 0.45, s0 - 1.08, z - 0.45], [h.x - 0.22, h.y - 0.5, h.z + 0.18], [h.x - 0.1, h.y - 0.02, h.z + 0.01], [h.x, h.y + 0.073, h.z], [h.x + 0.1, h.y - 0.02, h.z], [h.x + 0.12, h.y - 0.3, h.z + 0.01], [h.x + 0.12, h.y - 0.62, h.z + 0.02]].map(p => new THREE.Vector3(...p)), false, 'centripetal');
+  const tn = Math.round(tail.getLength() / 0.035), top = new THREE.Vector3(h.x, h.y + 0.073, h.z), tw = [];
+  for (let i = 0; i <= tn; i++) { put(tail.getPointAt(i / tn), i / tn > 1 - 0.08 / tail.getLength() ? 'whip' : 'tail'); tw.push(i / tn); }
+  const onHook = tw.reduce((m, f) => (tail.getPointAt(f).distanceTo(top) < tail.getPointAt(m).distanceTo(top) ? f : m), 0);      // (where it lies over the hook)
+  // arc length, frames carried down the line without twisting
+  const n = C.length, s = [0], T = [], N = [], Bn = [];
+  for (let i = 1; i < n; i++) s.push(s[i - 1] + C[i].distanceTo(C[i - 1]));
+  for (let i = 0; i < n; i++) T.push(C[Math.min(n - 1, i + 1)].clone().sub(C[Math.max(0, i - 1)]).normalize());
+  N.push(new THREE.Vector3(1, 0, 0).sub(T[0].clone().multiplyScalar(T[0].x)).normalize());
+  for (let i = 1; i < n; i++) N.push(N[i - 1].clone().sub(T[i].clone().multiplyScalar(N[i - 1].dot(T[i]))).normalize());
+  for (let i = 0; i < n; i++) Bn.push(T[i].clone().cross(N[i]));
+  const pos = [], col = [], lift = [], idx = [], t0 = n - tw.length, hash = (a, b) => { const q = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return q - Math.floor(q); };
+  const lin = h => { const c = new THREE.Color(h); return [c.r, c.g, c.b]; }, HEMP = lin('#b39b72'), TWINE = lin('#5a4a38'), WOOL = ['#76342a', '#dcd0b4', '#3e5149'].map(lin);
+  for (let i = 0; i < n; i++) {
+    const k = kind[i], yy = C[i].y, w = i < t0 ? 0 : Math.min(1, tw[i - t0] / onHook), up = (1 - Math.cos(Math.PI * w)) / 2;
+    const lay = k === 'high' ? 0 : k === 'rope' ? Math.min(1, (FLR + 12 - yy) / 1) * 0.2 : 0.2;
+    const e = k === 'sally' ? Math.min(yy - s0, s1 - yy) : 0, swell = THREE.MathUtils.smoothstep(e, 0.02, 0.16);
+    for (let j = 0; j < NR; j++) {
+      const a = j / NR * Math.PI * 2, lobe = Math.abs(Math.cos(1.5 * (a - s[i] / PITCH * Math.PI * 2)));
+      let r = R * (1 - lay + lay * lobe), c = HEMP.map(v => v * (1 - lay * 1.6 + lay * 1.6 * lobe));
+      if (k === 'whip') { r = R * 0.93; c = TWINE; }
+      if (k === 'sally') {
+        r = r + (0.1 * (1 + 0.09 * (hash(i, j) - 0.5)) - r) * swell;
+        const st = Math.floor(3 * ((yy - s0) / (NR * 0.035) - j / NR)), wc = WOOL[((st % 3) + 3) % 3], f = 0.9 + 0.16 * hash(j, i);      // (wound round it: one turn of three colours every twelve rings, so a stripe's edge runs along the mesh's diagonals)
+        c = swell < 0.5 ? TWINE : wc.map(v => v * f);      // (bound in dark twine where it narrows to the rope)
+      }
+      const p = C[i].clone().addScaledVector(N[i], Math.cos(a) * r).addScaledVector(Bn[i], Math.sin(a) * r);
+      pos.push(p.x, p.y, p.z); col.push(...c); lift.push(0, dip * up, 0);
+    }
+  }
+  for (let i = 0; i < n - 1; i++) for (let j = 0; j < NR; j++) { const a = i * NR + j, b = i * NR + (j + 1) % NR, c = a + NR, d = b + NR; idx.push(a, b, c, b, d, c); }
+  const end = C[n - 1].clone().addScaledVector(T[n - 1], 0.015), ci = pos.length / 3; pos.push(end.x, end.y, end.z); col.push(...TWINE); lift.push(0, dip, 0);      // the end, cut square
+  for (let j = 0; j < NR; j++) idx.push((n - 1) * NR + j, (n - 1) * NR + (j + 1) % NR, ci);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setIndex(idx);
+  g.computeVertexNormals(); g.morphAttributes.position = [new THREE.Float32BufferAttribute(lift, 3)]; g.morphTargetsRelative = true;
+  return g;
+}
+
+// ---- the pews' joinery ----------------------------------------------------------------------------------------
+// Each part is an outline in the chapel's own (z, y), pushed along x: z the way the pew faces (toward the table),
+// zr the line of its back. Texture in feet: the ends' grain runs up them, the boards' along the pew.
+const PEW = { rail: [-0.23, 3.02, 0.085], eyes: [[1.43, 2.36], [-0.23, 3.02]] };      // the back's rail (z, y, radius); the two scrolls' middles
+// An outline in (z, y) given as a THREE.Shape, from x0 to x1; with bevel, its edges rounded that much
+function alongX(shape, x0, x1, o = {}) {
+  const b = o.bevel ?? 0, g = new THREE.ExtrudeGeometry(shape, { depth: x1 - x0 - 2 * b, bevelEnabled: b > 0, bevelThickness: b, bevelSize: b, bevelSegments: 2, curveSegments: o.seg ?? 10 });
+  g.rotateY(-Math.PI / 2); g.translate(x1 - b, 0, 0);       // (a turn, not a mirror: the extrusion's far face comes out at x0)
+  return g.index ? g.toNonIndexed() : g;
+}
+const outline = (zr, pts) => new THREE.Shape(pts.map(([z, y]) => new THREE.Vector2(zr + z, FLR + y)));
+// The seat: its nose rounded, falling an inch to the back
+function seatShape(zr) {
+  const s = new THREE.Shape(); s.moveTo(zr - 0.04, FLR + 1.355); s.lineTo(zr - 0.04, FLR + 1.455); s.lineTo(zr + 1.42, FLR + 1.5);
+  s.absarc(zr + 1.42, FLR + 1.45, 0.05, Math.PI / 2, -Math.PI / 2, true); s.lineTo(zr - 0.04, FLR + 1.355); return s;
+}
+const backShape = zr => outline(zr, [[-0.01, 0.3], [-0.01, 1.4], [-0.18, 2.98], [-0.28, 2.98], [-0.11, 1.4], [-0.11, 0.3]]);
+const ledgeShape = zr => outline(zr, [[-0.2, 2.33], [-0.2, 2.38], [-0.39, 2.38], [-0.39, 2.43], [-0.43, 2.43], [-0.43, 2.33]]);
+function standardShape(zr) {
+  const s = new THREE.Shape(); s.moveTo(zr - 0.06, FLR); s.lineTo(zr + 0.35, FLR); s.quadraticCurveTo(zr + 0.55, FLR + 1.05, zr + 1.2, FLR + 1.385); s.lineTo(zr - 0.06, FLR + 1.35); return s;
+}
+// The end: a back edge rising to a scroll over the rail, the rim sweeping down in an S to a lower scroll for the
+// arm, the front edge set back under it. With c and r, a round hole through it there (for the roundel's face).
+function endShape(zr, c, r) {
+  const [fz, fy] = PEW.eyes[0], [bz, by] = PEW.eyes[1], s = new THREE.Shape(), P = (z, y) => [zr + z, FLR + y], a0 = -115 * Math.PI / 180;
+  s.moveTo(...P(-0.38, 0)); s.lineTo(...P(1.36, 0)); s.lineTo(...P(1.36, 2.0));
+  s.quadraticCurveTo(...P(1.34, 2.15), ...P(fz + 0.17 * Math.cos(a0), fy + 0.17 * Math.sin(a0)));
+  s.absarc(...P(fz, fy), 0.17, a0, Math.PI / 2, false);
+  s.bezierCurveTo(...P(fz - 0.45, fy + 0.17), ...P(0.14, 2.975), ...P(bz + 0.075, by + 0.13));
+  s.absarc(...P(bz, by), 0.15, Math.PI / 3, Math.PI, false); s.lineTo(...P(-0.38, 0));
+  if (c) s.holes.push(new THREE.Path(Array.from({ length: 48 }, (_, i) => new THREE.Vector2(c[0] + Math.cos(-i / 48 * Math.PI * 2) * r, c[1] + Math.sin(-i / 48 * Math.PI * 2) * r))));
+  return s;
+}
+// A disc lying on a face that looks along x (out = +1 or -1), at (y, z)
+function ground(x, y, z, r, out) {
+  const g = new THREE.CircleGeometry(r, 40).toNonIndexed(); g.rotateY(out * Math.PI / 2).translate(x, y, z);
+  const p = g.attributes.position, uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, p.getZ(i), p.getY(i));
+  return g;
+}
+// A bead: a ring of round moulding standing on a face that looks along x, at (y, z)
+function bead(x, y, z, R, r) {
+  const g = new THREE.TorusGeometry(R, r, 6, 48).toNonIndexed(); g.rotateY(Math.PI / 2).translate(x, y, z);
+  const p = g.attributes.position, uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, p.getZ(i), p.getY(i));
+  return g;
+}
+// A round bar along x (the back's rail; the scrolls' eyes)
+function roundRail(x0, x1, y, z, r, seg = 12) {
+  const g = new THREE.CylinderGeometry(r, r, x1 - x0, seg, 1).toNonIndexed(), uv = g.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * Math.PI * 2 * r, uv.getY(i) * (x1 - x0));
+  return g.rotateZ(Math.PI / 2).translate((x0 + x1) / 2, y, z);
+}
+// The carved figures. Each is drawn in a unit circle (u to the right of someone facing it, v up) as low relief:
+// ridges with a narrow top and broad sloping sides, bosses and small chamfered plaques, all nearly all slope, so
+// that the room's light finds them from any side. Most answer the small roundel in the short window under their
+// window (chapel/glass.js, LOWS); the tree, the logistic map and the solid answer the tall window itself.
+const EMBLEMS = {
+  lorenz(E) {      // a few turns of the flow, the two wings
+    let x = 0.1, y = 0, z = 0; const pts = [];
+    for (let i = 0; i < 1500; i++) { const dx = 10 * (y - x), dy = x * (28 - z) - y, dz = x * y - (8 / 3) * z; x += dx * 0.006; y += dy * 0.006; z += dz * 0.006; if (i > 380 && i % 4 === 0) pts.push([x / 22, (z - 24) / 22]); }
+    E.line(pts, 0.04);
+  },
+  life(E) { for (const [i, j] of [[0, -1], [1, 0], [-1, 1], [0, 1], [1, 1]]) E.poly(E.sq(i * 0.42, -j * 0.42, 0.34), 0.036); },      // a glider
+  turing(E) { for (let k = 1; k <= 34; k++) { const a = k * 2.39996, q = Math.sqrt(k / 34); E.dot(Math.cos(a) * 0.8 * q, Math.sin(a) * 0.8 * q, 0.05 + 0.06 * q); } },      // a seed head
+  loop(E) {      // the tribar
+    const A = 0.84, w = A * 0.2, d = w / Math.sin(Math.PI / 3), k = (A / 2 - w) / (A / 2), cy = -A * 0.12;
+    const V = [0, 1, 2].map(i => [A * Math.cos(Math.PI / 2 + i * Math.PI * 2 / 3), cy + A * Math.sin(Math.PI / 2 + i * Math.PI * 2 / 3)]), H = V.map(([vx, vy]) => [vx * k, cy + (vy - cy) * k]);
+    const to = (p, q, len) => { const l = Math.hypot(q[0] - p[0], q[1] - p[1]); return [p[0] + (q[0] - p[0]) * len / l, p[1] + (q[1] - p[1]) * len / l]; };
+    const hex = [], Qs = [];
+    for (let i = 0; i < 3; i++) { const v = V[(i + 1) % 3]; hex.push(to(v, V[i], d)); const q = to(v, V[(i + 2) % 3], d); hex.push(q); Qs.push(q); }
+    E.line([...hex, hex[0]], 0.045, true); E.line([...H, H[0]], 0.045, true);
+    for (let i = 0; i < 3; i++) E.line([H[(i + 1) % 3], Qs[i]], 0.045);
+  },
+  eigen(E) { const pts = []; for (let a = 0; a <= 17; a += 0.15) { const q = 0.84 * Math.exp(-a * 0.135); pts.push([Math.cos(a) * q, Math.sin(a) * q]); } E.line(pts, 0.045); E.dot(0, 0, 0.09); },      // the same turn, down to the point that stays
+  ingression(E) {      // the one solid at the top of the great window: a dodecahedron, seen face on
+    const g = new THREE.DodecahedronGeometry(0.62, 0), e = new THREE.EdgesGeometry(g, 1).attributes.position;
+    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, (1 + Math.sqrt(5)) / 2).normalize(), new THREE.Vector3(0, 0, 1)), a = new THREE.Vector3(), b = new THREE.Vector3();
+    for (let i = 0; i < e.count; i += 2) { a.fromBufferAttribute(e, i).applyQuaternion(q); b.fromBufferAttribute(e, i + 1).applyQuaternion(q); if (Math.max(a.z, b.z) > 0.01) E.line([[a.x, a.y], [b.x, b.y]], 0.045); }
+  },
+  murmuration(E) {      // a small flock, turning
+    const r = rng(23); for (let i = 0; i < 13; i++) { const t = i / 12, x = -0.62 + 1.24 * t + (r() - 0.5) * 0.22, y = 0.42 * Math.sin(t * 4.2 - 0.6) * (0.4 + t * 0.6) + (r() - 0.5) * 0.24, s = 0.09 + r() * 0.07, a = (r() - 0.5) * 0.5;
+      E.line([[-1, 0.15], [-0.5, 0.42], [0, 0], [0.5, 0.42], [1, 0.15]].map(([p, q]) => [x + (p * Math.cos(a) - q * Math.sin(a)) * s, y + (p * Math.sin(a) + q * Math.cos(a)) * s]), 0.032); }
+  },
+  calculus(E) {      // McCulloch and Pitts: one cell, two knobs on it; it fires only if both do
+    const s = 0.34; E.poly([[-s, 0.7 * s], [0, -1.1 * s], [s, 0.7 * s]], 0.036, 0.5);
+    for (const sx of [-1, 1]) { E.line([[sx * 0.52, 0.78], [sx * s * 0.45, 0.33]], 0.04); E.dot(sx * s * 0.45, 0.3, 0.075); }
+    E.line([[0, -1.1 * s], [0, -0.8]], 0.04);
+  },
+  neuron(E) {      // one of Cajal's cells, a small one
+    const r = rng(41), tw = (px, py, a, len, wd, n) => { const bend = (r() - 0.5) * 0.5, qx = px + Math.cos(a + bend) * len, qy = py + Math.sin(a + bend) * len; E.line([[px, py], [qx, qy]], wd); if (n > 0) for (const sg of [-1, 1]) tw(qx, qy, a + sg * (0.3 + r() * 0.35), len * 0.74, Math.max(0.022, wd * 0.72), n - 1); };
+    tw(0, -0.3, Math.PI / 2, 0.36, 0.055, 3); for (const a of [0.45, 1.25, 1.9, 2.7]) tw(0, -0.3, -a, 0.2, 0.035, 2);
+    E.poly([[0, -0.12], [-0.12, -0.39], [0.12, -0.39]], 0.035, 0.45);
+  },
+  symmetry(E) {      // one compass needle, pointing the way they all chose
+    const dir = 1.15, L = 0.76, wN = 0.15, c = Math.cos(dir), s = Math.sin(dir);
+    E.poly([[c * L, s * L], [-s * wN, c * wN], [-c * L, -s * L], [s * wN, -c * wN]], 0.036, 0.4); E.dot(0, 0, 0.08, 0.04);
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; E.line([[Math.cos(a) * 0.86, Math.sin(a) * 0.86], [Math.cos(a) * 0.96, Math.sin(a) * 0.96]], 0.03); }
+  },
+  tree(E) {      // Darwin's tree of 1837, from one root; the twigs that came through have a bar across them
+    const r = rng(7), grow = (x, y, a, len, n) => { const qx = x + Math.cos(a) * len, qy = y + Math.sin(a) * len; E.line([[x, y], [qx, qy]], 0.04);
+      if (n === 0) { if (r() < 0.6) E.line([[qx - Math.sin(a) * 0.07, qy + Math.cos(a) * 0.07], [qx + Math.sin(a) * 0.07, qy - Math.cos(a) * 0.07]], 0.035); return; }
+      const m = r() < 0.4 ? 3 : 2; for (let i = 0; i < m; i++) grow(qx, qy, a + (i - (m - 1) / 2) * 0.62 + (r() - 0.5) * 0.25, len * (0.66 + r() * 0.12), n - 1); };
+    grow(-0.05, -0.86, Math.PI / 2 + 0.08, 0.34, 3);
+  },
+  logistic(E) {      // where the arithmetic settles, as the rate goes up: one value, then two, four, eight
+    const cols = []; for (let c = 0; c <= 36; c++) { const rr = 2.85 + (3.562 - 2.85) * c / 36; let x = 0.5; for (let i = 0; i < 3000; i++) x = rr * x * (1 - x); const v = []; for (let i = 0; i < 16; i++) { x = rr * x * (1 - x); if (!v.some(q => Math.abs(q - x) < 0.004)) v.push(x); } cols.push(v.map(q => [-0.86 + 1.72 * c / 36, (q - 0.62) * 2.2])); }
+    for (let c = 1; c < cols.length; c++) for (const p of cols[c]) { const q = cols[c - 1].reduce((m, o) => (Math.abs(o[1] - p[1]) < Math.abs(m[1] - p[1]) ? o : m)); E.line([q, p], 0.035); }
+  },
+};
+// One figure, `id`, carved on a face whose sunk ground is at `at` ([x, y, z]); `out` is the way the face looks
+// (+1 toward +x); S feet to the unit circle's rim
+function emblemGeo(id, at, out, S) {
+  const P = [], H = 0.032;      // (the relief stands no prouder than the ground is sunk)
+  const quad = (a, b, c, d) => P.push(a, b, c, a, c, d);
+  const E = {
+    // a ridge along a polyline: hw its half-width at the foot (in units), its top a third of that
+    line(pts, hw, closed = false, h = H) {
+      const n = pts.length; if (n < 2) return; const L = [], R = [], TL = [], TR = [];
+      for (let i = 0; i < n; i++) {
+        const p = pts[i], a = pts[i > 0 ? i - 1 : (closed ? n - 2 : 0)], b = pts[i < n - 1 ? i + 1 : (closed ? 1 : n - 1)];
+        let d0 = [p[0] - a[0], p[1] - a[1]], d1 = [b[0] - p[0], b[1] - p[1]]; const l0 = Math.hypot(...d0) || 1, l1 = Math.hypot(...d1) || 1; d0 = [d0[0] / l0, d0[1] / l0]; d1 = [d1[0] / l1, d1[1] / l1];
+        if (i === 0 && !closed) d0 = d1; if (i === n - 1 && !closed) d1 = d0;
+        let m = [-(d0[1] + d1[1]), d0[0] + d1[0]]; const ml = Math.hypot(...m) || 1; m = [m[0] / ml, m[1] / ml];
+        const k = Math.min(2, 1 / Math.max(0.2, m[0] * -d0[1] + m[1] * d0[0])), t = (i === 0 && !closed) ? hw * 0.6 : (i === n - 1 && !closed) ? -hw * 0.6 : 0, tp = [p[0] + d1[0] * t, p[1] + d1[1] * t];
+        L.push([p[0] + m[0] * hw * k, p[1] + m[1] * hw * k, 0]); R.push([p[0] - m[0] * hw * k, p[1] - m[1] * hw * k, 0]);
+        TL.push([tp[0] + m[0] * hw * k * 0.3, tp[1] + m[1] * hw * k * 0.3, h]); TR.push([tp[0] - m[0] * hw * k * 0.3, tp[1] - m[1] * hw * k * 0.3, h]);
+      }
+      for (let i = 0; i < n - 1; i++) { quad(L[i], L[i + 1], TL[i + 1], TL[i]); quad(TL[i], TL[i + 1], TR[i + 1], TR[i]); quad(TR[i], TR[i + 1], R[i + 1], R[i]); }
+      if (!closed) { quad(R[0], L[0], TL[0], TR[0]); quad(L[n - 1], R[n - 1], TR[n - 1], TL[n - 1]); }
+    },
+    // a convex plaque, its top shrunk toward its middle by k
+    poly(pts, h = H, k = 0.55) {
+      const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length, cy = pts.reduce((s, p) => s + p[1], 0) / pts.length, T = pts.map(([x, y]) => [cx + (x - cx) * k, cy + (y - cy) * k, h]), Bs = pts.map(([x, y]) => [x, y, 0]);
+      for (let i = 0; i < pts.length; i++) { const j = (i + 1) % pts.length; quad(Bs[i], Bs[j], T[j], T[i]); }
+      for (let i = 1; i < T.length - 1; i++) P.push(T[0], T[i], T[i + 1]);
+    },
+    dot(x, y, r, h = H) { this.poly(Array.from({ length: 10 }, (_, i) => [x + Math.cos(i / 10 * Math.PI * 2) * r, y + Math.sin(i / 10 * Math.PI * 2) * r]), h, 0.45); },
+    sq: (x, y, s) => [[x - s / 2, y - s / 2], [x + s / 2, y - s / 2], [x + s / 2, y + s / 2], [x - s / 2, y + s / 2]],
+  };
+  EMBLEMS[id](E);
+  // into the chapel's feet: u along -out * z, v up, the relief out from the face; every face turned to look out
+  const pos = new Float32Array(P.length * 3), uv = new Float32Array(P.length * 2), W = ([u, v, w]) => [at[0] + out * w, at[1] + v * S, at[2] - out * u * S];
+  for (let i = 0; i < P.length; i += 3) {
+    let a = W(P[i]), b = W(P[i + 1]), c = W(P[i + 2]);
+    const nx = (b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]);
+    if (nx * out < 0) [b, c] = [c, b];
+    for (const [j, q] of [a, b, c].entries()) { pos.set(q, (i + j) * 3); uv.set([q[2], q[1]], (i + j) * 2); }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); g.computeVertexNormals();
+  return g;
 }
 
 // ---- small helpers ------------------------------------------------------------------------------------------

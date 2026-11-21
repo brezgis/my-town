@@ -24,6 +24,7 @@ import { makeShade } from './shade.js';
 import { loadFonts } from './fonts.js';
 import { makeFrameMeter } from './engine/frame.js';
 import { openStage } from './engine/stage.js';
+import { pictureInfo } from './engine/picinfo.js';
 
 // Every sign, label, leaf and face on the street is painted on a 2D canvas and handed to the renderer as
 // a texture. Browsers keep such canvases on the graphics card unless told otherwise, and a card that is
@@ -82,7 +83,7 @@ const builder = new Builder();
 builder.zone = 'shell';                                   // the house itself is always drawn (see visibility.js)
 const STAGE = {}, mark = k => { STAGE[k] = Math.round(performance.now()); };      // start-up timings, for perf.js
 mark('start');
-const stage = openStage({ mark, onEarlyEnter: () => sound.start() });      // the place opens on a picture before it is furnished (engine/stage.js): the photos are counted from here
+const stage = openStage({ mark, onEarlyEnter: () => sound.start(), early: Q.get('early') === '1' });      // the place opens on a picture before it is furnished (engine/stage.js): the photos are counted from here
 const house = buildTown(builder); mark('house');
 installHouseLight(house.boxes, FL, CEIL);                                      // indoor light, patched into the shaders before anything compiles (lighting.js)
 const { surfaces, rooms, lamps, spawn } = house;
@@ -93,7 +94,7 @@ for (const l of lamps) l.kind = l.fire ? 'fire' : (l.kind ?? 'fill');
 // be seen into: so the street is built with its shops bare, the island is drawn and the threshold lifts, and the
 // shops are fitted out behind that picture, one at a time (shops/index.js furnishSteps), before anything else is set
 // going. Any address that asks for a particular view or test fits everything out at once, as before (so does ?stream=0).
-const PLAIN = new Set(['fps', 'quality', 'time', 'stages', 'loadlog', 'welcome', 'stream', 'aa', 'lamps', 'tex', 'shadow', 'ratio']);
+const PLAIN = new Set(['fps', 'quality', 'time', 'stages', 'loadlog', 'welcome', 'stream', 'aa', 'lamps', 'tex', 'shadow', 'ratio', 'early']);
 const STREAM = Q.has('stream') ? Q.get('stream') !== '0' : [...Q.keys()].every(k => PLAIN.has(k));
 const items = STREAM ? furnishStart(builder, house) : furnish(builder, house); mark('furnish');
 const kitLamps = items.lamps; let kitLampsIn = kitLamps.length;
@@ -144,6 +145,7 @@ const life = bringToLife({ scene, outdoors, vis, quality: QUALITY, renderer, cam
 // Hooks for the parts of the house that move and answer back. The garden may
 // return setup(ctx); the staff (robots, cats) live in staff.js if it exists.
 const ctx = { THREE, scene, camera, renderer, materials, house, items, flash: t => flash(t), zoom: on => { camera.fov = on ? 13 : WALK_FOV; camera.updateProjectionMatrix(); walker.lookScale = on ? 0.22 : 1; ctx.zoomed = !!on; }, garden, colliders: builder.colliders, interact: life.interact, animated: life.animated, loadModel: life.loadModel, track: life.track, zoneAt: life.zoneAt, sound, day, get walker() { return walker; }, get mode() { return mode; }, get aimed() { return aimed; }, get flashlight() { return torch.intensity > 0; } };
+pictureInfo({ extras: items.extras ?? [], interact: life.interact, say: t => window.houseUI?.toast?.(t, 6000) });      // E on a hung picture: its title, artist and year (engine/picinfo.js)
 mark('life');
 garden?.setup?.(Object.create(ctx, { scene: { value: outdoors } }));      // the street's own things go in the outdoors group
 mark('gardenSetup');
